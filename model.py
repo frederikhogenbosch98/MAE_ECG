@@ -2,32 +2,63 @@ import torch.nn as nn
 
 
 class Encoder(nn.Module):
-    def __init__(self, num_input_channels: int, base_channel_size: int, latent_dim: int, act_fn: object = nn.ReLU):
-        super().__init__()
-        self.c_hidden_layers = base_channel_size
-        self.kernel_size = 3
-        self.padding = 1
-
+    def __init__(self):
+        super(Encoder, self).__init__()
+        
         self.net = nn.Sequential(
-            nn.Conv2d(num_input_channels, self.c_hidden_layers, kernel_size = self.kernel_size, padding = self.padding, stride = self.stride),
-            act_fn(),
-            nn.Conv2d(self.c_hidden_layers, 2 * self.c_hidden_layers, kernel_size = self.kernel_size, padding = self.padding),
-            act_fn(),
-            nn.Flatten(),
-            nn.Linear(2*16*self.c_hidden_layers, latent_dim),
+            # input shape: [N, 12, 5000]
+            nn.Conv1d(in_channels=12, out_channels=24, kernel_size=5, stride=1, padding=2), 
+            nn.ReLU(),  
+            nn.MaxPool1d(kernel_size=4, stride=4),  
+            
+            # intermediate shape: [N, 24, 1250]
+            nn.Conv1d(in_channels=24, out_channels=48, kernel_size=5, stride=1, padding=2), 
+            nn.ReLU(), 
+            nn.MaxPool1d(kernel_size=4, stride=4), 
+            
+            # intermediate shape: [N, 48, 312]
+            nn.Conv1d(in_channels=48, out_channels=96, kernel_size=5, stride=1, padding=2), 
+            nn.ReLU(),  
+            nn.MaxPool1d(kernel_size=4, stride=4),  
+            
+            # final shape: [N, 96, 78]
         )
 
     def forward(self, x):
         return self.net(x)
 
 
-class Decoder(nn.Module):
-    def __init__(self, num_input_channels: int, base_channel_size: int, latent_dim: int, act_fn: object = nn.ReLU):
-        super().__init__()
-        self.c_hidden_layers = base_channel_size
-        self.kernel_size = 3
-        self.padding = 1
 
-        self.net == nn.Sequential(
-            nn.Linear(latent_dim, )
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+        
+        self.net = nn.Sequential(
+            # input shape: [N, 96, 78]
+            nn.ConvTranspose1d(in_channels=96, out_channels=48, kernel_size=4, stride=4),
+            nn.ReLU(),
+            # intermediate shape: [N, 48, 312] after upsampling
+            
+            nn.ConvTranspose1d(in_channels=48, out_channels=24, kernel_size=4, stride=4),
+            nn.ReLU(),
+            # intermediate shape: [N, 24, 1248] after upsampling
+            
+            nn.ConvTranspose1d(in_channels=24, out_channels=12, kernel_size=4, stride=4),
+            nn.ReLU(),
+            # intermediate shape: [N, 12, 4992] after upsampling
         )
+    
+    def forward(self, x):
+        return self.net(x)
+
+
+class AutoEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.encoder = Encoder()
+        self.decoder = Decoder()
+
+    def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded

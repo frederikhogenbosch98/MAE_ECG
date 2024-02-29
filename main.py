@@ -1,11 +1,9 @@
-import os
-import argparse
 import numpy as np
 import torch
 import torch.nn as nn
-# from utils import setup_seed
 import matplotlib.pyplot as plt
 import wfdb
+from model import AutoEncoder
 
 physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 
@@ -22,7 +20,6 @@ def create_input_tensor():
     print(f'creating input tensor')
     init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
     input_tensor = torch.Tensor(np.array(init_sample)).unsqueeze(0)
-
     for i in range(2, 104):
         try: 
             sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00{i:03}')
@@ -33,20 +30,35 @@ def create_input_tensor():
             print(f"FileNotFoundError for sample {i}, skipping...")
             continue
 
-    print(input_tensor.size())
+    return input_tensor
 
     
-
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('--seed', type=int, default=42)
 
+    # input_tensor = create_input_tensor()
 
-    # args = parser.parse_args()
-    # setup_seed(args.seed)
-    
-    # plot_ecg()
-    create_input_tensor()
+    init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
+    input_tensor = torch.Tensor(np.array(init_sample)).unsqueeze(0)
+    input_tensor = input_tensor.permute(0,2,1)
+
+    # print(input_tensor.size())
+
+    model = AutoEncoder()
+    print(model)
+    output_tensor = model(input_tensor)
+    print(output_tensor.size())
+
+    # selected_sample_channel = output_tensor[0, 0, :]
+
+    # selected_sample_channel_np = selected_sample_channel.detach().numpy()
+
+    # time_points = range(len(selected_sample_channel_np))
+
+    # plt.plot(time_points, selected_sample_channel_np)
+    # plt.title(f"Sample {0+1}, Channel {0+1}")
+    # plt.xlabel("Time Point")
+    # plt.ylabel("Amplitude")
+    # plt.show()
 
