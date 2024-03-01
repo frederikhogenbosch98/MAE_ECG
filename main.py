@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,8 +5,8 @@ import matplotlib.pyplot as plt
 import wfdb
 from model import AutoEncoder
 from torch.utils.data import Dataset, DataLoader
-import glob
 from create_dataset import ECGDataset
+import time
 
 # def plot_ecg(i):
 #     record = wfdb.rdrecord(f'{physio_root}/01/010/JS00{i:03}') 
@@ -31,6 +30,11 @@ def plot_results(model, test_tensor):
     plt.show()
 
 
+
+def print_epoch_info(epoch, loss, t_int):
+    print(f'Epoch {epoch+1}, Loss: {loss:.4f}, Duration: {np.round(t_int, 2)}s')
+
+
 if __name__ == "__main__":
 
     LR_RATE = 0.001
@@ -41,31 +45,39 @@ if __name__ == "__main__":
     torch.manual_seed(RANDOM_SEED)    
 
     dtype = torch.float
-    device = torch.device("mps")  # mps for Apple Metal, torch.device("cuda") for Nvidia GPU's or otherwise torch.device("cpu") to use CPU
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") 
 
     dataset = torch.load('data/datasets/train_dataset.pt')
-    print(dataset)
-
-    test_tensor = torch.load('data/datasets/test_dataset.pt')
-
-
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-    print(dataloader)
 
+
+    test_tensor = torch.load('data/datasets/test_dataset.pt').to(device)
 
     model = AutoEncoder()
     loss_function = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LR_RATE)
 
 
-    print(f'selected device: {device}')
+    # move everything to mps device
+    print(f'moving model and dataset to device: {device}')
+    model = model.to(device)
+
+    is_on_mps = next(model.parameters()).device.type == 'mps'
+    print(f"Model is on MPS: {is_on_mps}")  
+    # dataset = dataset.move_device(device)
+
+    # print(dataset.get_device())
 
     for epoch in range(NUM_EPOCHS):
+        t_start = time.time()
 
         model.train()
         running_loss = 0.0
         
         for inputs, _ in dataloader:
+
+            inputs = inputs.to(device)
+            inputs.get_device()
             optimizer.zero_grad()
 
             outputs = model(inputs)
@@ -75,7 +87,9 @@ if __name__ == "__main__":
 
             running_loss += loss.item()
 
+        t_end = time.time()
         epoch_loss = running_loss / len(dataloader)
-        print(f'Epoch {epoch+1}, Loss: {epoch_loss:.4f}')
+        print_epoch_info(epoch, epoch_loss, t_end-t_start)
 
-    # plot_results(model, test_tensor)
+
+    plot_results(model, test_tensor)

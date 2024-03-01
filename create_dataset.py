@@ -1,6 +1,5 @@
 import wfdb
 import torch
-import glob
 import numpy as np
 from torch.utils.data import Dataset
 from pathlib import Path
@@ -12,11 +11,18 @@ class ECGDataset(Dataset):
     def __init__(self, data):
         self.data = data
 
+
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         return self.data[idx], 0
+    
+    def move_device(self, device):
+        self.data = self.data.to(device)
+
+    def get_device(self):
+        print(self.data.get_device())
 
 
 def create_input_tensor():
