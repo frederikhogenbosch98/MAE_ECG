@@ -6,12 +6,12 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         
         self.net = nn.Sequential(
-            # input shape: [N, 12, 5000]
+            # input shape: [N, 12, 4992]
             nn.Conv1d(in_channels=12, out_channels=24, kernel_size=5, stride=1, padding=2), 
             nn.ReLU(),  
             nn.MaxPool1d(kernel_size=4, stride=4),  
             
-            # intermediate shape: [N, 24, 1250]
+            # intermediate shape: [N, 24, 1248]
             nn.Conv1d(in_channels=24, out_channels=48, kernel_size=5, stride=1, padding=2), 
             nn.ReLU(), 
             nn.MaxPool1d(kernel_size=4, stride=4), 
@@ -34,18 +34,16 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         
         self.net = nn.Sequential(
-            # input shape: [N, 96, 78]
-            nn.ConvTranspose1d(in_channels=96, out_channels=48, kernel_size=4, stride=4),
+            nn.ConvTranspose1d(in_channels=96, out_channels=48, kernel_size=5, stride=4, padding=2, output_padding=3),
             nn.ReLU(),
-            # intermediate shape: [N, 48, 312] after upsampling
             
-            nn.ConvTranspose1d(in_channels=48, out_channels=24, kernel_size=4, stride=4),
+            # intermediate: [N, 24, 4992]
+            nn.ConvTranspose1d(in_channels=48, out_channels=24, kernel_size=5, stride=4, padding=2, output_padding=3),
             nn.ReLU(),
-            # intermediate shape: [N, 24, 1248] after upsampling
             
-            nn.ConvTranspose1d(in_channels=24, out_channels=12, kernel_size=4, stride=4),
-            nn.ReLU(),
-            # intermediate shape: [N, 12, 4992] after upsampling
+            # final: [N, 12, 4992]
+            nn.ConvTranspose1d(in_channels=24, out_channels=12, kernel_size=5, stride=4, padding=2, output_padding=3),
+            nn.ReLU()
         )
     
     def forward(self, x):
