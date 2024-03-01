@@ -17,10 +17,11 @@ import time
 def plot_results(model, test_tensor):
     output_tensor = model(test_tensor[0, :, :])
     selected_sample_channel = output_tensor[0,:]
-
+    selected_sample_channel = selected_sample_channel.cpu()
     selected_sample_channel_np = selected_sample_channel.detach().numpy()
 
     time_points = range(test_tensor.size(dim=2))
+    test_tensor = test_tensor.cpu()
 
     plt.plot(time_points, selected_sample_channel_np)
     plt.plot(time_points, test_tensor[0, 0, :])
@@ -32,14 +33,14 @@ def plot_results(model, test_tensor):
 
 
 def print_epoch_info(epoch, loss, t_int):
-    print(f'Epoch {epoch+1}, Loss: {loss:.4f}, Duration: {np.round(t_int, 2)}s')
+    print(f'epoch {epoch+1}, Loss: {loss:.4f}, Duration: {np.round(t_int, 2)}s')
 
 
 if __name__ == "__main__":
 
     LR_RATE = 0.001
     BATCH_SIZE = 32
-    NUM_EPOCHS = 20
+    NUM_EPOCHS = 10
     RANDOM_SEED = 123
 
     torch.manual_seed(RANDOM_SEED)    
