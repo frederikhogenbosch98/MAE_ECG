@@ -46,7 +46,6 @@ def masking(tensor, ratio):
     N = tensor.size(dim=2)
     N_r = int(ratio*N)
     zero_idxs = random.sample(range(N),N_r)
-    print(zero_idxs)
     mask = np.ones(N, dtype=bool)
     for i in zero_idxs:
         mask[i] = False
@@ -60,7 +59,7 @@ def print_epoch_info(epoch, loss,  t_int):
 
 if __name__ == "__main__":
 
-    LR_RATE = 0.001
+    LEARNING_RATE = 0.001
     BATCH_SIZE = 32
     NUM_EPOCHS = 2
     RANDOM_SEED = 123
@@ -73,16 +72,15 @@ if __name__ == "__main__":
     train_tensor = torch.load('data/datasets/train_dataset.pt').to(device)
     test_tensor = torch.load('data/datasets/test_dataset.pt').to(device)
 
-    mask = masking(train_tensor, 0.5)
+    dataset_train = ECGDataset(train_tensor)
+    dataloader_train = DataLoader(dataset_train, batch_size=32, shuffle=True)
 
-    mt = torch.masked_tensor(train_tensor, mask)
-
-    dataset = ECGDataset(mt)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    dataset_test = ECGDataset(train_tensor)
+    dataloader_test = DataLoader(dataset_test, batch_size=32, shuffle=True)
 
     model = AutoEncoder()
     loss_function = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=LR_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
 
     # move everything to mps device
@@ -103,10 +101,11 @@ if __name__ == "__main__":
         model.train()
         running_loss = 0.0
         
-        for idx, (inputs, _) in enumerate(dataloader):
+        for idx, (inputs, _) in enumerate(dataloader_train):
 
             inputs = inputs.to(device)
-            inputs.get_device()
+            mask = masking(train_tensor, 1) # 0 is fully masked
+            inputs = inputs.masked_fill(torch.from_numpy(mask).to(device) == True, 0)
             optimizer.zero_grad()
 
             outputs = model(inputs)
@@ -114,15 +113,34 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
 
+            # del inputs
+
             running_loss += loss.item()
         t_end = time.time()
 
-        epoch_loss = running_loss / len(dataloader)
+        epoch_loss = running_loss / len(dataloader_train)
         losses.append(epoch_loss)
         print_epoch_info(epoch, epoch_loss, t_end-t_start)
 
 
     # TESTING
     
+    model.eval()
+
+    mse_loss = nn.MSELoss(reduction='mean')  # Initialize the MSE loss function
+    total_loss = 0.0
+    count = 0
+
+    with torch.no_grad():  
+        for inputs, _ in dataloader_test:
+            inputs = inputs.to(device)  
+            reconstructed = model(inputs)  
+            loss = mse_loss(reconstructed, inputs)  
+            total_loss += loss.item() 
+            count += 1
+
+    average_loss = np.round(total_loss / count, 6)
+
+    print(f'Average MSE Loss on Test Set: {average_loss}')
 
     plot_results(model, test_tensor, losses, NUM_EPOCHS)
