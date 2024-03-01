@@ -3,33 +3,36 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset
 from pathlib import Path
+from scipy.signal import butter, lfilter
 
 physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 
 
-class ECGDataset(Dataset):
-    def __init__(self, data):
-        self.data = data
 
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx], 0
     
-    def move_device(self, device):
-        self.data = self.data.to(device)
 
-    def get_device(self):
-        print(self.data.get_device())
+def butter_bandpass(lowcut, highcut, fs, order=5):
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band', analog=False)
+    return b, a
 
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
 
 def create_input_tensor():
     print(f'creating datasets')
+    
+    low_cut = 1
+    high_cut = 20
+    fs = 500
 
     init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
-    input_tensor = torch.Tensor(np.array(init_sample)).unsqueeze(0)
+    init_filtered = butter_bandpass_filter(np.array(init_sample), low_cut, high_cut, fs, order=5)
+    input_tensor = torch.Tensor(init_sample).unsqueeze(0)
 
     directory_path = Path(f'{physio_root}')
 
@@ -40,14 +43,18 @@ def create_input_tensor():
 
     for idx, file in enumerate(mat_files_without_extension):
         if idx % 1000 == 0:
-            print(f'at iteration: {idx}')
+            print(f'processing folder {(idx//1000)+1}/10')
         sample_values, sample_field = wfdb.rdsamp(f'{file}')
-        sample_tensor = torch.Tensor(np.array(sample_values)).unsqueeze(0)
+        sample_values = np.array(sample_values)
+        filtered_data = np.zeros((sample_values.shape[0], sample_values.shape[1]))
+        for l in range(sample_values.shape[1]):
+            filtered_data[:,l] = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
+
+        sample_tensor = torch.Tensor(filtered_data).unsqueeze(0)
         input_tensor = torch.cat([input_tensor, sample_tensor], dim=0)
 
     print(input_tensor.size())
     return input_tensor
-
 
 
 def train_test_split(tensor, split):
@@ -66,8 +73,8 @@ if __name__ == "__main__":
     print(train_tensor.size())
     print(test_tensor.size())
 
-    train_dataset = ECGDataset(train_tensor)
+    # train_dataset = ECGDataset(train_tensor)
     # test_dataset = ECGDataset(test_tensor)
 
-    torch.save(train_dataset, 'data/datasets/train_dataset.pt')
+    torch.save(train_tensor, 'data/datasets/train_dataset.pt')
     torch.save(test_tensor, 'data/datasets/test_dataset.pt')

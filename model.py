@@ -8,7 +8,7 @@ class Encoder(nn.Module):
         self.net = nn.Sequential(
             # input shape: [N, 12, 4992]
             nn.Conv1d(in_channels=12, out_channels=24, kernel_size=5, stride=1, padding=2), 
-            nn.ReLU(),  
+            nn.ReLU(), 
             nn.MaxPool1d(kernel_size=4, stride=4),  
             
             # intermediate shape: [N, 24, 1248]
@@ -43,7 +43,7 @@ class Decoder(nn.Module):
             
             # final: [N, 12, 4992]
             nn.ConvTranspose1d(in_channels=24, out_channels=12, kernel_size=5, stride=4, padding=2, output_padding=3),
-            nn.ReLU()
+            nn.Tanh()
         )
     
     def forward(self, x):
