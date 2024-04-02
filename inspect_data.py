@@ -58,7 +58,22 @@ def extract_segments(data):
         
 
     return segments
- 
+
+
+def averaging(segments):
+    print(len(segments[0]))
+    print(len(segments))
+    averaged_signal = []
+    for j in range(len(segments[0])):
+        mean_vec = []
+        for i in range(len(segments)):
+            mean_vec.append(segments[i][j])
+        averaged_signal.append(np.average(mean_vec))
+
+    return averaged_signal
+        
+
+
 def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
     x = np.linspace(0,2000, len(sample_values[:,0]))
     plt.plot(x, sample_values[:,0], label='true')
@@ -71,12 +86,10 @@ def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
 
 
 def plot_peaks(resampled_data):
+
     plt.plot(resampled_data)
-
     plt.plot(extracted_segments, resampled_data[extracted_segments], "x")
-
     plt.plot(np.zeros_like(resampled_data), "--", color="gray")
-
     plt.show()
 
 def plot_segments(segments):
@@ -93,7 +106,12 @@ if __name__ == "__main__":
     resampled_data = resample(normalized_data, num=3600)
 
     extracted_segments = extract_segments(resampled_data)
-    plot_segments(extracted_segments[1:])
+    del extracted_segments[0]
+    plot_segments(extracted_segments)
+
+    averaged_signal = averaging(extracted_segments)
+    plt.plot(averaged_signal)    
+    plt.show()
 
 
 
