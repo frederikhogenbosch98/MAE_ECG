@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import wfdb
-from scipy.signal import butter, lfilter
+from scipy.signal import butter, lfilter, filtfilt
 import matplotlib.pyplot as plt
 
 physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
@@ -18,7 +18,7 @@ def butter_bandpass(lowcut, highcut, fs, order=5):
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
+    y = filtfilt(b, a, data)
     return y
 
 
@@ -32,18 +32,31 @@ def filter_signal_and_plot(i):
     sample_values = np.array(sample_values)
 
     low_cut = 1
-    high_cut = 20
+    high_cut = 100
     fs = 500
+    x = np.linspace(0,2000, len(sample_values[:,0]))
 
     filtered_data = butter_bandpass_filter(sample_values[:,0], low_cut, high_cut, fs, order=5)
-    plt.plot(filtered_data)
-    plt.plot(sample_values[:,0])
+    plt.plot(x, sample_values[:,0], label='true')
+    plt.plot(x, filtered_data, label='filtered')
+    plt.title(f'Bandpass filter (cutoff low: {low_cut}Hz, cutoff high: {high_cut}Hz)')
+    plt.xlabel('time (ms)')
+    plt.ylabel('voltage (mV)')
+    plt.legend()
     plt.show()
 
     
 
 if __name__ == "__main__":
     # plot_ecg(1)
-    filter_signal_and_plot(8)
-    filter_signal_and_plot(23)
-    filter_signal_and_plot(94)
+    # filter_signal_and_plot(7)
+    # filter_signal_and_plot(17)
+    # filter_signal_and_plot(27)
+    # filter_signal_and_plot(37)
+    filter_signal_and_plot(47)
+    # filter_signal_and_plot(57)
+    # filter_signal_and_plot(67)
+    # filter_signal_and_plot(77)
+
+    # filter_signal_and_plot(23)
+    # filter_signal_and_plot(94)

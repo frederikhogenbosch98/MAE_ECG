@@ -24,7 +24,7 @@ def plot_results(model, test_tensor):
     plt.show()
 
 
-def eval(model, device, NUM_EPOCHS):
+def eval(model, device):
 
     model.to(device)
     model.eval()

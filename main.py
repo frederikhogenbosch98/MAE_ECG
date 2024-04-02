@@ -14,7 +14,7 @@ if __name__ == "__main__":
     dtype = torch.float
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    TRAIN = False
+    TRAIN = True
     SAVE_MODEL = True
 
     LEARNING_RATE = 0.001
@@ -28,5 +28,5 @@ if __name__ == "__main__":
     model = train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN)
 
     # EVALUATION
-    eval(model, device, NUM_EPOCHS)
+    eval(model, device)
     

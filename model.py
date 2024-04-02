@@ -21,6 +21,9 @@ class Encoder(nn.Module):
             nn.ReLU(),  
             nn.MaxPool1d(kernel_size=4, stride=4),  
             
+            nn.Conv1d(in_channels=96, out_channels=192, kernel_size=5, stride=1, padding=2), 
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=4, stride=4),
             # final shape: [N, 96, 78]
         )
 
@@ -34,6 +37,9 @@ class Decoder(nn.Module):
         super(Decoder, self).__init__()
         
         self.net = nn.Sequential(
+            nn.ConvTranspose1d(in_channels=192, out_channels=96, kernel_size=5, stride=4, padding=2, output_padding=3),
+            nn.ReLU(),
+
             nn.ConvTranspose1d(in_channels=96, out_channels=48, kernel_size=5, stride=4, padding=2, output_padding=3),
             nn.ReLU(),
             

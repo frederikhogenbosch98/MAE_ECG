@@ -4,12 +4,10 @@ import numpy as np
 from torch.utils.data import Dataset
 from pathlib import Path
 from scipy.signal import butter, lfilter
+import pandas as pd
 
 physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 
-
-
-    
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -32,7 +30,7 @@ def create_input_tensor():
 
     init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
     init_filtered = butter_bandpass_filter(np.array(init_sample), low_cut, high_cut, fs, order=5)
-    input_tensor = torch.Tensor(init_sample).unsqueeze(0)
+    input_tensor = torch.Tensor(init_filtered).unsqueeze(0)
 
     directory_path = Path(f'{physio_root}')
 
@@ -57,6 +55,14 @@ def create_input_tensor():
     return input_tensor
 
 
+def create_label_tensors():
+
+    Y = pd.read_csv(path+'ptbxl_database.csv', index_col='ecg_id')
+    Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
+
+    return label_tensor
+
+
 def train_test_split(tensor, split):
     split_idx = int(tensor.size(dim=0)*split)
     train_tensor = tensor[1:split_idx,:,:]
@@ -67,6 +73,8 @@ def train_test_split(tensor, split):
 if __name__ == "__main__":
     input_tensor = create_input_tensor().permute(0,2,1)
     input_tensor = input_tensor[:, :, 0:4992]
+
+    # shuffle tensors with some sort of seed
 
     train_tensor, test_tensor = train_test_split(input_tensor, 0.7)
 
