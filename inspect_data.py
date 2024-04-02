@@ -27,36 +27,41 @@ def plot_ecg(i):
     wfdb.plot_wfdb(record=record, title=f'01 010 i')
 
 
-def filter_signal_and_plot(i):
+def filter_signal(i):
     sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00{i:03}')
     sample_values = np.array(sample_values)
 
     low_cut = 1
     high_cut = 100
     fs = 500
-    x = np.linspace(0,2000, len(sample_values[:,0]))
 
     filtered_data = butter_bandpass_filter(sample_values[:,0], low_cut, high_cut, fs, order=5)
+
+    return sample_values, filtered_data, low_cut, high_cut
+
+
+
+
+def normalize(segment):
+    segment_min = np.min(segment)
+    segment_max = np.max(segment)
+    return (segment - segment_min) / (segment_max - segment_min)
+    
+def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
+    x = np.linspace(0,2000, len(sample_values[:,0]))
     plt.plot(x, sample_values[:,0], label='true')
-    plt.plot(x, filtered_data, label='filtered')
+    # plt.plot(x, filtered_data, label='filtered')
     plt.title(f'Bandpass filter (cutoff low: {low_cut}Hz, cutoff high: {high_cut}Hz)')
     plt.xlabel('time (ms)')
     plt.ylabel('voltage (mV)')
     plt.legend()
     plt.show()
 
-    
-
 if __name__ == "__main__":
-    # plot_ecg(1)
-    # filter_signal_and_plot(7)
-    # filter_signal_and_plot(17)
-    # filter_signal_and_plot(27)
-    # filter_signal_and_plot(37)
-    filter_signal_and_plot(47)
-    # filter_signal_and_plot(57)
-    # filter_signal_and_plot(67)
-    # filter_signal_and_plot(77)
 
-    # filter_signal_and_plot(23)
-    # filter_signal_and_plot(94)
+    true_data, filtered_data, low_cut, high_cut = filter_signal(47)
+    filtered_data = normalize(filtered_data)
+    true_data = normalize(true_data)
+    print(np.max(true_data))
+    plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
+

@@ -32,6 +32,8 @@ def create_input_tensor():
     init_filtered = butter_bandpass_filter(np.array(init_sample), low_cut, high_cut, fs, order=5)
     input_tensor = torch.Tensor(init_filtered).unsqueeze(0)
 
+    labels_list = []
+
     directory_path = Path(f'{physio_root}')
 
     mat_files = [file for file in directory_path.rglob('*.mat')]
@@ -42,36 +44,54 @@ def create_input_tensor():
     for idx, file in enumerate(mat_files_without_extension):
         if idx % 1000 == 0:
             print(f'processing folder {(idx//1000)+1}/10')
+
+        ### signal data
         sample_values, sample_field = wfdb.rdsamp(f'{file}')
         sample_values = np.array(sample_values)
         filtered_data = np.zeros((sample_values.shape[0], sample_values.shape[1]))
         for l in range(sample_values.shape[1]):
             filtered_data[:,l] = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
 
+        ### header data
+        header = wfdb.rdheader(f'{file}')
+        for comment in header.comments:
+            if comment.startswith('Dx:'):
+                dx_info = comment.split(': ')[1]
+                dx_codes = dx_info.split(',')
+                dx_codes_int = [int(code) for code in dx_codes]
+
+        
+        labels_list.append(dx_codes_int)
+
+        ### creating tensors
         sample_tensor = torch.Tensor(filtered_data).unsqueeze(0)
         input_tensor = torch.cat([input_tensor, sample_tensor], dim=0)
 
+        if idx == 100:
+            break
+        
+    print(labels_list)
+    labels_tensor = torch.Tensor(labels_list)
+    
+
     print(input_tensor.size())
-    return input_tensor
+    print(labels_tensor.size())
+    return input_tensor, labels_tensor
 
 
-def create_label_tensors():
-
-    Y = pd.read_csv(path+'ptbxl_database.csv', index_col='ecg_id')
-    Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
-
-    return label_tensor
-
-
-def train_test_split(tensor, split):
+def train_test_split(tensor, labels, split):
     split_idx = int(tensor.size(dim=0)*split)
     train_tensor = tensor[1:split_idx,:,:]
     test_tensor = tensor[split_idx+1:-1,:,:]
 
-    return train_tensor, test_tensor
+    train_labels = labels[1:split_idx,:,:]
+    test_labels = labels[split_idx+1:-1,:,:]
+
+    return train_tensor, test_tensor, train_labels, test_labels
 
 if __name__ == "__main__":
-    input_tensor = create_input_tensor().permute(0,2,1)
+    input_tensor, labels_tensor = create_input_tensor()
+    input_tensor = input_tensor.permute(0,2,1)
     input_tensor = input_tensor[:, :, 0:4992]
 
     # shuffle tensors with some sort of seed
