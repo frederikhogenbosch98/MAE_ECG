@@ -43,7 +43,8 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
     if TRAIN:
         loss_function = nn.MSELoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+        # optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+        optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
 
 
         # move everything to mps device

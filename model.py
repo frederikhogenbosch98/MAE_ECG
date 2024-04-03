@@ -1,8 +1,34 @@
 import torch.nn as nn
 
 
+class Block(nn.Module):
+    def __init__(self, dim, D=3):
+        super.__init__()
+        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=10, bias=True, dimension=D)
+        self.norm = nn.LayerNorm(dim, 1e-6)
+        self.conv_l2 = nn.Linear(dim, 4*dim)
+        self.act = nn.GELU()
+        self.conv_l3 = nn.Linear(4*dim, dim)
+        
+
+    def forward(self, x):
+        x = self.conv_l1(x)
+        x = x.permute(0, 2, 3, 1)
+        x = self.norm(x)
+        x = self.conv_l2(x)
+        x = self.act(x)
+        x = self.conv_l3(x)
+        x = x.permute(0, 3, 1, 2)
+
+        return x
+    
+    
+
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self,
+                 in_chans=12,
+                 depths=[3, 3, 9, 3],
+                 dims=[92, 192, 384, 768]):
         super(Encoder, self).__init__()
         
         self.net = nn.Sequential(

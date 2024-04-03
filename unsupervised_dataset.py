@@ -7,6 +7,7 @@ from scipy.signal import butter, lfilter
 import pandas as pd
 from scipy.signal import resample, find_peaks
 import matplotlib.pyplot as plt
+import os
 
 # physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 physio_root = 'data/physionet/ptbxl/records500'
@@ -72,7 +73,7 @@ def create_input_tensor():
     # input_tensor = torch.Tensor(init_filtered).unsqueeze(0)
 
     directory_path = Path(f'{physio_root}')
-
+    num_folders = len(next(os.walk(f'{physio_root}'))[1])
     mat_files = [file for file in directory_path.rglob('*.dat')]
 
     mat_files_without_extension = [str(file)[:-4] for file in mat_files]
@@ -80,7 +81,7 @@ def create_input_tensor():
 
     for idx, file in enumerate(mat_files_without_extension):
         if idx % 1000 == 0:
-            print(f'processing folder {(idx//1000)+1}/10')
+            print(f'processing folder {(idx//1000)+1}/{num_folders}')
 
         ### signal data
         sample_values, sample_field = wfdb.rdsamp(f'{file}')
@@ -89,32 +90,19 @@ def create_input_tensor():
         resampled_data = []
         segs = []
         output_data = np.zeros((300, 12))
+
         for l in range(sample_values.shape[1]):
             filtered_data = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
-
             resampled_data = resample(filtered_data, num=3600)
             if l == 0:
                 r_idx = get_r_idx(resampled_data)
-                # plt.plot(filtered_data[:,l])
-                plt.plot(resampled_data)
-                plt.show()
-            
 
             segs = extract_segments(resampled_data, r_idx)
             if segs:
                 del segs[0], segs[-1]
                 output_data[:,l] = np.mean(np.array(segs), axis=0)
                 output_data[:,l] = normalize(output_data[:,l])
-        print(type(output_data))
-        plt.plot(output_data[:,0])
-        plt.plot(output_data[:,1])
-        plt.plot(output_data[:,2])
-        plt.plot(output_data[:,3])
-        plt.plot(output_data[:,5])
-        plt.show()
 
-        if idx == 100:
-            break
         ### creating tensors
         if idx == 0:
             input_tensor = torch.Tensor(output_data).unsqueeze(0)
