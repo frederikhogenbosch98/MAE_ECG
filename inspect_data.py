@@ -33,7 +33,7 @@ def filter_signal(i):
     sample_values = np.array(sample_values)
 
     low_cut = 1
-    high_cut = 100
+    high_cut = 100 
     fs = 500
 
     filtered_data = butter_bandpass_filter(sample_values[:,0], low_cut, high_cut, fs, order=5)
@@ -46,13 +46,16 @@ def normalize(segment):
     segment_max = np.max(segment)
     return (segment - segment_min) / (segment_max - segment_min)
 
-def extract_segments(data):
 
+def extract_segments(data):
     r_idx, _ = find_peaks(data, height=0.65)
     segments = []
+    diffs = np.diff(r_idx)
+    min_diff = np.min(diffs)
+
     for idx in r_idx:
-        start = max(idx-360, 0)
-        end = min(idx+120, len(data))
+        start = max(idx-100, 0)
+        end = min(idx+200, len(data))
         segment = list(data[start:end])
         segments.append(segment)
         
@@ -61,11 +64,11 @@ def extract_segments(data):
 
 
 def averaging(segments):
-    print(len(segments[0]))
-    print(len(segments))
     averaged_signal = []
-    for j in range(len(segments[0])):
+    seg = 0
+    for j in range(len(segments[seg])):
         mean_vec = []
+        seg += 1
         for i in range(len(segments)):
             mean_vec.append(segments[i][j])
         averaged_signal.append(np.average(mean_vec))
@@ -99,20 +102,44 @@ def plot_segments(segments):
 
 if __name__ == "__main__":
 
-    true_data, filtered_data, low_cut, high_cut = filter_signal(47)
+    # true_data, filtered_data, low_cut, high_cut = filter_signal(47)
+    # # true_data, filtered_data, low_cut, high_cut = filter_signal(7)
+    # # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
+    # # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
+
+    # normalized_data = normalize(filtered_data)
+    # resampled_data = resample(normalized_data, num=3600)
+    # # plt.plot(normalized_data)
+    # # plt.plot(resampled_data)
+    # # plt.show()
+
+    # extracted_segments = extract_segments(resampled_data)
+    # del extracted_segments[0]
+    # plot_segments(extracted_segments)
+
+    # averaged_signal = averaging(extracted_segments)
+    # plt.plot(averaged_signal)    
+    # plt.show()
+
+    # true_data, filtered_data, low_cut, high_cut = filter_signal(27)
+    # true_data, filtered_data, low_cut, high_cut = filter_signal(7)
+    true_data, filtered_data, low_cut, high_cut = filter_signal(77) 
     # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
 
     normalized_data = normalize(filtered_data)
     resampled_data = resample(normalized_data, num=3600)
+    # plt.plot(normalized_data)
+    # plt.plot(resampled_data)
+    # plt.show()
 
     extracted_segments = extract_segments(resampled_data)
     del extracted_segments[0]
+    del extracted_segments[-1]
     plot_segments(extracted_segments)
 
     averaged_signal = averaging(extracted_segments)
     plt.plot(averaged_signal)    
     plt.show()
-
 
 
 
