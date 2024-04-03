@@ -30,31 +30,60 @@ class Encoder(nn.Module):
                  depths=[3, 3, 9, 3],
                  dims=[92, 192, 384, 768]):
         super(Encoder, self).__init__()
+
+        self.stages = nn.ModuleList()
+        cur = 0
+        for i in range(4):
+            stage = nn.Sequential(
+                *[Block(dim=dims[i]) for j in range(depths[i])]
+            )
+            self.stages.append(stage)
+            cur += depths[i]
+
+        self.norm = nn.Layernorm(dims[-1], eps=1e-6)
         
-        self.net = nn.Sequential(
-            # input shape: [N, 12, 4992]
-            nn.Conv1d(in_channels=12, out_channels=24, kernel_size=5, stride=1, padding=2), 
-            nn.ReLU(), 
-            nn.MaxPool1d(kernel_size=4, stride=4),  
-            
-            # intermediate shape: [N, 24, 1248]
-            nn.Conv1d(in_channels=24, out_channels=48, kernel_size=5, stride=1, padding=2), 
-            nn.ReLU(), 
-            nn.MaxPool1d(kernel_size=4, stride=4), 
-            
-            # intermediate shape: [N, 48, 312]
-            nn.Conv1d(in_channels=48, out_channels=96, kernel_size=5, stride=1, padding=2), 
-            nn.ReLU(),  
-            nn.MaxPool1d(kernel_size=4, stride=4),  
-            
-            nn.Conv1d(in_channels=96, out_channels=192, kernel_size=5, stride=1, padding=2), 
-            nn.ReLU(),
-            nn.MaxPool1d(kernel_size=4, stride=4),
-            # final shape: [N, 96, 78]
-        )
+
+
 
     def forward(self, x):
+        num_stages = len(self.stages)
+        for i in range(num_stages):
+            x = self.stages[i](x)
+
+
         return self.net(x)
+
+# class Encoder(nn.Module):
+#     def __init__(self,
+#                  in_chans=12,
+#                  depths=[3, 3, 9, 3],
+#                  dims=[92, 192, 384, 768]):
+#         super(Encoder, self).__init__()
+        
+#         self.net = nn.Sequential(
+#             # input shape: [N, 12, 4992]
+#             nn.Conv1d(in_channels=12, out_channels=24, kernel_size=5, stride=1, padding=2), 
+#             nn.ReLU(), 
+#             nn.MaxPool1d(kernel_size=4, stride=4),  
+            
+#             # intermediate shape: [N, 24, 1248]
+#             nn.Conv1d(in_channels=24, out_channels=48, kernel_size=5, stride=1, padding=2), 
+#             nn.ReLU(), 
+#             nn.MaxPool1d(kernel_size=4, stride=4), 
+            
+#             # intermediate shape: [N, 48, 312]
+#             nn.Conv1d(in_channels=48, out_channels=96, kernel_size=5, stride=1, padding=2), 
+#             nn.ReLU(),  
+#             nn.MaxPool1d(kernel_size=4, stride=4),  
+            
+#             nn.Conv1d(in_channels=96, out_channels=192, kernel_size=5, stride=1, padding=2), 
+#             nn.ReLU(),
+#             nn.MaxPool1d(kernel_size=4, stride=4),
+#             # final shape: [N, 96, 78]
+#         )
+
+#     def forward(self, x):
+#         return self.net(x)
 
 
 
