@@ -6,8 +6,10 @@ import wfdb
 from scipy.signal import butter, lfilter, filtfilt
 import matplotlib.pyplot as plt
 from scipy.signal import resample, find_peaks
+from scipy.fft import fft, fftfreq
 
-physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
+# physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
+physio_root = 'data/physionet/ptbxl/records500'
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
@@ -29,11 +31,12 @@ def plot_ecg(i):
 
 
 def filter_signal(i):
-    sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00{i:03}')
+    # sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00{i:03}')
+    sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/00000/00{i:03}_hr')
     sample_values = np.array(sample_values)
 
     low_cut = 1
-    high_cut = 100 
+    high_cut = 49 
     fs = 500
 
     filtered_data = butter_bandpass_filter(sample_values[:,0], low_cut, high_cut, fs, order=5)
@@ -48,10 +51,8 @@ def normalize(segment):
 
 
 def extract_segments(data):
-    r_idx, _ = find_peaks(data, height=0.65)
+    r_idx, _ = find_peaks(data, height=0.25)
     segments = []
-    diffs = np.diff(r_idx)
-    min_diff = np.min(diffs)
 
     for idx in r_idx:
         start = max(idx-100, 0)
@@ -74,7 +75,38 @@ def averaging(segments):
         averaged_signal.append(np.average(mean_vec))
 
     return averaged_signal
-        
+
+
+def inspect_freqs(ecg_signal, fs):
+
+    """
+    Plot the FFT of an ECG signal.
+
+    Parameters:
+    - ecg_signal: Array-like, the ECG signal samples.
+    - fs: Sampling frequency in Hz.
+    """
+    # Number of samples in the ECG signal
+    N = len(ecg_signal)
+    
+    # Compute the FFT of the ECG signal
+    fft_ecg = np.fft.fft(ecg_signal)
+    # Compute the frequencies for each FFT component
+    freqs = np.fft.fftfreq(N, d=1/fs)
+    
+    # Magnitude of the FFT (2-sided spectrum)
+    magnitude = np.abs(fft_ecg)
+    
+    # Only plot the one-sided spectrum (up to Nyquist frequency)
+    # Nyquist frequency is fs/2
+    n = N // 2
+    plt.figure(figsize=(10, 6))
+    plt.plot(freqs[:n], magnitude[:n])
+    plt.title('FFT of ECG Signal')
+    plt.xlabel('Frequency (Hz)')
+    plt.ylabel('Magnitude')
+    plt.grid(True)
+    plt.show()
 
 
 def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
@@ -95,50 +127,36 @@ def plot_peaks(resampled_data):
     plt.plot(np.zeros_like(resampled_data), "--", color="gray")
     plt.show()
 
+
 def plot_segments(segments):
     for i in range(len(segments)):
         plt.plot(segments[i],label = 'id %s'%i)
     plt.show()
 
+
 if __name__ == "__main__":
-
+    # plot_ecg(27)
     # true_data, filtered_data, low_cut, high_cut = filter_signal(47)
-    # # true_data, filtered_data, low_cut, high_cut = filter_signal(7)
-    # # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
-    # # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
-
-    # normalized_data = normalize(filtered_data)
-    # resampled_data = resample(normalized_data, num=3600)
-    # # plt.plot(normalized_data)
-    # # plt.plot(resampled_data)
-    # # plt.show()
-
-    # extracted_segments = extract_segments(resampled_data)
-    # del extracted_segments[0]
-    # plot_segments(extracted_segments)
-
-    # averaged_signal = averaging(extracted_segments)
-    # plt.plot(averaged_signal)    
-    # plt.show()
-
-    # true_data, filtered_data, low_cut, high_cut = filter_signal(27)
-    # true_data, filtered_data, low_cut, high_cut = filter_signal(7)
-    true_data, filtered_data, low_cut, high_cut = filter_signal(77) 
+    true_data, filtered_data, low_cut, high_cut = filter_signal(1)
+    # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
     # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
 
-    normalized_data = normalize(filtered_data)
-    resampled_data = resample(normalized_data, num=3600)
-    # plt.plot(normalized_data)
+    resampled_data = resample(filtered_data, num=3600)
+    # inspect_freqs(resampled_data, 360)
+    # plt.plot(filtered_data)
     # plt.plot(resampled_data)
     # plt.show()
 
     extracted_segments = extract_segments(resampled_data)
     del extracted_segments[0]
     del extracted_segments[-1]
-    plot_segments(extracted_segments)
+    # plot_segments(extracted_segments)
 
-    averaged_signal = averaging(extracted_segments)
-    plt.plot(averaged_signal)    
+    # averaged_signal = averaging(extracted_segments)
+    averaged_signal = np.mean(np.array(extracted_segments), axis=0)
+    print(averaged_signal.shape)
+    normalized_data = normalize(averaged_signal)
+    plt.plot(normalized_data)    
     plt.show()
 
 

@@ -5,8 +5,11 @@ from torch.utils.data import Dataset
 from pathlib import Path
 from scipy.signal import butter, lfilter
 import pandas as pd
+from scipy.signal import resample, find_peaks
+import matplotlib.pyplot as plt
 
-physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
+# physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
+physio_root = 'data/physionet/ptbxl/records500'
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
@@ -21,6 +24,41 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     y = lfilter(b, a, data)
     return y
 
+
+def normalize(segment):
+    segment_min = np.min(segment)
+    segment_max = np.max(segment)
+    return (segment - segment_min) / (segment_max - segment_min)
+
+
+def get_r_idx(data):
+    r_idx, _ = find_peaks(data, distance=250) 
+    return r_idx
+
+def extract_segments(data, r_idx):
+    segments = []
+    for idx in r_idx:
+        start = max(idx-100, 0)
+        end = min(idx+200, len(data))
+        segment = list(data[start:end])
+        segments.append(segment)
+        
+    return segments
+
+
+def averaging(segments):
+    averaged_signal = []
+    seg = 0
+    for j in range(len(segments[seg])):
+        mean_vec = []
+        for i in range(len(segments)):
+            mean_vec.append(segments[i][j])
+        
+        averaged_signal.append(np.average(mean_vec))
+
+    return averaged_signal
+
+
 def create_input_tensor():
     print(f'creating datasets')
     
@@ -28,15 +66,14 @@ def create_input_tensor():
     high_cut = 20
     fs = 500
 
-    init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
-    init_filtered = butter_bandpass_filter(np.array(init_sample), low_cut, high_cut, fs, order=5)
-    input_tensor = torch.Tensor(init_filtered).unsqueeze(0)
-
-    labels_list = []
+    # # init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
+    # init_sample, init_field = wfdb.rdsamp(f'{physio_root}/00000/00001_hr')
+    # init_filtered = butter_bandpass_filter(np.array(init_sample), low_cut, high_cut, fs, order=5)
+    # input_tensor = torch.Tensor(init_filtered).unsqueeze(0)
 
     directory_path = Path(f'{physio_root}')
 
-    mat_files = [file for file in directory_path.rglob('*.mat')]
+    mat_files = [file for file in directory_path.rglob('*.dat')]
 
     mat_files_without_extension = [str(file)[:-4] for file in mat_files]
     mat_files_without_extension = mat_files_without_extension[1:]
@@ -49,48 +86,55 @@ def create_input_tensor():
         sample_values, sample_field = wfdb.rdsamp(f'{file}')
         sample_values = np.array(sample_values)
         filtered_data = np.zeros((sample_values.shape[0], sample_values.shape[1]))
+        resampled_data = np.zeros((sample_values.shape[1]))
+        segs = []
+        output_data = np.zeros((300, 12))
         for l in range(sample_values.shape[1]):
             filtered_data[:,l] = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
 
-        ### header data
-        header = wfdb.rdheader(f'{file}')
-        for comment in header.comments:
-            if comment.startswith('Dx:'):
-                dx_info = comment.split(': ')[1]
-                dx_codes = dx_info.split(',')
-                dx_codes_int = [int(code) for code in dx_codes]
+            resampled_data = resample(filtered_data[:,l], num=3600)
+            if l == 0:
+                r_idx = get_r_idx(resampled_data)
+                # plt.plot(filtered_data[:,l])
+                plt.plot(resampled_data)
+                plt.show()
+            
 
-        
-        labels_list.append(dx_codes_int)
+            segs = extract_segments(resampled_data, r_idx)
+            if segs:
+                del segs[0], segs[-1]
+                output_data[:,l] = np.mean(np.array(segs), axis=0)
+                output_data[:,l] = normalize(output_data[:,l])
 
-        ### creating tensors
-        sample_tensor = torch.Tensor(filtered_data).unsqueeze(0)
-        input_tensor = torch.cat([input_tensor, sample_tensor], dim=0)
+                plt.plot(output_data[:,0])
+                plt.show()
 
         if idx == 100:
             break
-        
-    print(labels_list)
-    labels_tensor = torch.Tensor(labels_list)
-    
+        ### creating tensors
+        if idx == 0:
+            input_tensor = torch.Tensor(output_data).unsqueeze(0)
+        else:
+            sample_tensor = torch.Tensor(output_data).unsqueeze(0)
+            input_tensor = torch.cat([input_tensor, sample_tensor], dim=0) 
 
     print(input_tensor.size())
-    print(labels_tensor.size())
-    return input_tensor, labels_tensor
+    return input_tensor
 
 
-def train_test_split(tensor, labels, split):
+def train_test_split(tensor, split):
     split_idx = int(tensor.size(dim=0)*split)
     train_tensor = tensor[1:split_idx,:,:]
     test_tensor = tensor[split_idx+1:-1,:,:]
 
-    train_labels = labels[1:split_idx,:,:]
-    test_labels = labels[split_idx+1:-1,:,:]
-
-    return train_tensor, test_tensor, train_labels, test_labels
+    return train_tensor, test_tensor 
 
 if __name__ == "__main__":
-    input_tensor, labels_tensor = create_input_tensor()
+
+    SAVE = True
+
+
+    input_tensor = create_input_tensor()
     input_tensor = input_tensor.permute(0,2,1)
     input_tensor = input_tensor[:, :, 0:4992]
 
@@ -104,5 +148,9 @@ if __name__ == "__main__":
     # train_dataset = ECGDataset(train_tensor)
     # test_dataset = ECGDataset(test_tensor)
 
-    torch.save(train_tensor, 'data/datasets/train_dataset.pt')
-    torch.save(test_tensor, 'data/datasets/test_dataset.pt')
+
+    if SAVE:
+        save_dir = 'data/datasets/'
+        torch.save(train_tensor, f'{save_dir}train_dataset.pt')
+        torch.save(test_tensor, f'{save_dir}test_dataset.pt')
+        print(f'tensors saved to {save_dir}')
