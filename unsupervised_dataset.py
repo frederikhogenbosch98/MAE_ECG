@@ -85,14 +85,14 @@ def create_input_tensor():
         ### signal data
         sample_values, sample_field = wfdb.rdsamp(f'{file}')
         sample_values = np.array(sample_values)
-        filtered_data = np.zeros((sample_values.shape[0], sample_values.shape[1]))
-        resampled_data = np.zeros((sample_values.shape[1]))
+        filtered_data = []
+        resampled_data = []
         segs = []
         output_data = np.zeros((300, 12))
         for l in range(sample_values.shape[1]):
-            filtered_data[:,l] = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
+            filtered_data = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
 
-            resampled_data = resample(filtered_data[:,l], num=3600)
+            resampled_data = resample(filtered_data, num=3600)
             if l == 0:
                 r_idx = get_r_idx(resampled_data)
                 # plt.plot(filtered_data[:,l])
@@ -105,9 +105,13 @@ def create_input_tensor():
                 del segs[0], segs[-1]
                 output_data[:,l] = np.mean(np.array(segs), axis=0)
                 output_data[:,l] = normalize(output_data[:,l])
-
-                plt.plot(output_data[:,0])
-                plt.show()
+        print(type(output_data))
+        plt.plot(output_data[:,0])
+        plt.plot(output_data[:,1])
+        plt.plot(output_data[:,2])
+        plt.plot(output_data[:,3])
+        plt.plot(output_data[:,5])
+        plt.show()
 
         if idx == 100:
             break
