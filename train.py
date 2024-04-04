@@ -35,11 +35,16 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
 
     train_tensor = torch.load('data/datasets/train_dataset.pt').to(device)
+    train_tensor = train_tensor.permute(0, 3, 2, 1)
 
     dataset_train = ECGDataset(train_tensor)
     dataloader_train = DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
 
-    model = AutoEncoder()
+    model = AutoEncoder(in_chans=12, dims=[24, 48], depths=[2, 2])
+
+
+    # N, C, H, W  -> 512 batch, 12 leads, 300 samples, 6 cycles
+    print(train_tensor.size())
 
     if TRAIN:
         loss_function = nn.MSELoss()
@@ -59,6 +64,7 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
         losses = []
         # TRAINING
+        print("STARTING TRAINING")
         for epoch in range(NUM_EPOCHS):
             t_start = time.time()
 
@@ -69,7 +75,7 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
                 inputs = inputs.to(device)
                 mask = masking(train_tensor, 1) # 0 is fully masked
-                inputs = inputs.masked_fill(torch.from_numpy(mask).to(device) == True, 0)
+                # inputs = inputs.masked_fill(torch.from_numpy(mask).to(device) == True, 0)
                 optimizer.zero_grad()
 
                 outputs = model(inputs)

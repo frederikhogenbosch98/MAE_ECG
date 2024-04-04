@@ -18,8 +18,8 @@ if __name__ == "__main__":
     SAVE_MODEL = True
 
     LEARNING_RATE = 0.0003
-    BATCH_SIZE = 512
-    NUM_EPOCHS = 500
+    BATCH_SIZE = 32 #512
+    NUM_EPOCHS = 40 #500
     RANDOM_SEED = 123
 
     torch.manual_seed(RANDOM_SEED)    

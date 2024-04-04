@@ -51,7 +51,7 @@ def normalize(segment):
 
 
 def extract_segments(data):
-    r_idx, _ = find_peaks(data, height=0.25)
+    r_idx, _ = find_peaks(data, distance=250)
     segments = []
 
     for idx in r_idx:
@@ -137,27 +137,38 @@ def plot_segments(segments):
 if __name__ == "__main__":
     # plot_ecg(27)
     # true_data, filtered_data, low_cut, high_cut = filter_signal(47)
-    true_data, filtered_data, low_cut, high_cut = filter_signal(1)
-    # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
-    # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
+    num_segs = []
+    for i in range(1,980):
+        try:
+            true_data, filtered_data, low_cut, high_cut = filter_signal(i)
+            # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
+            # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
 
-    resampled_data = resample(filtered_data, num=3600)
-    # inspect_freqs(resampled_data, 360)
-    # plt.plot(filtered_data)
-    # plt.plot(resampled_data)
+            resampled_data = resample(filtered_data, num=3600)
+            # inspect_freqs(resampled_data, 360)
+            # plt.plot(filtered_data)
+            # plt.plot(resampled_data)
+            # plt.show()
+
+            extracted_segments = extract_segments(resampled_data)
+            del extracted_segments[0], extracted_segments[-1]
+            # plot_segments(extracted_segments)
+
+            # averaged_signal = averaging(extracted_segments)
+            # averaged_signal = np.mean(np.array(extracted_segments), axis=0)
+            averaged_signal = np.array(extracted_segments)
+            num_segs.append(averaged_signal.shape[0])
+            # normalized_data = np.zeros((averaged_signal.shape))
+            # for j in range(averaged_signal.shape[0]):
+                # normalized_data[j,:] = normalize(averaged_signal[j,:])
+        except FileNotFoundError:
+            continue
+        
+    print(np.unique(num_segs, return_counts=True))
+    # plt.plot(normalized_data[5,:])    
+    # plt.plot(normalized_data[2,:])    
+    # plt.plot(normalized_data[0,:])    
     # plt.show()
-
-    extracted_segments = extract_segments(resampled_data)
-    del extracted_segments[0]
-    del extracted_segments[-1]
-    # plot_segments(extracted_segments)
-
-    # averaged_signal = averaging(extracted_segments)
-    averaged_signal = np.mean(np.array(extracted_segments), axis=0)
-    print(averaged_signal.shape)
-    normalized_data = normalize(averaged_signal)
-    plt.plot(normalized_data)    
-    plt.show()
 
 
 

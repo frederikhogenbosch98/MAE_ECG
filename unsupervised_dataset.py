@@ -89,7 +89,6 @@ def create_input_tensor():
         filtered_data = []
         resampled_data = []
         segs = []
-        output_data = np.zeros((300, 12))
 
         for l in range(sample_values.shape[1]):
             filtered_data = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
@@ -98,11 +97,17 @@ def create_input_tensor():
                 r_idx = get_r_idx(resampled_data)
 
             segs = extract_segments(resampled_data, r_idx)
-            if segs:
+            if segs and len(segs) > 7:
+                mid_idx = len(segs) // 2
+                strt_idx = max(0, mid_idx-4)
+                end_idx = strt_idx+8
+                segs = segs[strt_idx:end_idx]
                 del segs[0], segs[-1]
-                output_data[:,l] = np.mean(np.array(segs), axis=0)
-                output_data[:,l] = normalize(output_data[:,l])
-
+                output_data = np.zeros((6, 300, 12))
+                for j in range(6):
+                    output_data[j,:,l] = np.array(segs[j])
+                    output_data[j,:,l] = normalize(output_data[j,:,l])
+        
         ### creating tensors
         if idx == 0:
             input_tensor = torch.Tensor(output_data).unsqueeze(0)
@@ -110,14 +115,15 @@ def create_input_tensor():
             sample_tensor = torch.Tensor(output_data).unsqueeze(0)
             input_tensor = torch.cat([input_tensor, sample_tensor], dim=0) 
 
+
     print(input_tensor.size())
     return input_tensor
 
 
 def train_test_split(tensor, split):
     split_idx = int(tensor.size(dim=0)*split)
-    train_tensor = tensor[1:split_idx,:,:]
-    test_tensor = tensor[split_idx+1:-1,:,:]
+    train_tensor = tensor[1:split_idx,:,:,:]
+    test_tensor = tensor[split_idx+1:-1,:,:,:]
 
     return train_tensor, test_tensor 
 
@@ -127,8 +133,8 @@ if __name__ == "__main__":
 
 
     input_tensor = create_input_tensor()
-    input_tensor = input_tensor.permute(0,2,1)
-    input_tensor = input_tensor[:, :, 0:4992]
+    # input_tensor = input_tensor.permute(0,2,1)
+    # input_tensor = input_tensor[:, :, 0:4992]
 
     # shuffle tensors with some sort of seed
 

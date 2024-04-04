@@ -1,23 +1,26 @@
 import torch.nn as nn
-
+import torch
+import torch.nn.functional as F
+import pdb
 
 class Block(nn.Module):
-    def __init__(self, dim, D=3):
-        super.__init__()
-        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=10, bias=True, dimension=D)
+    def __init__(self, dim):
+        super().__init__()
+        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=(5,1), bias=True)
         self.norm = nn.LayerNorm(dim, 1e-6)
-        self.conv_l2 = nn.Linear(dim, 4*dim)
+        self.lin_up = nn.Linear(dim, 4*dim)
         self.act = nn.GELU()
-        self.conv_l3 = nn.Linear(4*dim, dim)
+        self.lin_down = nn.Linear(4*dim, dim)
         
 
     def forward(self, x):
+        print(f'block shape: {x.shape}')
         x = self.conv_l1(x)
         x = x.permute(0, 2, 3, 1)
         x = self.norm(x)
-        x = self.conv_l2(x)
+        x = self.lin_up(x)
         x = self.act(x)
-        x = self.conv_l3(x)
+        x = self.lin_down(x)
         x = x.permute(0, 3, 1, 2)
 
         return x
@@ -27,30 +30,118 @@ class Block(nn.Module):
 class Encoder(nn.Module):
     def __init__(self,
                  in_chans=12,
-                 depths=[3, 3, 9, 3],
+                 depths=[12, 12, 12*3, 12],
                  dims=[92, 192, 384, 768]):
         super(Encoder, self).__init__()
+        self.downsample_layers = nn.ModuleList()
+        stem = nn.Sequential(
+            nn.Conv2d(in_chans, dims[0], kernel_size=(10,2), stride=4),
+            LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
+            )
 
+        self.downsample_layers.append(stem)
+        for i in range(len(dims)-1):
+            # pdb.set_trace()
+            downsample_layer = nn.Sequential(
+                LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
+                nn.Conv2d(dims[i], dims[i+1], kernel_size=2, stride=2, bias=True)
+            )
+            self.downsample_layers.append(downsample_layer)
         self.stages = nn.ModuleList()
         cur = 0
-        for i in range(4):
+        for i in range(len(dims)):
             stage = nn.Sequential(
                 *[Block(dim=dims[i]) for j in range(depths[i])]
             )
             self.stages.append(stage)
             cur += depths[i]
 
-        self.norm = nn.Layernorm(dims[-1], eps=1e-6)
-        
+
 
 
     def forward(self, x):
+        print(f'starting tensor input shape: {x.shape}')
         num_stages = len(self.stages)
-        for i in range(num_stages):
+        num_down_laywers = len(self.downsample_layers)
+        for i in range(min(num_stages, num_down_laywers)):
+            # pdb.set_trace()
+            x = self.downsample_layers[i](x)
+            print(f'after downsample layers: {x.shape}')
             x = self.stages[i](x)
+            print(f'after stages: {x.shape}')
 
 
-        return self.net(x)
+        return x
+
+
+class AutoEncoder(nn.Module):
+    def __init__(self, in_chans, dims=[92, 192, 384, 768], depths=[12, 12, 12*3, 12], decoder_embed_dim=12, decoder_depth=5):
+        super().__init__()
+        self.encoder = Encoder(in_chans, dims=dims, depths=depths)
+        decoder = [Block(
+            dim=decoder_embed_dim) for i in range(decoder_depth)]
+        self.decoder = nn.Sequential(*decoder)        
+        self.proj = nn.Conv2d(
+            in_channels = dims[-1],
+            out_channels = decoder_embed_dim,
+            kernel_size = 1
+        )
+
+        self.pred = nn.Conv2d(
+            in_channels = decoder_embed_dim,
+            out_channels = in_chans,
+            kernel_size = 1
+        )
+        
+
+    def forward_encoder(self, x):
+        x = self.encoder(x)
+        return x
+
+    def forward_decoder(self, x):
+        print(f'before prod: {x.shape}')
+        x = self.proj(x)
+        print(x.shape)
+        x = self.decoder(x)
+        print(x.shape)
+        x = self.pred(x)
+        print(x.shape)
+        return x
+
+    def forward(self, x):
+        x = self.forward_encoder(x)
+        print(x.shape)
+        x = self.forward_decoder(x)
+        print(x.shape)
+        return x
+
+
+
+class LayerNorm(nn.Module):
+    r""" LayerNorm that supports two data formats: channels_last (default) or channels_first. 
+    The ordering of the dimensions in the inputs. channels_last corresponds to inputs with 
+    shape (batch_size, height, width, channels) while channels_first corresponds to inputs 
+    with shape (batch_size, channels, height, width).
+    """
+    def __init__(self, normalized_shape, eps=1e-6, data_format="channels_last"):
+        super().__init__()
+        self.weight = nn.Parameter(torch.ones(normalized_shape))
+        self.bias = nn.Parameter(torch.zeros(normalized_shape))
+        self.eps = eps
+        self.data_format = data_format
+        if self.data_format not in ["channels_last", "channels_first"]:
+            raise NotImplementedError 
+        self.normalized_shape = (normalized_shape, )
+
+    def forward(self, x):
+        if self.data_format == "channels_last":
+            return F.layer_norm(x, self.normalized_shape, self.weight, self.bias, self.eps)
+        elif self.data_format == "channels_first":
+            u = x.mean(1, keepdim=True)
+            s = (x - u).pow(2).mean(1, keepdim=True)
+            x = (x - u) / torch.sqrt(s + self.eps)
+            x = self.weight[:, None, None] * x + self.bias[:, None, None]
+            return x
 
 # class Encoder(nn.Module):
 #     def __init__(self,
@@ -108,31 +199,3 @@ class Encoder(nn.Module):
     
 #     def forward(self, x):
 #         return self.net(x)
-
-
-class AutoEncoder(nn.Module):
-    def __init__(self, dims, depths, decoder_embed_dim=300, decoder_depth=1):
-        super().__init__()
-        self.encoder = Encoder()
-        decoder = [Block(
-            dim=decoder_embed_dim) for i in range(decoder_depth)]
-        self.decoder = nn.Sequential(*decoder)        
-        self.proj = nn.Conv2d(
-            in_channels = dims[-1],
-            out_channels = decoder_embed_dim,
-            kernel_size = 1
-        )
-
-    def forward_encoder(self, x):
-        x = self.encoder(x)
-        return x
-
-    def forward_decoder(self, x):
-        x = self.proj(x)
-        x = self.decoder(x)
-        return x
-
-    def forward(self, x):
-        x = self.forward_encoder(x)
-        x = self.forward_decoder(x)
-        return x
