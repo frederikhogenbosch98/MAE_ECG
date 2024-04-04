@@ -121,22 +121,30 @@ class Decoder(nn.Module):
         print(dims)
         dims = [out_chans] + dims
         print(dims)
-        stem = nn.Sequential(
-            nn.ConvTranspose2d(dims[1], dims[0], kernel_size=(6,3), stride=(2,1), padding=(5,0)),
-            LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
-            )
+        # stem = nn.Sequential(
+        #     nn.ConvTranspose2d(dims[1], dims[0], kernel_size=(6,3), stride=(2,1), padding=(5,0)),
+        #     LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
+        #     )
 
         for i in reversed(range(len(dims))):
             # pdb.set_trace()
             print(dims[i])
-            downsample_layer = nn.Sequential(
-                LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                nn.ConvTranspose2d(dims[i], dims[i-1], kernel_size=(12,2), stride=(2,1), padding=(1,0), bias=True)
+            print(i)
+            if i != 0:
+                downsample_layer = nn.Sequential(
+                    LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
+                    nn.ConvTranspose2d(dims[i], dims[i-1], kernel_size=(12,2), stride=(2,1), padding=(1,0), bias=True)
 
-            )
+                )
+            else:
+                downsample_layer = nn.Sequential(
+                    LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
+                    nn.ConvTranspose2d(dims[i], dims[i], kernel_size=(12,2), stride=(2,1), padding=(1,0), bias=True)
+
+                ) 
             self.downsample_layers.append(downsample_layer)
 
-        self.downsample_layers.append(stem)
+        # self.downsample_layers.append(stem)
         self.stages = nn.ModuleList()
 
         for i in reversed(range(len(dims))):
