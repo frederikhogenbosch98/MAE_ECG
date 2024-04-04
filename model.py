@@ -122,7 +122,7 @@ class Decoder(nn.Module):
         dims = [out_chans] + dims
         print(dims)
         stem = nn.Sequential(
-            nn.ConvTranspose2d(dims[1], dims[0], kernel_size=(12,3), stride=(2,1), padding=(5,0)),
+            nn.ConvTranspose2d(dims[1], dims[0], kernel_size=(6,3), stride=(2,1), padding=(5,0)),
             LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
             )
 
@@ -131,18 +131,27 @@ class Decoder(nn.Module):
             print(dims[i])
             downsample_layer = nn.Sequential(
                 LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                nn.ConvTranspose2d(dims[i], dims[i-1], kernel_size=(12,2), stride=(2,1), bias=True)
+                nn.ConvTranspose2d(dims[i], dims[i-1], kernel_size=(12,2), stride=(2,1), padding=(1,0), bias=True)
+
             )
             self.downsample_layers.append(downsample_layer)
 
         self.downsample_layers.append(stem)
         self.stages = nn.ModuleList()
 
-        for i in reversed(range(len(dims)-1)):
+        for i in reversed(range(len(dims))):
             stage = nn.Sequential(
                 DecoderBlock(dim=dims[i])
             )
             self.stages.append(stage)
+
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((300, 6))
+
+
+        # self.stem_final = nn.Sequential(
+            # nn.ConvTranspose2d(dims[0], dims[0], kernel_size=(5,2), stride=(1,1), padding=(0,0)),
+            # LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
+        # )
 
 
     def forward(self, x):
@@ -151,11 +160,14 @@ class Decoder(nn.Module):
         num_down_laywers = len(self.downsample_layers)
         for i in range(min(num_stages, num_down_laywers)):
             # pdb.set_trace()
-            x = self.downsample_layers[i](x)
-            print(f'after downsample layers: {x.shape}')
             x = self.stages[i](x)
             print(f'after stages: {x.shape}')
+            x = self.downsample_layers[i](x)
+            print(f'after downsample layers: {x.shape}')
 
+        
+        x = self.adaptive_pool(x)
+        print(f'final shape: {x.shape}')
         return x
 
 class AutoEncoder(nn.Module):
