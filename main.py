@@ -14,8 +14,8 @@ if __name__ == "__main__":
     dtype = torch.float
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    TRAIN = True
-    SAVE_MODEL = True
+    TRAIN = False
+    SAVE_MODEL = False
 
     LEARNING_RATE = 0.0003
     BATCH_SIZE = 32 #512

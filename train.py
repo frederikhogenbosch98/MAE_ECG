@@ -44,6 +44,8 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
 
     # N, C, H, W  -> 512 batch, 12 leads, 300 samples, 6 cycles
+    # torch.set_printoptions(threshold=10)
+    # print(train_tensor)
     print(train_tensor.size())
 
     if TRAIN:

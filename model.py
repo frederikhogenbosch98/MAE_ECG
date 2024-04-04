@@ -14,7 +14,7 @@ class EncoderBlock(nn.Module):
         
 
     def forward(self, x):
-        print(f'block shape: {x.shape}')
+        # print(f'block shape: {x.shape}')
         input = x
         x = self.conv_l1(x)
         x = x.permute(0, 2, 3, 1) # from [N, C, H, W] to [N, H, W, C]
@@ -23,7 +23,7 @@ class EncoderBlock(nn.Module):
         x = self.act(x)
         x = self.lin_down(x)
         x = x.permute(0, 3, 1, 2) # from [N, H, W, C] to [N, C, H, W] 
-        print(f'block end shape: {x.shape}')
+        # print(f'block end shape: {x.shape}')
 
 
         x = input + x
@@ -44,19 +44,19 @@ class DecoderBlock(nn.Module):
         
 
     def forward(self, x):
-        print(f'block shape: {x.shape}')
+        # print(f'block shape: {x.shape}')
         input = x
-        print('before conv')
-        print(self.dim)
+        # print('before conv')
+        # print(self.dim)
         x = self.conv_l1(x)
-        print('after conv')
+        # print('after conv')
         x = x.permute(0, 2, 3, 1) # from [N, C, H, W] to [N, H, W, C]
         x = self.norm(x)
         x = self.lin_up(x)
         x = self.act(x)
         x = self.lin_down(x)
         x = x.permute(0, 3, 1, 2) # from [N, H, W, C] to [N, C, H, W] 
-        print(f'block end shape: {x.shape}')
+        # print(f'block end shape: {x.shape}')
 
 
         x = input + x
@@ -98,15 +98,15 @@ class Encoder(nn.Module):
 
 
     def forward(self, x):
-        print(f'starting tensor input shape: {x.shape}')
+        # print(f'starting tensor input shape: {x.shape}')
         num_stages = len(self.stages)
         num_down_laywers = len(self.downsample_layers)
         for i in range(min(num_stages, num_down_laywers)):
             # pdb.set_trace()
             x = self.downsample_layers[i](x)
-            print(f'after downsample layers: {x.shape}')
+            # print(f'after downsample layers: {x.shape}')
             x = self.stages[i](x)
-            print(f'after stages: {x.shape}')
+            # print(f'after stages: {x.shape}')
 
 
         return x
@@ -118,9 +118,9 @@ class Decoder(nn.Module):
                  dims=[92, 192, 384, 768]):
         super(Decoder, self).__init__()
         self.downsample_layers = nn.ModuleList()
-        print(dims)
+        # print(dims)
         dims = [out_chans] + dims
-        print(dims)
+        # print(dims)
         # stem = nn.Sequential(
         #     nn.ConvTranspose2d(dims[1], dims[0], kernel_size=(6,3), stride=(2,1), padding=(5,0)),
         #     LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
@@ -128,8 +128,8 @@ class Decoder(nn.Module):
 
         for i in reversed(range(len(dims))):
             # pdb.set_trace()
-            print(dims[i])
-            print(i)
+            # print(dims[i])
+            # print(i)
             if i != 0:
                 downsample_layer = nn.Sequential(
                     LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
@@ -163,19 +163,19 @@ class Decoder(nn.Module):
 
 
     def forward(self, x):
-        print(f'starting tensor input shape: {x.shape}')
+        # print(f'starting tensor input shape: {x.shape}')
         num_stages = len(self.stages)
         num_down_laywers = len(self.downsample_layers)
         for i in range(min(num_stages, num_down_laywers)):
             # pdb.set_trace()
             x = self.stages[i](x)
-            print(f'after stages: {x.shape}')
+            # print(f'after stages: {x.shape}')
             x = self.downsample_layers[i](x)
-            print(f'after downsample layers: {x.shape}')
+            # print(f'after downsample layers: {x.shape}')
 
         
         x = self.adaptive_pool(x)
-        print(f'final shape: {x.shape}')
+        # print(f'final shape: {x.shape}')
         return x
 
 class AutoEncoder(nn.Module):
@@ -204,24 +204,24 @@ class AutoEncoder(nn.Module):
         return x
 
     def forward_decoder(self, x):
-        print(f'before prod: {x.shape}')
+        # print(f'before prod: {x.shape}')
         # x = self.proj(x)
         # print(x.shape)
         # x = self.decoder(x)
         # print(x.shape)
         # x = self.pred(x)
         x = self.decoder(x)
-        print(x.shape)
+        # print(x.shape)
         return x
 
     def forward(self, x):
-        print("ENCODING")
+        # print("ENCODING")
         x = self.forward_encoder(x)
-        print(x.shape)
-        print("DECODING")
+        # print(x.shape)
+        # print("DECODING")
         x = self.forward_decoder(x)
-        print(x.shape)
-        print("FINISHED")
+        # print(x.shape)
+        # print("FINISHED")
         return x
 
 
