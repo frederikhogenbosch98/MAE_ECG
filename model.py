@@ -44,7 +44,6 @@ class Encoder(nn.Module):
         
 
 
-
     def forward(self, x):
         num_stages = len(self.stages)
         for i in range(num_stages):
@@ -87,37 +86,53 @@ class Encoder(nn.Module):
 
 
 
-class Decoder(nn.Module):
-    def __init__(self):
-        super(Decoder, self).__init__()
+# class Decoder(nn.Module):
+#     def __init__(self):
+#         super(Decoder, self).__init__()
         
-        self.net = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=192, out_channels=96, kernel_size=5, stride=4, padding=2, output_padding=3),
-            nn.ReLU(),
+#         self.net = nn.Sequential(
+#             nn.ConvTranspose1d(in_channels=192, out_channels=96, kernel_size=5, stride=4, padding=2, output_padding=3),
+#             nn.ReLU(),
 
-            nn.ConvTranspose1d(in_channels=96, out_channels=48, kernel_size=5, stride=4, padding=2, output_padding=3),
-            nn.ReLU(),
+#             nn.ConvTranspose1d(in_channels=96, out_channels=48, kernel_size=5, stride=4, padding=2, output_padding=3),
+#             nn.ReLU(),
             
-            # intermediate: [N, 24, 4992]
-            nn.ConvTranspose1d(in_channels=48, out_channels=24, kernel_size=5, stride=4, padding=2, output_padding=3),
-            nn.ReLU(),
+#             # intermediate: [N, 24, 4992]
+#             nn.ConvTranspose1d(in_channels=48, out_channels=24, kernel_size=5, stride=4, padding=2, output_padding=3),
+#             nn.ReLU(),
             
-            # final: [N, 12, 4992]
-            nn.ConvTranspose1d(in_channels=24, out_channels=12, kernel_size=5, stride=4, padding=2, output_padding=3),
-            nn.Tanh()
-        )
+#             # final: [N, 12, 4992]
+#             nn.ConvTranspose1d(in_channels=24, out_channels=12, kernel_size=5, stride=4, padding=2, output_padding=3),
+#             nn.Tanh()
+#         )
     
-    def forward(self, x):
-        return self.net(x)
+#     def forward(self, x):
+#         return self.net(x)
 
 
 class AutoEncoder(nn.Module):
-    def __init__(self):
+    def __init__(self, dims, depths, decoder_embed_dim=300, decoder_depth=1):
         super().__init__()
         self.encoder = Encoder()
-        self.decoder = Decoder()
+        decoder = [Block(
+            dim=decoder_embed_dim) for i in range(decoder_depth)]
+        self.decoder = nn.Sequential(*decoder)        
+        self.proj = nn.Conv2d(
+            in_channels = dims[-1],
+            out_channels = decoder_embed_dim,
+            kernel_size = 1
+        )
+
+    def forward_encoder(self, x):
+        x = self.encoder(x)
+        return x
+
+    def forward_decoder(self, x):
+        x = self.proj(x)
+        x = self.decoder(x)
+        return x
 
     def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
+        x = self.forward_encoder(x)
+        x = self.forward_decoder(x)
+        return x
