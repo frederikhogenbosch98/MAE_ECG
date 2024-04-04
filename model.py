@@ -6,7 +6,7 @@ import pdb
 class Block(nn.Module):
     def __init__(self, dim):
         super().__init__()
-        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=(5,1), bias=True)
+        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=(7,3), padding=(3,1), stride=(1,1), bias=True)
         self.norm = nn.LayerNorm(dim, 1e-6)
         self.lin_up = nn.Linear(dim, 4*dim)
         self.act = nn.GELU()
@@ -15,13 +15,19 @@ class Block(nn.Module):
 
     def forward(self, x):
         print(f'block shape: {x.shape}')
+        input = x
         x = self.conv_l1(x)
-        x = x.permute(0, 2, 3, 1)
+        x = x.permute(0, 2, 3, 1) # from [N, C, H, W] to [N, H, W, C]
         x = self.norm(x)
         x = self.lin_up(x)
         x = self.act(x)
         x = self.lin_down(x)
-        x = x.permute(0, 3, 1, 2)
+        x = x.permute(0, 3, 1, 2) # from [N, H, W, C] to [N, C, H, W] 
+        print(f'block end shape: {x.shape}')
+
+
+        x = input + x
+
 
         return x
     
@@ -35,7 +41,7 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.downsample_layers = nn.ModuleList()
         stem = nn.Sequential(
-            nn.Conv2d(in_chans, dims[0], kernel_size=(10,2), stride=4),
+            nn.Conv2d(in_chans, dims[0], kernel_size=(12,3), stride=(2,1), padding=(5,0)),
             LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
             )
 
@@ -44,7 +50,7 @@ class Encoder(nn.Module):
             # pdb.set_trace()
             downsample_layer = nn.Sequential(
                 LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                nn.Conv2d(dims[i], dims[i+1], kernel_size=2, stride=2, bias=True)
+                nn.Conv2d(dims[i], dims[i+1], kernel_size=(12,2), stride=(2,1), bias=True)
             )
             self.downsample_layers.append(downsample_layer)
         self.stages = nn.ModuleList()
@@ -75,7 +81,7 @@ class Encoder(nn.Module):
 
 
 class AutoEncoder(nn.Module):
-    def __init__(self, in_chans, dims=[92, 192, 384, 768], depths=[12, 12, 12*3, 12], decoder_embed_dim=12, decoder_depth=5):
+    def __init__(self, in_chans, dims=[92, 192, 384, 768], depths=[12, 12, 12*3, 12], decoder_embed_dim=12, decoder_depth=2):
         super().__init__()
         self.encoder = Encoder(in_chans, dims=dims, depths=depths)
         decoder = [Block(

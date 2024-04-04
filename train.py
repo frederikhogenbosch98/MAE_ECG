@@ -40,7 +40,7 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
     dataset_train = ECGDataset(train_tensor)
     dataloader_train = DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
 
-    model = AutoEncoder(in_chans=12, dims=[24, 48], depths=[2, 2])
+    model = AutoEncoder(in_chans=12, dims=[24, 48], depths=[1, 1], decoder_embed_dim=512)
 
 
     # N, C, H, W  -> 512 batch, 12 leads, 300 samples, 6 cycles
