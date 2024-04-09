@@ -117,26 +117,16 @@ def create_img(signal, width, height):
     fig_width_in = width / dpi
     fig_height_in = height / dpi
     t = np.linspace(0, 1, len(signal))  
-    # plt.plot(t, signal)
-    # plt.axis('off')
-    # plt.tight_layout()
-    # plt.show()
 
     fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
     fig.patch.set_facecolor('white')
     ax.set_facecolor('white')
 
-    # ax.plot(t * width,  
-    #         ((signal + 1) / 2) * height,
-    #         color='black')
-
-    # ax.plot(t * (fig.get_figwidth()*100), (signal + 1) * (fig.get_figheight() * 50), color='black', linewidth=0.5)
 
     ax.plot(t, signal, color='black', linewidth=0.5)
     ax.axis('off')
 
     plt.savefig('signal_image_pixels.png', dpi=300, bbox_inches='tight', pad_inches=0)
-    # plt.show()
 
 
 

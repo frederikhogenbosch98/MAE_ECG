@@ -8,6 +8,9 @@ import pandas as pd
 from scipy.signal import resample, find_peaks
 import matplotlib.pyplot as plt
 import os
+import io
+from PIL import Image
+
 
 # physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 physio_root = 'data/physionet/ptbxl/records500'
@@ -120,16 +123,38 @@ def create_input_tensor():
         # plt.show()
         # print(output_data[0,:,0])
         # creating tensors
+                    
+            buf = create_img(output_data[:,:,l], 512, 512)
+            buf.seek(0)
+            image = Image.open(buf).convert('L')
+            image_array = np.array(image)
+            if l == 0:
+                img_tensor = torch.tensor(image_array[1:513, 2:514])
+                img_tensor = img_tensor[None, :, :]
+            else:
+                temp_img_tensor = torch.tensor(image_array[1:513, 2:514]) 
+                temp_img_tensor = temp_img_tensor[None, :, :]
+                img_tensor = torch.cat([img_tensor, temp_img_tensor], dim=0)
+
+        print(img_tensor.shape)
+
         if idx == 0:
-            input_tensor = torch.Tensor(output_data).unsqueeze(0)
-            # plt.plot(input_tensor[0,0,:,0])
-            # plt.show()
-            # print(input_tensor)
+            input_tensor = img_tensor.unsqueeze(0)
         else:
-            # print(output_data[])
-            sample_tensor = torch.Tensor(output_data).unsqueeze(0)
-            # print(sample_tensor[0,:,:,:])
-            input_tensor = torch.cat([input_tensor, sample_tensor], dim=0) 
+            input_tensor = torch.cat([input_tensor, img_tensor.unsqueeze(0)], dim=0)
+            print(input_tensor.shape)
+
+
+        # if idx == 0:
+        #     input_tensor = torch.Tensor(output_data).unsqueeze(0)
+        #     # plt.plot(input_tensor[0,0,:,0])
+        #     # plt.show()
+        #     # print(input_tensor)
+        # else:
+        #     # print(output_data[])
+        #     sample_tensor = torch.Tensor(output_data).unsqueeze(0)
+        #     # print(sample_tensor[0,:,:,:])
+        #     input_tensor = torch.cat([input_tensor, sample_tensor], dim=0) 
         # break
         # if idx == 100:
         #     plot_resulting_tensors(input_tensor, 27)
@@ -139,6 +164,31 @@ def create_input_tensor():
 
     print(input_tensor.size())
     return input_tensor
+
+
+
+
+def create_img(signal, width, height):
+
+    dpi = 230 
+    fig_width_in = width / dpi
+    fig_height_in = height / dpi
+    t = np.linspace(0, 1, len(signal))  
+
+    fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+
+    ax.plot(t, signal, color='black', linewidth=0.5)
+    ax.axis('off')
+    buf = io.BytesIO()
+
+    plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.close(fig)
+    
+    return buf
+
 
 
 def plot_resulting_tensors(tensor, i):
