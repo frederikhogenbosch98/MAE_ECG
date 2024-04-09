@@ -90,7 +90,7 @@ def create_input_tensor():
         resampled_data = []
         segs = []
 
-        output_data = np.zeros((6, 300, 12))
+        output_data = np.zeros((300, 12))
         for l in range(sample_values.shape[1]):
             filtered_data = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
             # print(filtered_data)
@@ -100,17 +100,22 @@ def create_input_tensor():
                 r_idx = get_r_idx(resampled_data)
 
             segs = extract_segments(resampled_data, r_idx)
+            del segs[0], segs[-1]
+            # print(np.array(segs))
+            output_data[:,l] = np.mean(np.array(segs), axis=0)
+            output_data[:,l] = normalize(output_data[:,l])
+
             # print(segs)
-            if segs and len(segs) > 7:
-                mid_idx = len(segs) // 2
-                strt_idx = max(0, mid_idx-4)
-                end_idx = strt_idx+8
-                segs = segs[strt_idx:end_idx]
-                del segs[0], segs[-1]
-                for j in range(6):
-                    # print(segs[0])
-                    output_data[j,:,l] = np.array(segs[j])
-                    output_data[j,:,l] = normalize(output_data[j,:,l])
+            # if segs and len(segs) > 7:
+            #     mid_idx = len(segs) // 2
+            #     strt_idx = max(0, mid_idx-4)
+            #     end_idx = strt_idx+8
+            #     segs = segs[strt_idx:end_idx]
+            #     del segs[0], segs[-1]
+            #     for j in range(6):
+            #         # print(segs[0])
+            #         output_data[j,:,l] = np.array(segs[j])
+            #         output_data[j,:,l] = normalize(output_data[j,:,l])
                     # print(output_data[j,:,l])
                     # break
             # print(segs[0])
@@ -142,19 +147,19 @@ def create_input_tensor():
 
 
 def plot_resulting_tensors(tensor, i):
-    plt.plot(tensor[i,0,:,0])
-    plt.plot(tensor[i,1,:,0])
-    plt.plot(tensor[i,2,:,0])
-    plt.plot(tensor[i,3,:,0])
-    plt.plot(tensor[i,4,:,0])
-    plt.plot(tensor[i,5,:,0])
+    plt.plot(tensor[i,:,0])
+    # plt.plot(tensor[i,:,1])
+    # plt.plot(tensor[i,:,2])
+    # plt.plot(tensor[i,:,3])
+    # plt.plot(tensor[i,:,4])
+    # plt.plot(tensor[i,:,5])
 
     plt.show()
 
 def train_test_split(tensor, split):
     split_idx = int(tensor.size(dim=0)*split)
-    train_tensor = tensor[0:split_idx,:,:,:]
-    test_tensor = tensor[split_idx+1:-1,:,:,:]
+    train_tensor = tensor[0:split_idx,:,:]
+    test_tensor = tensor[split_idx+1:-1,:,:]
 
     return train_tensor, test_tensor 
 
@@ -177,7 +182,7 @@ if __name__ == "__main__":
     # train_dataset = ECGDataset(train_tensor)
     # test_dataset = ECGDataset(test_tensor)
     # for i in range(50):
-        # plot_resulting_tensors(train_tensor,i)
+    #     plot_resulting_tensors(train_tensor,i)
     if SAVE:
         save_dir = 'data/datasets/'
         torch.save(train_tensor, f'{save_dir}train_dataset.pt')

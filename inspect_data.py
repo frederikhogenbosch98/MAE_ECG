@@ -7,6 +7,8 @@ from scipy.signal import butter, lfilter, filtfilt
 import matplotlib.pyplot as plt
 from scipy.signal import resample, find_peaks
 from scipy.fft import fft, fftfreq
+from PIL import Image, ImageDraw
+import cv2
 
 # physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 physio_root = 'data/physionet/ptbxl/records500'
@@ -36,7 +38,7 @@ def filter_signal(i):
     sample_values = np.array(sample_values)
 
     low_cut = 1
-    high_cut = 49 
+    high_cut = 100 
     fs = 500
 
     filtered_data = butter_bandpass_filter(sample_values[:,0], low_cut, high_cut, fs, order=5)
@@ -109,6 +111,37 @@ def inspect_freqs(ecg_signal, fs):
     plt.show()
 
 
+def create_img(signal, width, height):
+
+    dpi = 230 
+    fig_width_in = width / dpi
+    fig_height_in = height / dpi
+    t = np.linspace(0, 1, len(signal))  
+    # plt.plot(t, signal)
+    # plt.axis('off')
+    # plt.tight_layout()
+    # plt.show()
+
+    fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+    # ax.plot(t * width,  
+    #         ((signal + 1) / 2) * height,
+    #         color='black')
+
+    # ax.plot(t * (fig.get_figwidth()*100), (signal + 1) * (fig.get_figheight() * 50), color='black', linewidth=0.5)
+
+    ax.plot(t, signal, color='black', linewidth=0.5)
+    ax.axis('off')
+
+    plt.savefig('signal_image_pixels.png', dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
+
+
+
+
+
 def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
     x = np.linspace(0,2000, len(sample_values[:,0]))
     plt.plot(x, sample_values[:,0], label='true')
@@ -133,12 +166,21 @@ def plot_segments(segments):
         plt.plot(segments[i],label = 'id %s'%i)
     plt.show()
 
+def plot_resulting_tensors(tensor):
+    plt.plot(tensor[0,0,:,0])
+    plt.plot(tensor[0,1,:,0])
+    plt.plot(tensor[0,2,:,0])
+    plt.plot(tensor[0,3,:,0])
+    plt.plot(tensor[0,4,:,0])
+    plt.plot(tensor[0,5,:,0])
+
+    plt.show()
 
 if __name__ == "__main__":
     # plot_ecg(27)
-    # true_data, filtered_data, low_cut, high_cut = filter_signal(47)
+    true_data, filtered_data, low_cut, high_cut = filter_signal(47)
     num_segs = []
-    for i in range(1,980):
+    for i in range(5,10):
         try:
             true_data, filtered_data, low_cut, high_cut = filter_signal(i)
             # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
@@ -155,16 +197,22 @@ if __name__ == "__main__":
             # plot_segments(extracted_segments)
 
             # averaged_signal = averaging(extracted_segments)
-            # averaged_signal = np.mean(np.array(extracted_segments), axis=0)
-            averaged_signal = np.array(extracted_segments)
+            averaged_signal = np.mean(np.array(extracted_segments), axis=0)
+            # averaged_signal = np.array(extracted_segments)
             num_segs.append(averaged_signal.shape[0])
             # normalized_data = np.zeros((averaged_signal.shape))
             # for j in range(averaged_signal.shape[0]):
                 # normalized_data[j,:] = normalize(averaged_signal[j,:])
+            normalized_data = normalize(averaged_signal)
+            create_img(normalized_data, width=512, height=512)
         except FileNotFoundError:
             continue
         
-    print(np.unique(num_segs, return_counts=True))
+    # print(np.unique(num_segs, return_counts=True))
+
+    train_tensor = torch.load('data/datasets/train_dataset.pt')
+    # train_tensor = train_tensor.permute(0, 3, 2, 1)
+    plot_resulting_tensors(train_tensor)
     # plt.plot(normalized_data[5,:])    
     # plt.plot(normalized_data[2,:])    
     # plt.plot(normalized_data[0,:])    

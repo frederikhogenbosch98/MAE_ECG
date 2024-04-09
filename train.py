@@ -35,18 +35,20 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
 
     train_tensor = torch.load('data/datasets/train_dataset.pt').to(device)
-    train_tensor = train_tensor.permute(0, 3, 2, 1)
+    # train_tensor = train_tensor.permute(0, 3, 2, 1)
+    train_tensor = train_tensor[:,None,:,:]
+    print(train_tensor.shape)
 
     dataset_train = ECGDataset(train_tensor)
     dataloader_train = DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
 
-    model = AutoEncoder(in_chans=12, dims=[24, 48, 96], depths=[2, 2, 2], decoder_embed_dim=512)
+    model = AutoEncoder(in_chans=1, dims=[2, 4, 8, 16], depths=[4, 4, 4, 4], decoder_embed_dim=512)
 
 
     # N, C, H, W  -> 512 batch, 12 leads, 300 samples, 6 cycles
     # torch.set_printoptions(threshold=10)
     # print(train_tensor)
-    print(train_tensor.size())
+    # print(train_tensor.size())
 
     if TRAIN:
         loss_function = nn.MSELoss()

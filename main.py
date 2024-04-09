@@ -14,12 +14,12 @@ if __name__ == "__main__":
     dtype = torch.float
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    TRAIN = False
+    TRAIN = True
     SAVE_MODEL = False
 
-    LEARNING_RATE = 0.0003
-    BATCH_SIZE = 32 #512
-    NUM_EPOCHS = 40 #500
+    LEARNING_RATE = 0.001
+    BATCH_SIZE = 64 #512
+    NUM_EPOCHS = 5 #500
     RANDOM_SEED = 123
 
     torch.manual_seed(RANDOM_SEED)    
