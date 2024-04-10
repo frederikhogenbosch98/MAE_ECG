@@ -1,7 +1,8 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from model import AutoEncoder
+# from model import AutoEncoder
+from model_img import AutoEncoder
 from torch.utils.data import Dataset, DataLoader
 import time
 import random

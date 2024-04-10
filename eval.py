@@ -33,6 +33,13 @@ def plot_results(model, test_tensor, i, lead=0):
     plt.legend()
     plt.show()
 
+def plot_img(model, tensor, i, lead):
+    output_tensor = model(tensor[i:i+1, :, :, :])
+
+    output_tensor = output_tensor.cpu()
+    output_tensor = output_tensor.numpy()
+    plt.imshow(tensor[i,lead,:,:])
+    plt.imshow(output_tensor[i,lead,:,:])
 
 def eval(model, device):
 
@@ -65,4 +72,5 @@ def eval(model, device):
 
     print(f'Average MSE Loss on Test Set: {average_loss}')
     for i in range(4000,4010):
-        plot_results(model, test_tensor,i, lead=11)
+        plot_img(model, test_tensor, i, lead=0)
+        # plot_results(model, test_tensor,i, lead=11)

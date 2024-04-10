@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import os
 import io
 from PIL import Image
+import time
 
 
 # physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
@@ -66,8 +67,8 @@ def averaging(segments):
 def create_input_tensor():
     print(f'creating datasets')
     
-    low_cut = 1
-    high_cut = 20
+    low_cut = 0.1
+    high_cut = 100
     fs = 500
 
     # # init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
@@ -123,27 +124,31 @@ def create_input_tensor():
         # plt.show()
         # print(output_data[0,:,0])
         # creating tensors
-                    
-            buf = create_img(output_data[:,:,l], 512, 512)
+            # st = time.time()
+            buf = create_img(output_data[:,:,l], 224, 224)
+            # end = time.time()
+            # print(end-st)
             buf.seek(0)
             image = Image.open(buf).convert('L')
             image_array = np.array(image)
             if l == 0:
-                img_tensor = torch.tensor(image_array[1:513, 2:514])
+                img_tensor = torch.tensor(image_array[1:225, 0:224])
                 img_tensor = img_tensor[None, :, :]
             else:
-                temp_img_tensor = torch.tensor(image_array[1:513, 2:514]) 
+                temp_img_tensor = torch.tensor(image_array[1:225, 0:224]) 
                 temp_img_tensor = temp_img_tensor[None, :, :]
                 img_tensor = torch.cat([img_tensor, temp_img_tensor], dim=0)
 
-        print(img_tensor.shape)
+        # print(img_tensor.shape)
 
         if idx == 0:
             input_tensor = img_tensor.unsqueeze(0)
         else:
             input_tensor = torch.cat([input_tensor, img_tensor.unsqueeze(0)], dim=0)
-            print(input_tensor.shape)
+            # print(input_tensor.shape)
 
+        if idx == 5000:
+            break  
 
         # if idx == 0:
         #     input_tensor = torch.Tensor(output_data).unsqueeze(0)
@@ -212,8 +217,10 @@ if __name__ == "__main__":
 
     SAVE = True
 
-
+    st = time.time()
     input_tensor = create_input_tensor()
+    end = time.time()
+    print(f'total tensor creation time: {end-st}s')
     # input_tensor = input_tensor.permute(0,2,1)
     # input_tensor = input_tensor[:, :, 0:4992]
 

@@ -6,7 +6,7 @@ import pdb
 class EncoderBlock(nn.Module):
     def __init__(self, dim):
         super().__init__()
-        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=(7,3), padding=(3,1), stride=(1,1), bias=True)
+        self.conv_l1 = nn.Conv2d(dim, dim, kernel_size=7, padding=(0,0), stride=(1,1), bias=True)
         self.norm = nn.LayerNorm(dim, 1e-6)
         self.lin_up = nn.Linear(dim, 4*dim)
         self.act = nn.GELU()
@@ -35,7 +35,7 @@ class EncoderBlock(nn.Module):
 class DecoderBlock(nn.Module):
     def __init__(self, dim):
         super().__init__()
-        self.conv_l1 = nn.ConvTranspose2d(dim, dim, kernel_size=(7,3), padding=(3,1), stride=(1,1), bias=True)
+        self.conv_l1 = nn.ConvTranspose2d(dim, dim, kernel_size=7, padding=(0,0), stride=(1,1), bias=True)
         self.dim = dim
         self.norm = nn.LayerNorm(dim, 1e-6)
         self.lin_up = nn.Linear(dim, 4*dim)
@@ -58,7 +58,9 @@ class DecoderBlock(nn.Module):
         x = x.permute(0, 3, 1, 2) # from [N, H, W, C] to [N, C, H, W] 
         # print(f'block end shape: {x.shape}')
 
+
         x = input + x
+
 
         return x
         
@@ -74,7 +76,7 @@ class Encoder(nn.Module):
         # print(in_chans)
         # print(dims[0])
         stem = nn.Sequential(
-            nn.Conv2d(in_chans, dims[0], kernel_size=(3,3), stride=(2,1), padding=(1,0)),
+            nn.Conv2d(in_chans, dims[0], kernel_size=4, stride=4, padding=0),
             LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
             )
 
@@ -83,7 +85,7 @@ class Encoder(nn.Module):
             # pdb.set_trace()
             downsample_layer = nn.Sequential(
                 LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                nn.Conv2d(dims[i], dims[i+1], kernel_size=(3,2), stride=(2,1), bias=True)
+                nn.Conv2d(dims[i], dims[i+1], kernel_size=2, stride=2, bias=True)
             )
             self.downsample_layers.append(downsample_layer)
         self.stages = nn.ModuleList()
@@ -135,13 +137,13 @@ class Decoder(nn.Module):
             if i != 0:
                 downsample_layer = nn.Sequential(
                     LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                    nn.ConvTranspose2d(dims[i], dims[i-1], kernel_size=(3,2), stride=(2,1), padding=(1,0), bias=True)
+                    nn.ConvTranspose2d(dims[i], dims[i-1], kernel_size=2, stride=2, padding=0, bias=True)
 
                 )
             else:
                 downsample_layer = nn.Sequential(
                     LayerNorm(dims[i], eps=1e-6, data_format="channels_first"),
-                    nn.ConvTranspose2d(dims[i], dims[i], kernel_size=(3,2), stride=(2,1), padding=(1,0), bias=True)
+                    nn.ConvTranspose2d(dims[i], dims[i], kernel_size=2, stride=2, padding=0, bias=True)
 
                 ) 
             self.downsample_layers.append(downsample_layer)
@@ -155,7 +157,7 @@ class Decoder(nn.Module):
             )
             self.stages.append(stage)
 
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((300, 12))
+        # self.adaptive_pool = nn.AdaptiveAvgPool2d((300, 12))
 
 
         # self.stem_final = nn.Sequential(
@@ -177,7 +179,7 @@ class Decoder(nn.Module):
             print(f'after downsample layers: {x.shape}')
 
         
-        x = self.adaptive_pool(x)
+        # x = self.adaptive_pool(x)
         # print(f'final shape: {x.shape}')
         return x
 

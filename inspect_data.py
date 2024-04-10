@@ -32,16 +32,17 @@ def plot_ecg(i):
     wfdb.plot_wfdb(record=record, title=f'01 010 i')
 
 
-def filter_signal(i):
+def filter_signal(i, lead):
     # sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00{i:03}')
     sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/00000/00{i:03}_hr')
     sample_values = np.array(sample_values)
 
-    low_cut = 1
+    low_cut = 0.1
     high_cut = 100 
     fs = 500
 
-    filtered_data = butter_bandpass_filter(sample_values[:,0], low_cut, high_cut, fs, order=5)
+    # print(sample_values.shape)
+    filtered_data = butter_bandpass_filter(sample_values[:,lead], low_cut, high_cut, fs, order=5)
 
     return sample_values, filtered_data, low_cut, high_cut
 
@@ -63,7 +64,7 @@ def extract_segments(data):
         segments.append(segment)
         
 
-    return segments
+    return r_idx, segments
 
 
 def averaging(segments):
@@ -127,6 +128,7 @@ def create_img(signal, width, height):
     ax.axis('off')
 
     plt.savefig('signal_image_pixels.png', dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
 
 
 
@@ -168,13 +170,14 @@ def plot_resulting_tensors(tensor):
 
 if __name__ == "__main__":
     # plot_ecg(27)
-    true_data, filtered_data, low_cut, high_cut = filter_signal(47)
+    true_data, filtered_data, low_cut, high_cut = filter_signal(47, 1)
     num_segs = []
-    for i in range(5,10):
+    for lead in range(0,12):
+        # print(lead)
         try:
-            true_data, filtered_data, low_cut, high_cut = filter_signal(i)
+            true_data, filtered_data, low_cut, high_cut = filter_signal(27, lead)
             # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
-            # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
+            plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
 
             resampled_data = resample(filtered_data, num=3600)
             # inspect_freqs(resampled_data, 360)
@@ -182,7 +185,13 @@ if __name__ == "__main__":
             # plt.plot(resampled_data)
             # plt.show()
 
-            extracted_segments = extract_segments(resampled_data)
+
+            r_idx, extracted_segments = extract_segments(resampled_data)
+            # plot_peaks(resampled_data)
+            # plt.plot(resampled_data)
+            # plt.plot(r_idx, resampled_data[r_idx], "x")
+            # plt.plot(np.zeros_like(resampled_data), "--", color="gray")
+            # plt.show()
             del extracted_segments[0], extracted_segments[-1]
             # plot_segments(extracted_segments)
 
@@ -194,19 +203,23 @@ if __name__ == "__main__":
             # for j in range(averaged_signal.shape[0]):
                 # normalized_data[j,:] = normalize(averaged_signal[j,:])
             normalized_data = normalize(averaged_signal)
-            create_img(normalized_data, width=512, height=512)
+            create_img(normalized_data, width=224, height=224)
         except FileNotFoundError:
             continue
         
     # print(np.unique(num_segs, return_counts=True))
 
-    train_tensor = torch.load('data/datasets/train_dataset.pt')
+    # train_tensor = torch.load('data/datasets/train_dataset.pt')
     # train_tensor = train_tensor.permute(0, 3, 2, 1)
-    plot_resulting_tensors(train_tensor)
+    # plot_resulting_tensors(train_tensor)
     # plt.plot(normalized_data[5,:])    
     # plt.plot(normalized_data[2,:])    
     # plt.plot(normalized_data[0,:])    
     # plt.show()
+
+
+    # train_tensor = torch.load('data/datasets/train_dataset.pt')
+    # print(train_tensor[0,0,:,0])
 
 
 
