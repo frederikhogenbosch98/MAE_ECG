@@ -1,15 +1,60 @@
 from torchvision import datasets, transforms
 import torch
 import torch.nn as nn
-from model_scratch import AutoEncoder
+import torch.nn.functional as F
+from models.model_28x28 import AutoEncoder
 import matplotlib.pyplot as plt
 import time
 import numpy as np
 from print_funs import plot_losses, plotimg
 
-# mnist_data = torch.utils.data.Subset(mnist_data, range(4096))
-# mnist_data = list(mnist_data)[:4096]
-# print(type(mnist_data))
+
+def apply_mask(x, ratio, p=4):
+    x = x.permute(0,5,1,2,3,4)
+    rand_mask = torch.rand(x.shape[0], x.shape[1], x.shape[2], x.shape[3]) < ratio
+    rand_mask = rand_mask.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, 1, 1, 4, 4)
+    x = torch.where(rand_mask, torch.zeros_like(x), x) 
+    return x
+ 
+
+def patchify(imgs, ratio, p=4):
+    """
+    imgs: (N, 3, H, W)
+    x: (N, L, patch_size**2 *3)
+    """
+    assert imgs.shape[2] == imgs.shape[3] and imgs.shape[2] % p == 0
+
+    h = w = imgs.shape[2] // p
+    x = imgs.reshape(shape=(imgs.shape[0], 1, h, p, w, p))
+    x = torch.einsum('nchpwq->nhwpqc', x)
+    x = apply_mask(x, ratio)
+    x = x.reshape(shape=(imgs.shape[0], h * w, p**2 * 1))
+    return x
+
+
+def unpatchify(x, p=4):
+    """
+    x: (N, L, patch_size**2 *3)
+    imgs: (N, 3, H, W)
+    """
+    h = w = int(x.shape[1]**.5)
+    assert h * w == x.shape[1]
+    
+    x = x.reshape(shape=(x.shape[0], h, w, p, p, 1))
+    x = torch.einsum('nhwpqc->nchpwq', x)
+    imgs = x.reshape(shape=(x.shape[0], 1, h * p, h * p))
+    return imgs
+
+def mask(batch, ratio):
+    x = patchify(batch.cpu(), ratio)
+    imgs = unpatchify(x)
+    plt.subplot(2,1,1)
+    plt.imshow(batch[8,0,:,:].cpu().detach().numpy())
+    plt.subplot(2,1,2)
+    plt.imshow(imgs[8,0,:,:].cpu().detach().numpy())
+    plt.show()
+
+
 
 def train(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN=True, SAVE_MODEL=True):
     torch.manual_seed(42)
@@ -31,12 +76,15 @@ def train(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAI
             for data in train_loader:
                 img, _ = data
                 img = img.to(device)
+                mask(img, 0)
                 recon = model(img)
                 loss = criterion(recon, img)
                 loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
                 running_loss += loss.item()
+                break
+            break
             t_epoch_end = time.time()
             print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
             outputs.append((epoch, img, recon),)
@@ -110,12 +158,14 @@ if __name__ == "__main__":
     dtype = torch.float32
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    mnist_data = datasets.MNIST('data', train=True, download=True, transform=transforms.ToTensor())
+    mnist_data = datasets.FashionMNIST('data', train=True, download=True, transform=transforms.ToTensor())
     trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
+
+    
 
     model = AutoEncoder().to(device)
     num_epochs = 20
-    model = train(model, trainset, num_epochs=num_epochs, TRAIN=False, SAVE_MODEL=True)
+    model = train(model, trainset, num_epochs=num_epochs, TRAIN=True, SAVE_MODEL=False)
     eval(model, testset)
     # imgs = outputs[num_epochs-1][1].cpu()
     # imgs = imgs.detach().numpy()
