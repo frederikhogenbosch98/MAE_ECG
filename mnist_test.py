@@ -5,7 +5,7 @@ from model_scratch import AutoEncoder
 import matplotlib.pyplot as plt
 import time
 import numpy as np
-from print_funs import plot_losses
+from print_funs import plot_losses, plotimg
 
 # mnist_data = torch.utils.data.Subset(mnist_data, range(4096))
 # mnist_data = list(mnist_data)[:4096]
@@ -93,18 +93,16 @@ def eval(model, testset, batch_size=64):
     test_data_tensor = torch.cat(data_list, dim=0)
     test_target_tensor = torch.tensor(target_list)
     print(type(test_data_tensor))
+    test_data_tensor = test_data_tensor.unsqueeze(0).permute(1,0,2,3).to(device)
+    print(test_data_tensor.shape)
+    # model = model.cpu()
 
-    for i in range(2):
+    for i in range(10):
         x = model(test_data_tensor[i])
         embedding = model.encoder(x)
         e1 = embedding
         recon = model.decoder(e1).permute(1,2,0).cpu().detach().numpy()
-        # recon = recon.detach().numpy()
-        plt.subplot(2, 2, 1)
-        plt.imshow(testset[i][0])
-        plt.subplot(2, 2, 2)
-        plt.imshow(recon)
-        plt.show()
+        plotimg(test_data_tensor[i], recon)
 
 
 if __name__ == "__main__":
