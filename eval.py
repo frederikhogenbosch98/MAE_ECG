@@ -1,4 +1,3 @@
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -37,18 +36,27 @@ def plot_img(model, tensor, i, lead):
     output_tensor = model(tensor[i:i+1, :, :, :])
 
     output_tensor = output_tensor.cpu()
-    output_tensor = output_tensor.numpy()
+    # print(tensor.device)
+    tensor = tensor.cpu()
+    output_tensor = output_tensor.detach().numpy()
+    # print(tensor[i,lead,:,:].shape)
+    # print(np.transpose(output_tensor[:,lead,:,:],(1,2,0)).shape)
     plt.imshow(tensor[i,lead,:,:])
-    plt.imshow(output_tensor[i,lead,:,:])
+    plt.imshow(np.transpose(output_tensor[:,lead,:,:],(1,2,0)))
+    plt.show()
 
 def eval(model, device):
 
     model.to(device)
     model.eval()
 
-    test_tensor = torch.load('data/datasets/test_dataset.pt').to(device)
+    test_tensor = torch.load('data/datasets/test_dataset_img.pt').to(device)
     # test_tensor = test_tensor.permute(0, 3, 2, 1)
-    test_tensor = test_tensor[:,None,:,:]
+    # test_tensor = test_tensor[:,None,:,:]
+    added_layer = 255*torch.ones([test_tensor.shape[0], test_tensor.shape[1], 1, test_tensor.shape[3]], dtype=torch.float32)
+    added_layer = added_layer.to(device)
+
+    test_tensor = torch.cat((test_tensor, added_layer), dim=2)
     # torch.set_printoptions(threshold=10)
     # print(test_tensor)
     print(test_tensor.shape)
@@ -71,6 +79,6 @@ def eval(model, device):
     average_loss = np.round(total_loss / count, 6)
 
     print(f'Average MSE Loss on Test Set: {average_loss}')
-    for i in range(4000,4010):
+    for i in range(100,110):
         plot_img(model, test_tensor, i, lead=0)
         # plot_results(model, test_tensor,i, lead=11)

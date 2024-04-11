@@ -35,15 +35,17 @@ def masking(tensor, ratio):
 def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
 
-    train_tensor = torch.load('data/datasets/train_dataset.pt').to(device)
-    # train_tensor = train_tensor.permute(0, 3, 2, 1)
-    train_tensor = train_tensor[:,None,:,:]
+    train_tensor = torch.load('data/datasets/train_dataset_img.pt').to(device)
+    added_layer = 255*torch.ones([train_tensor.shape[0], train_tensor.shape[1], 1, train_tensor.shape[3]], dtype=torch.float32)
+    added_layer = added_layer.to(device)
+
+    train_tensor = torch.cat((train_tensor, added_layer), dim=2)
     print(train_tensor.shape)
 
     dataset_train = ECGDataset(train_tensor)
     dataloader_train = DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
 
-    model = AutoEncoder(in_chans=1, dims=[2, 4, 8, 16], depths=[4, 4, 4, 4], decoder_embed_dim=512)
+    model = AutoEncoder(in_chans=12, dims=[2, 4, 8, 16], depths=[4, 4, 4, 4], decoder_embed_dim=512)
 
 
     # N, C, H, W  -> 512 batch, 12 leads, 300 samples, 6 cycles
@@ -54,7 +56,8 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
     if TRAIN:
         loss_function = nn.MSELoss()
         # optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-        optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
+        # optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, betas=(0.9, 0.95))
 
 
         # move everything to mps device
@@ -69,19 +72,22 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
         losses = []
         # TRAINING
-        print("STARTING TRAINING")
-        for epoch in range(NUM_EPOCHS):
-            t_start = time.time()
+        print()
+        print(f"Start training for {NUM_EPOCHS} epochs")
+        t_start = time.time()
 
-            model.train()
+        for epoch in range(NUM_EPOCHS):
+
+            model.train(True)
             running_loss = 0.0
             
             for idx, (inputs, _) in enumerate(dataloader_train):
 
                 inputs = inputs.to(device)
-                mask = masking(train_tensor, 1) # 0 is fully masked
+                # mask = masking(train_tensor, 1) # 0 is fully masked
                 # inputs = inputs.masked_fill(torch.from_numpy(mask).to(device) == True, 0)
                 optimizer.zero_grad()
+
 
                 outputs = model(inputs)
                 loss = loss_function(outputs, inputs)
@@ -93,7 +99,7 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
 
             epoch_loss = running_loss / len(dataloader_train)
             losses.append(epoch_loss)
-            print_epoch_info(epoch, epoch_loss, t_end-t_start, torch.mps.current_allocated_memory())
+            print_epoch_info(epoch, epoch_loss, t_end-t_start, np.round(torch.mps.current_allocated_memory(),3))
 
         
 
@@ -102,11 +108,11 @@ def train(LEARNING_RATE, BATCH_SIZE, NUM_EPOCHS, SAVE_MODEL, device, TRAIN):
             torch.save(model.state_dict(), save_folder)
             print(f'model saved to {save_folder}')
 
-        plt.plot(np.arange(NUM_EPOCHS), losses)
-        plt.title('loss function')
-        plt.xlabel('epoch')
-        plt.ylabel('loss')
-        plt.show()
+        # plt.plot(np.arange(NUM_EPOCHS), losses)
+        # plt.title('loss function')
+        # plt.xlabel('epoch')
+        # plt.ylabel('loss')
+        # plt.show()
 
     else:
         model.load_state_dict(torch.load('data/models/MAE.pth'))

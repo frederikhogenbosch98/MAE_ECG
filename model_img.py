@@ -101,14 +101,14 @@ class Encoder(nn.Module):
 
 
     def forward(self, x):
-        print(f'starting tensor input shape: {x.shape}')
+        # print(f'starting tensor input shape: {x.shape}')
         num_stages = len(self.stages)
         num_down_laywers = len(self.downsample_layers)
         # for i in range(min(num_stages, num_down_laywers)):
         for i in range(num_down_laywers):
             # pdb.set_trace()
             x = self.downsample_layers[i](x)
-            print(f'after downsample layers: {x.shape}')
+            # print(f'after downsample layers: {x.shape}')
             # x = self.stages[i](x)
             # print(f'after stages: {x.shape}')
 
@@ -176,7 +176,7 @@ class Decoder(nn.Module):
             # x = self.stages[i](x)
             # print(f'after stages: {x.shape}')
             x = self.downsample_layers[i](x)
-            print(f'after downsample layers: {x.shape}')
+            # print(f'after downsample layers: {x.shape}')
 
         
         # x = self.adaptive_pool(x)
