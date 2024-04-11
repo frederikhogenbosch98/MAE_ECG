@@ -6,10 +6,10 @@ from models.model_28x28 import AutoEncoder
 import matplotlib.pyplot as plt
 import time
 import numpy as np
-from print_funs import plot_losses, plotimg
+from print_funs import plot_losses, plotimg, plot_single_img
 
 
-def apply_mask(x, ratio, p=4):
+def apply_mask(x, ratio):
     x = x.permute(0,5,1,2,3,4)
     rand_mask = torch.rand(x.shape[0], x.shape[1], x.shape[2], x.shape[3]) < ratio
     rand_mask = rand_mask.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, 1, 1, 4, 4)
@@ -48,11 +48,12 @@ def unpatchify(x, p=4):
 def mask(batch, ratio):
     x = patchify(batch.cpu(), ratio)
     imgs = unpatchify(x)
-    plt.subplot(2,1,1)
-    plt.imshow(batch[8,0,:,:].cpu().detach().numpy())
-    plt.subplot(2,1,2)
-    plt.imshow(imgs[8,0,:,:].cpu().detach().numpy())
-    plt.show()
+    return imgs
+    # plt.subplot(2,1,1)
+    # plt.imshow(batch[8,0,:,:].cpu().detach().numpy(), cmap="gray")
+    # plt.subplot(2,1,2)
+    # plt.imshow(imgs[8,0,:,:].cpu().detach().numpy(), cmap="gray")
+    # plt.show()
 
 
 
@@ -75,16 +76,18 @@ def train(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAI
             t_epoch_start = time.time()
             for data in train_loader:
                 img, _ = data
+                # plot_single_img(img, 10)
+                img = mask(img, 0.7)
+                # plot_single_img(img, 10)
                 img = img.to(device)
-                mask(img, 0)
                 recon = model(img)
                 loss = criterion(recon, img)
                 loss.backward()
                 optimizer.step()
                 optimizer.zero_grad()
                 running_loss += loss.item()
-                break
-            break
+            #     break
+            # # break
             t_epoch_end = time.time()
             print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
             outputs.append((epoch, img, recon),)
@@ -140,9 +143,9 @@ def eval(model, testset, batch_size=64):
 
     test_data_tensor = torch.cat(data_list, dim=0)
     test_target_tensor = torch.tensor(target_list)
-    print(type(test_data_tensor))
+    # print(type(test_data_tensor))
     test_data_tensor = test_data_tensor.unsqueeze(0).permute(1,0,2,3).to(device)
-    print(test_data_tensor.shape)
+    # print(test_data_tensor.shape)
     # model = model.cpu()
 
     for i in range(10):
@@ -161,10 +164,9 @@ if __name__ == "__main__":
     mnist_data = datasets.FashionMNIST('data', train=True, download=True, transform=transforms.ToTensor())
     trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
 
-    
 
     model = AutoEncoder().to(device)
-    num_epochs = 20
+    num_epochs = 6
     model = train(model, trainset, num_epochs=num_epochs, TRAIN=True, SAVE_MODEL=False)
     eval(model, testset)
     # imgs = outputs[num_epochs-1][1].cpu()
