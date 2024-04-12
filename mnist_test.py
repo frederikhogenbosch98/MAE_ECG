@@ -2,7 +2,7 @@ from torchvision import datasets, transforms
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.model_28x28 import AutoEncoder
+from models.model_28x28 import AutoEncoder, Classifier
 import matplotlib.pyplot as plt
 import time
 import numpy as np
@@ -57,7 +57,7 @@ def mask(batch, ratio):
 
 
 
-def train(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN=True, SAVE_MODEL=True):
+def train_mae(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN=True, SAVE_MODEL=True):
     torch.manual_seed(42)
     if TRAIN:
         criterion = nn.MSELoss() # mean square error loss
@@ -110,7 +110,7 @@ def train(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAI
 
 
 
-def eval(model, testset, batch_size=64):
+def eval_mae(model, testset, batch_size=64):
     model.to(device)
     model.eval()
 
@@ -156,19 +156,50 @@ def eval(model, testset, batch_size=64):
         plotimg(test_data_tensor[i], recon)
 
 
+def train_classifier(classifier, trainset, num_epochs):
+
+    for param in classifier.encoder.parameters():
+        param.requires_grad = False
+
+    optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.001)
+    loss_function =  nn.CrossEntropyLoss()
+
+    for epoch in range(num_epochs):
+        for inputs, labels in dataloader:
+            optimizer.zero_grad()
+            outputs = classifier(inputs)
+            loss = loss_function(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+
+
+def eval_classifier(model, testset):
+    pass
+
+
+
 if __name__ == "__main__":
 
     dtype = torch.float32
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    mnist_data = datasets.FashionMNIST('data', train=True, download=True, transform=transforms.ToTensor())
+    mnist_data = datasets.MNIST('data', train=True, download=True, transform=transforms.ToTensor())
     trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
 
 
-    model = AutoEncoder().to(device)
-    num_epochs = 6
-    model = train(model, trainset, num_epochs=num_epochs, TRAIN=True, SAVE_MODEL=False)
-    eval(model, testset)
+    mae = AutoEncoder().to(device)
+    num_epochs_mae = 6
+    mae = train_mae(mae, trainset, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
+    eval_mae(mae, testset)
+
+
+    num_classes = 10
+    classifier = Classifier(autoencoder=mae, num_classes=num_classes).to(device)
+    num_epochs_classifier = 10
+    classifier = train_classifier(classifier, autoencoder=mae, num_epochs=num_epochs_classifier)
+    eval_classifier(classifier, testset)
+
     # imgs = outputs[num_epochs-1][1].cpu()
     # imgs = imgs.detach().numpy()
         

@@ -1,5 +1,5 @@
 import torch.nn as nn
-
+import torch.nn.functional as F
 
 class AutoEncoder(nn.Module):
     def __init__(self):
@@ -29,3 +29,21 @@ class AutoEncoder(nn.Module):
         x = self.encoder(x)
         x = self.decoder(x)
         return x
+
+
+class Classifier(nn.Module):
+    def __init__(self, autoencoder, num_classes):
+        super(Classifier, self).__init__()
+        self.encoder = autoencoder.encoder
+        input_dim = 64*28*28
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(input_dim, input_dim//2),
+            nn.GELU(),
+            nn.Linear(input_dim//2, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.classifier(x)
+        return F.softmax(x, dim=1)
