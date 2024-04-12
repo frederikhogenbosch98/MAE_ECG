@@ -4,7 +4,7 @@ import torch.nn.functional as F
 class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
-        self.encoder = nn.Sequential( # like the Composition layer you built
+        self.encoder = nn.Sequential( 
             nn.Conv2d(1, 16, 3, stride=2, padding=1),
             nn.GELU(),
             nn.Conv2d(16, 32, 3, stride=2, padding=1),
@@ -35,7 +35,7 @@ class Classifier(nn.Module):
     def __init__(self, autoencoder, num_classes):
         super(Classifier, self).__init__()
         self.encoder = autoencoder.encoder
-        input_dim = 64*28*28
+        input_dim = 64
         self.classifier = nn.Sequential(
             nn.Flatten(),
             nn.Linear(input_dim, input_dim//2),
@@ -47,3 +47,4 @@ class Classifier(nn.Module):
         x = self.encoder(x)
         x = self.classifier(x)
         return F.softmax(x, dim=1)
+        # return x

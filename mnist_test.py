@@ -57,9 +57,9 @@ def mask(batch, ratio):
 
 
 
-def train_mae(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN=True, SAVE_MODEL=True):
+def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True):
     torch.manual_seed(42)
-    if TRAIN:
+    if TRAIN_MAE:
         criterion = nn.MSELoss() # mean square error loss
         optimizer = torch.optim.Adam(model.parameters(),
                                     lr=learning_rate, 
@@ -69,7 +69,7 @@ def train_mae(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, 
                                                 shuffle=True)
         outputs = []
         losses = []
-        print(f"Start training for {num_epochs} epochs")
+        print(f"Start MAE training for {num_epochs} epochs")
         t_start = time.time()
         for epoch in range(num_epochs):
             running_loss = 0.0
@@ -77,7 +77,7 @@ def train_mae(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, 
             for data in train_loader:
                 img, _ = data
                 # plot_single_img(img, 10)
-                img = mask(img, 0.7)
+                img = mask(img, MASK_RATIO)
                 # plot_single_img(img, 10)
                 img = img.to(device)
                 recon = model(img)
@@ -87,24 +87,23 @@ def train_mae(model, trainset, num_epochs=5, batch_size=64, learning_rate=1e-3, 
                 optimizer.zero_grad()
                 running_loss += loss.item()
             #     break
-            # # break
+            # break
             t_epoch_end = time.time()
             print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
             outputs.append((epoch, img, recon),)
             epoch_loss = running_loss / len(train_loader)
             losses.append(epoch_loss)
         t_end = time.time()
-        print(f"End of training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
+        print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
 
-        plot_losses(num_epochs, losses)        
-
-        if SAVE_MODEL:
+        # plot_losses(num_epochs, losses)        
+        if SAVE_MODEL_MAE:
             save_folder = 'data/models_mnist/MAE.pth'
             torch.save(model.state_dict(), save_folder)
-            print(f'model saved to {save_folder}')
+            print(f'mae model saved to {save_folder}')
 
     else:
-        model.load_state_dict(torch.load('data/models_mnist/MAE.pth'))
+        model.load_state_dict(torch.load('data/models_mnist/MAE_MR_02.pth'))
 
     return model
 
@@ -156,26 +155,87 @@ def eval_mae(model, testset, batch_size=64):
         plotimg(test_data_tensor[i], recon)
 
 
-def train_classifier(classifier, trainset, num_epochs):
+def train_classifier(classifier, trainset, num_epochs, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
-    for param in classifier.encoder.parameters():
-        param.requires_grad = False
+    classifier.to(device)
+    if TRAIN_CLASSIFIER:
+        for param in classifier.encoder.parameters():
+            param.requires_grad = False
+        
 
-    optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.001)
-    loss_function =  nn.CrossEntropyLoss()
+        train_loader = torch.utils.data.DataLoader(trainset, 
+                                            batch_size=batch_size, 
+                                            shuffle=True)
 
-    for epoch in range(num_epochs):
-        for inputs, labels in dataloader:
-            optimizer.zero_grad()
-            outputs = classifier(inputs)
-            loss = loss_function(outputs, labels)
-            loss.backward()
-            optimizer.step()
+        optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.001)
+        loss_function =  nn.CrossEntropyLoss().to(device)
+
+        losses = []
+        print(f"Start CLASSIFIER training for {num_epochs} epochs")
+        t_start = time.time()
+        for epoch in range(num_epochs):
+            running_loss = 0.0
+            t_epoch_start = time.time()
+            for inputs, labels in train_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                optimizer.zero_grad()
+                outputs = classifier(inputs)
+                loss = loss_function(outputs, labels)
+                loss.backward()
+                optimizer.step()
+                running_loss += loss.item()
+            t_epoch_end = time.time()
+            print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
+            epoch_loss = running_loss / len(train_loader)
+            losses.append(epoch_loss)
+        t_end = time.time()
+        print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
+
+        if SAVE_MODEL_CLASSIFIER:
+            save_folder = 'data/models_mnist/CLASSIFIER.pth'
+            torch.save(classifier.state_dict(), save_folder)
+            print(f'classifier model saved to {save_folder}')
+
+    else:
+        classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
+
+    return classifier
 
 
+def eval_classifier(model, testset, batch_size=64):
 
-def eval_classifier(model, testset):
-    pass
+    model.to(device)
+    model.eval()
+
+    test_loader = torch.utils.data.DataLoader(testset, 
+                                            batch_size=batch_size, 
+                                            shuffle=False)
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+    print(f'Accuracy of the network on the 10000 test images: {accuracy}%')
+
+
+    # for idx, (images, labels) in enumerate(test_loader):
+    #     images, labels = images.to(device), labels.to(device)
+    #     x = model(images[:10])
+    #     _, predicted = torch.max(x.data, 1)
+    #     images = images.cpu()
+    #     plot_single_img(images, 0)
+    #     print(f'prediction: {predicted[0]} ----- label: {labels[0]}')
+    #     if idx == 10:
+    #         break
+
+    
+
 
 
 
@@ -187,17 +247,18 @@ if __name__ == "__main__":
     mnist_data = datasets.MNIST('data', train=True, download=True, transform=transforms.ToTensor())
     trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
 
+    MASK_RATIO = 0.7
 
     mae = AutoEncoder().to(device)
-    num_epochs_mae = 6
-    mae = train_mae(mae, trainset, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
-    eval_mae(mae, testset)
+    num_epochs_mae = 20
+    mae = train_mae(mae, trainset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=False, SAVE_MODEL_MAE=False)
+    # eval_mae(mae, testset)
 
 
     num_classes = 10
     classifier = Classifier(autoencoder=mae, num_classes=num_classes).to(device)
     num_epochs_classifier = 10
-    classifier = train_classifier(classifier, autoencoder=mae, num_epochs=num_epochs_classifier)
+    classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=False, SAVE_MODEL_CLASSIFIER=False)
     eval_classifier(classifier, testset)
 
     # imgs = outputs[num_epochs-1][1].cpu()
