@@ -2,17 +2,19 @@ from torchvision import datasets, transforms
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from models.model_28x28 import AutoEncoder, Classifier
+from torchvision.datasets import ImageFolder 
+from models.model_28x28 import AutoEncoder28, Classifier28
+from models.model_128x128 import AutoEncoder128, Classifier128
 import matplotlib.pyplot as plt
 import time
 import numpy as np
 from print_funs import plot_losses, plotimg, plot_single_img
 
 
-def apply_mask(x, ratio):
+def apply_mask(x, ratio, p):
     x = x.permute(0,5,1,2,3,4)
     rand_mask = torch.rand(x.shape[0], x.shape[1], x.shape[2], x.shape[3]) < ratio
-    rand_mask = rand_mask.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, 1, 1, 4, 4)
+    rand_mask = rand_mask.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, 1, 1, p, p)
     x = torch.where(rand_mask, torch.zeros_like(x), x) 
     return x
  
@@ -27,7 +29,7 @@ def patchify(imgs, ratio, p=4):
     h = w = imgs.shape[2] // p
     x = imgs.reshape(shape=(imgs.shape[0], 1, h, p, w, p))
     x = torch.einsum('nchpwq->nhwpqc', x)
-    x = apply_mask(x, ratio)
+    x = apply_mask(x, ratio, p)
     x = x.reshape(shape=(imgs.shape[0], h * w, p**2 * 1))
     return x
 
@@ -45,9 +47,9 @@ def unpatchify(x, p=4):
     imgs = x.reshape(shape=(x.shape[0], 1, h * p, h * p))
     return imgs
 
-def mask(batch, ratio):
-    x = patchify(batch.cpu(), ratio)
-    imgs = unpatchify(x)
+def mask(batch, ratio, p):
+    x = patchify(batch.cpu(), ratio, p)
+    imgs = unpatchify(x, p)
     return imgs
     # plt.subplot(2,1,1)
     # plt.imshow(batch[8,0,:,:].cpu().detach().numpy(), cmap="gray")
@@ -57,7 +59,7 @@ def mask(batch, ratio):
 
 
 
-def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True):
+def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     torch.manual_seed(42)
     if TRAIN_MAE:
         criterion = nn.MSELoss() # mean square error loss
@@ -66,7 +68,7 @@ def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=64, learning
                                     weight_decay=1e-5) # <--
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
-                                                shuffle=True)
+                                                shuffle=True, num_workers=4)
         outputs = []
         losses = []
         print(f"Start MAE training for {num_epochs} epochs")
@@ -77,7 +79,7 @@ def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=64, learning
             for data in train_loader:
                 img, _ = data
                 # plot_single_img(img, 10)
-                img = mask(img, MASK_RATIO)
+                img = mask(img, MASK_RATIO, p)
                 # plot_single_img(img, 10)
                 img = img.to(device)
                 recon = model(img)
@@ -165,7 +167,7 @@ def train_classifier(classifier, trainset, num_epochs, batch_size=64, TRAIN_CLAS
 
         train_loader = torch.utils.data.DataLoader(trainset, 
                                             batch_size=batch_size, 
-                                            shuffle=True)
+                                            shuffle=True, num_workers=4)
 
         optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.001)
         loss_function =  nn.CrossEntropyLoss().to(device)
@@ -234,9 +236,6 @@ def eval_classifier(model, testset, batch_size=64):
     #     if idx == 10:
     #         break
 
-    
-
-
 
 
 if __name__ == "__main__":
@@ -244,22 +243,72 @@ if __name__ == "__main__":
     dtype = torch.float32
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    mnist_data = datasets.MNIST('data', train=True, download=True, transform=transforms.ToTensor())
-    trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
+    # transform = transforms.Compose([
+    # # transforms.Resize((128, 128)),  
+    # transforms.ToTensor(),
+    # transforms.Normalize((0.5,), (0.5,))  
+    # ])
 
-    MASK_RATIO = 0.7
+    # mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
+    # trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
 
-    mae = AutoEncoder().to(device)
+    MASK_RATIO = 0
+
+    # mae = AutoEncoder28().to(device)
+    # num_epochs_mae = 20
+    # mae = train_mae(mae, trainset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
+    # # eval_mae(mae, testset)
+
+
+    # num_classes = 10
+    # classifier = Classifier28(autoencoder=mae, num_classes=num_classes).to(device)
+    # num_epochs_classifier = 10
+    # classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    # eval_classifier(classifier, testset)
+
+
+    transform = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1),
+        transforms.Resize((128, 128)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)) 
+    ])
+
+    trainset = ImageFolder('data/imagenette2/train', transform=transform)
+    testset = ImageFolder('data/imagenette2/val', transform=transform)
+
+    mae = AutoEncoder128().to(device)
     num_epochs_mae = 20
-    mae = train_mae(mae, trainset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=False, SAVE_MODEL_MAE=False)
-    # eval_mae(mae, testset)
-
+    mae = train_mae(mae, trainset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False, p=8)
 
     num_classes = 10
-    classifier = Classifier(autoencoder=mae, num_classes=num_classes).to(device)
+    classifier = Classifier128(autoencoder=mae, num_classes=num_classes).to(device)
     num_epochs_classifier = 10
-    classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=False, SAVE_MODEL_CLASSIFIER=False)
+    classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
     eval_classifier(classifier, testset)
+
+    # imagenette_loader = torch.utils.data.DataLoader(imagenette_data, batch_size=64, shuffle=True, num_workers=4)
+
+    # imagenette_classes = [
+    # 'tench',         # Class index 0
+    # 'English springer',  # Class index 1
+    # 'cassette player',   # Class index 2
+    # 'chain saw',      # Class index 3
+    # 'church',         # Class index 4
+    # 'French horn',    # Class index 5
+    # 'garbage truck',  # Class index 6
+    # 'gas pump',       # Class index 7
+    # 'golf ball',      # Class index 8
+    # 'parachute'       # Class index 9
+    # ]
+    
+    # for images, labels in imagenette_loader:
+    #     plot_single_img(images, 1)
+    #     print(imagenette_classes[labels[1].item()])
+    #     break
+    # imagenette_data = datasets.Imagenette('data', split='train', size='full', download=False, transform=transform)
+    # print(imagenette_data.shape)
+    # trainset, testset = torch.utils.data.random_split(imagenette_data, [])
 
     # imgs = outputs[num_epochs-1][1].cpu()
     # imgs = imgs.detach().numpy()
