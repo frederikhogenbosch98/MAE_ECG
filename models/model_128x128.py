@@ -44,7 +44,7 @@ class SelfBlock(nn.Module):
 class AutoEncoder128(nn.Module):
     def __init__(self):
         super(AutoEncoder128, self).__init__()
-        self.blocksize = 4
+        self.blocksize = 2
         self.encoder = nn.Sequential( 
             nn.Conv2d(1, 16, 3, stride=2, padding=1),
             nn.MaxPool2d(kernel_size=2, stride=2),

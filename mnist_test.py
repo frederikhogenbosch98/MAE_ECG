@@ -61,7 +61,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=128, learning_rate=1e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset, MASK_RATIO, num_epochs=5, batch_size=128, learning_rate=1e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     torch.manual_seed(42)
     if TRAIN_MAE:
         criterion = nn.MSELoss() # mean square error loss
@@ -72,6 +72,9 @@ def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=128, learnin
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
                                                 shuffle=True, num_workers=4)
+        val_loader = torch.utils.data.DataLoader(valset, 
+                                    batch_size=batch_size, 
+                                    shuffle=False, num_workers=4)                                  
         outputs = []
         losses = []
 
@@ -80,9 +83,11 @@ def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=128, learnin
         for epoch in range(num_epochs):
             running_loss = 0.0
             t_epoch_start = time.time()
+            model.train()
             for data in train_loader:
                 img, _ = data
                 # plot_single_img(img, 10)
+                unmasked_img = img.to(device)
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
                     # print('masking!!!')
@@ -90,21 +95,31 @@ def train_mae(model, trainset, MASK_RATIO, num_epochs=5, batch_size=128, learnin
                 img = img.to(device)
                 recon = model(img)
                 optimizer.zero_grad()
-                loss = criterion(recon, img)
+                loss = criterion(recon, unmasked_img)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
             #     break
             # break
-            t_epoch_end = time.time()
-            # print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
-            outputs.append((epoch, img, recon),)
+            model.eval()
+            validation_loss = 0.0
+
+            with torch.no_grad():
+                for data in val_loader:
+                    imgs, _ = data
+                    imgs = imgs.to(device)
+                    outputs = model(imgs)
+                    loss = criterion(outputs, imgs)
+                    validation_loss += loss.item() * imgs.size(0)
+
+            validation_loss /= len(val_loader.dataset)
             epoch_loss = running_loss / len(train_loader)
-            print('epoch {}: average loss: {:.4f} duration: {:.2f}s'.format(epoch+1, epoch_loss, t_epoch_end - t_epoch_start))
+            t_epoch_end = time.time()
+            print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, duration: {:.2f}s'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start))
             losses.append(epoch_loss)
             # scheduler.step()
         t_end = time.time()
-        print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
+        print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         # plot_losses(num_epochs, losses)        
         if SAVE_MODEL_MAE:
@@ -168,7 +183,7 @@ def eval_mae(model, testset, batch_size=128):
         plotimg(test_data_tensor[i], recon)
 
 
-def train_classifier(classifier, trainset, num_epochs, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
@@ -180,6 +195,10 @@ def train_classifier(classifier, trainset, num_epochs, batch_size=128, TRAIN_CLA
                                             batch_size=batch_size, 
                                             shuffle=True, num_workers=4)
 
+        val_loader = torch.utils.data.DataLoader(valset, 
+                            batch_size=batch_size, 
+                            shuffle=False, num_workers=4)    
+
         optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.01)
         # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
         loss_function =  nn.CrossEntropyLoss().to(device)
@@ -189,6 +208,7 @@ def train_classifier(classifier, trainset, num_epochs, batch_size=128, TRAIN_CLA
         t_start = time.time()
         for epoch in range(num_epochs):
             running_loss = 0.0
+            classifier.train()
             t_epoch_start = time.time()
             for inputs, labels in train_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
@@ -198,10 +218,28 @@ def train_classifier(classifier, trainset, num_epochs, batch_size=128, TRAIN_CLA
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
+
+
+            classifier.eval()  # Set the model to evaluation mode
+            validation_loss = 0.0
+            correct = 0
+            total = 0
+            with torch.no_grad():  # No gradients needed for validation
+                for data, target in val_loader:
+                    output = classifier(data)
+                    loss = loss_function(output, target)
+                    validation_loss += loss.item() * data.size(0)
+                    _, predicted = torch.max(output.data, 1)
+                    total += target.size(0)
+                    correct += (predicted == target).sum().item()
+
+            validation_loss /= len(val_loader.dataset)
+            accuracy = correct / total * 100
+
             t_epoch_end = time.time()
             # print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
             epoch_loss = running_loss / len(train_loader)
-            print('epoch {}: average loss: {:.4f} duration: {:.2f}s'.format(epoch+1, epoch_loss, t_epoch_end - t_epoch_start))
+            print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, accuracy: {:.2f}, duration: {:.2f}s'.format(epoch+1, epoch_loss, validation_loss, accuracy, t_epoch_end - t_epoch_start))
             losses.append(epoch_loss)
             # scheduler.step()
         t_end = time.time()
@@ -303,11 +341,17 @@ if __name__ == "__main__":
     ])
 
     trainset = ImageFolder('data/imagenette2/train', transform=transform)
+    # print(len(trainset))
     testset = ImageFolder('data/imagenette2/val', transform=transform)
+    # print(int(0.8*len(trainset)))
+    # print(int((1-0.8)*len(trainset)-1))
+    train_dataset, validation_dataset = torch.utils.data.random_split(trainset, [int(0.8*len(trainset)), int((1-0.8)*len(trainset)+1)])
 
+    # print(len(train_dataset))
+    # print(len(validation_dataset))
     mae = AutoEncoder128().to(device)
     num_epochs_mae = 100
-    mae = train_mae(mae, trainset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
+    mae = train_mae(mae, train_dataset, validation_dataset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
 
     num_classes = 10
     classifier = Classifier128(autoencoder=mae, num_classes=num_classes).to(device)
