@@ -12,6 +12,24 @@ from print_funs import plot_losses, plotimg, plot_single_img
 from torch.optim.lr_scheduler import StepLR
 
 
+class EarlyStopper:
+    def __init__(self, patience=1, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.min_validation_loss = float('inf')
+
+    def early_stop(self, validation_loss):
+        if validation_loss < self.min_validation_loss:
+            self.min_validation_loss = validation_loss
+            self.counter = 0
+        elif validation_loss > (self.min_validation_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.patience:
+                return True
+        return False
+
+
 def apply_mask(x, ratio, p):
     x = x.permute(0,5,1,2,3,4)
     rand_mask = torch.rand(x.shape[0], x.shape[1], x.shape[2], x.shape[3]) < ratio
@@ -169,6 +187,7 @@ def eval_mae(model, testset, batch_size=128):
         target_list.append(target)
 
     test_data_tensor = torch.cat(data_list, dim=0)
+    print(test_data_tensor.shape)
     test_target_tensor = torch.tensor(target_list)
     # print(type(test_data_tensor))
     test_data_tensor = test_data_tensor.unsqueeze(0).permute(1,0,2,3).to(device)
@@ -176,10 +195,12 @@ def eval_mae(model, testset, batch_size=128):
     # model = model.cpu()
 
     for i in range(10):
-        x = model(test_data_tensor[i])
+        x = model(test_data_tensor[i*64:(i+1)*64,:,:,:])
         embedding = model.encoder(x)
         e1 = embedding
-        recon = model.decoder(e1).permute(1,2,0).cpu().detach().numpy()
+        recon = model.decoder(e1)
+        recon = recon[i,:,:,:].permute(1,2,0).cpu().detach().numpy()
+
         plotimg(test_data_tensor[i], recon)
 
 
@@ -199,9 +220,11 @@ def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, T
                             batch_size=batch_size, 
                             shuffle=False, num_workers=4)    
 
-        optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.01)
+        optimizer = torch.optim.Adam(classifier.classifier.parameters(), lr=0.03)
         # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
         loss_function =  nn.CrossEntropyLoss().to(device)
+
+        early_stopper = EarlyStopper(patience=3, min_delta=10)
 
         losses = []
         print(f"Start CLASSIFIER training for {num_epochs} epochs")
@@ -220,12 +243,15 @@ def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, T
                 running_loss += loss.item()
 
 
+
+
             classifier.eval()  # Set the model to evaluation mode
             validation_loss = 0.0
             correct = 0
             total = 0
             with torch.no_grad():  # No gradients needed for validation
                 for data, target in val_loader:
+                    data, target = data.to(device), target.to(device)
                     output = classifier(data)
                     loss = loss_function(output, target)
                     validation_loss += loss.item() * data.size(0)
@@ -235,6 +261,9 @@ def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, T
 
             validation_loss /= len(val_loader.dataset)
             accuracy = correct / total * 100
+
+            if early_stopper.early_stop(validation_loss):             
+                break
 
             t_epoch_end = time.time()
             # print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
@@ -334,7 +363,7 @@ if __name__ == "__main__":
 
 
     transform = transforms.Compose([
-        transforms.Grayscale(num_output_channels=1),
+        # transforms.Grayscale(num_output_channels=1),
         transforms.Resize((128, 128)),
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,)) 
@@ -343,34 +372,15 @@ if __name__ == "__main__":
     trainset = ImageFolder('data/imagenette2/train', transform=transform)
     # print(len(trainset))
     testset = ImageFolder('data/imagenette2/val', transform=transform)
-    # print(int(0.8*len(trainset)))
-    # print(int((1-0.8)*len(trainset)-1))
     train_dataset, validation_dataset = torch.utils.data.random_split(trainset, [int(0.8*len(trainset)), int((1-0.8)*len(trainset)+1)])
 
-    # print(len(train_dataset))
-    # print(len(validation_dataset))
-    mae = AutoEncoder128().to(device)
+    mae = AutoEncoder128(channels=[96, 192, 384, 768], dims=[3, 3, 9, 3]).to(device)
     num_epochs_mae = 100
-    mae = train_mae(mae, train_dataset, validation_dataset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
+    mae = train_mae(mae, train_dataset, validation_dataset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=False, SAVE_MODEL_MAE=False, p=8)
+    eval_mae(mae, testset)
 
     num_classes = 10
-    classifier = Classifier128(autoencoder=mae, num_classes=num_classes).to(device)
+    classifier = Classifier128(autoencoder=mae, in_features=1024, out_features=num_classes).to(device)
     num_epochs_classifier = 50
-    classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True)
+    classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True)
     eval_classifier(classifier, testset)
-
-    # imagenette_loader = torch.utils.data.DataLoader(imagenette_data, batch_size=64, shuffle=True, num_workers=4)
-
-
-    
-    # for images, labels in imagenette_loader:
-    #     plot_single_img(images, 1)
-    #     print(imagenette_classes[labels[1].item()])
-    #     break
-    # imagenette_data = datasets.Imagenette('data', split='train', size='full', download=False, transform=transform)
-    # print(imagenette_data.shape)
-    # trainset, testset = torch.utils.data.random_split(imagenette_data, [])
-
-    # imgs = outputs[num_epochs-1][1].cpu()
-    # imgs = imgs.detach().numpy()
-        

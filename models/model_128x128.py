@@ -42,7 +42,7 @@ class SelfBlock(nn.Module):
 
 
 class AutoEncoder128(nn.Module):
-    def __init__(self):
+    def __init__(self, channels=[96, 192, 384, 768], dims=[3, 3, 9, 3]):
         super(AutoEncoder128, self).__init__()
         self.blocksize = 2
         self.encoder = nn.Sequential( 
@@ -95,28 +95,48 @@ class AutoEncoder128(nn.Module):
 
 
 class Classifier128(nn.Module):
-    def __init__(self, autoencoder, num_classes):
-        super(Classifier128, self).__init__()
+    def __init__(self, autoencoder, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
+        super().__init__()
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
         self.encoder = autoencoder.encoder
-        # input_dim = 8192
-        input_dim = 1024
-        # self.classifier = nn.Sequential(
-        #     nn.Flatten(),
-        #     nn.Linear(input_dim, input_dim//2),
-        #     nn.GELU(),
-        #     nn.Linear(input_dim//2, input_dim//4),
-        #     nn.GELU(),
-        #     nn.Linear(input_dim//4, input_dim//8),
-        #     nn.GELU(),
-        #     nn.Linear(input_dim//8, num_classes)
-        # )
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(input_dim, num_classes)
-        )
+        self.fc1 = nn.Linear(in_features, hidden_features)
+        self.act = act_layer()
+        self.fc2 = nn.Linear(hidden_features, out_features)
+        self.drop = nn.Dropout(drop)
 
     def forward(self, x):
         x = self.encoder(x)
-        x = self.classifier(x)
-        # return F.softmax(x, dim=1)
+        x = self.fc1(x)
+        x = self.act(x)
+        x = self.drop(x)
+        x = self.fc2(x)
+        x = self.drop(x)
         return x
+
+# class Classifier128(nn.Module):
+#     def __init__(self, autoencoder, num_classes):
+#         super(Classifier128, self).__init__()
+#         # input_dim = 8192
+#         input_dim = 1024
+#         # self.classifier = nn.Sequential(
+#         #     nn.Flatten(),
+#         #     nn.Linear(input_dim, input_dim//2),
+#         #     nn.GELU(),
+#         #     nn.Linear(input_dim//2, input_dim//4),
+#         #     nn.GELU(),
+#         #     nn.Linear(input_dim//4, input_dim//8),
+#         #     nn.GELU(),
+#         #     nn.Linear(input_dim//8, num_classes)
+#         # )
+#         self.classifier = nn.Sequential(
+#             nn.Flatten(),
+#             nn.Linear(input_dim, num_classes),
+#             nn.Dropout(p=0.3)
+#         )
+
+#     def forward(self, x):
+#         x = self.encoder(x)
+#         x = self.classifier(x)
+#         # return F.softmax(x, dim=1)
+#         return x
