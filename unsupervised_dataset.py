@@ -131,17 +131,19 @@ def create_input_tensor():
         # creating tensors
             # st = time.time()
 
-            buf = create_img(output_data[:,l], 224, 224)
+            buf = create_img(output_data[:,l], 28, 28)
             # end = time.time()
             # print(end-st)
             buf.seek(0)
             image = Image.open(buf).convert('L')
             image_array = np.array(image)
-            if l == 0:
-                img_tensor = torch.tensor(image_array[0:225, 0:224])
+            if l == 0:  
+                # print(image_array.shape)
+                img_tensor = torch.tensor(image_array[0:28, 0:28])
+                # print(img_tensor.shape)
                 img_tensor = img_tensor[None, :, :]
             else:
-                temp_img_tensor = torch.tensor(image_array[0:225, 0:224]) 
+                temp_img_tensor = torch.tensor(image_array[0:28, 0:28]) 
                 temp_img_tensor = temp_img_tensor[None, :, :]
                 img_tensor = torch.cat([img_tensor, temp_img_tensor], dim=0)
 
@@ -153,7 +155,7 @@ def create_input_tensor():
             input_tensor = torch.cat([input_tensor, img_tensor.unsqueeze(0)], dim=0)
             # print(input_tensor.shape)
 
-        if idx == 5000:
+        if idx == 20000:
             break  
 
         # if idx == 0:
@@ -222,7 +224,7 @@ def train_test_split(tensor, split):
 
 if __name__ == "__main__":
 
-    SAVE = False
+    SAVE = True
 
     st = time.time()
     input_tensor = create_input_tensor()
@@ -237,13 +239,17 @@ if __name__ == "__main__":
 
     print(train_tensor.size())
     print(test_tensor.size())
-
     # train_dataset = ECGDataset(train_tensor)
     # test_dataset = ECGDataset(test_tensor)
     # for i in range(50):
         # plot_resulting_tensors(train_tensor,i)
     if SAVE:
         save_dir = 'data/datasets/'
-        torch.save(train_tensor, f'{save_dir}train_dataset.pt')
-        torch.save(test_tensor, f'{save_dir}test_dataset.pt')
+        torch.save(train_tensor, f'{save_dir}train_dataset_20k_28.pt')
+        torch.save(test_tensor, f'{save_dir}test_dataset_20k_28.pt')
         print(f'tensors saved to {save_dir}')
+
+
+    for i in range(50):
+        plt.imshow(train_tensor[i,0, :, :].detach().numpy(),cmap="gray")
+        plt.show()
