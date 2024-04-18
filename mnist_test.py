@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torchvision.datasets import ImageFolder 
 from models.model_28x28 import AutoEncoder28, Classifier28
 from models.model_128x128 import AutoEncoder128, Classifier128
-from models.model_28x28_CPD import AutoEncoder28_CPD, Classifier28_CPD, Encoder28_CPD, Decoder28_CPD, UpscaleConvNet
+from models.model_28x28_CPD import AutoEncoder28_CPD, Classifier28_CPD, Encoder28_CPD, Decoder28_CPD
 import matplotlib.pyplot as plt
 import time
 import numpy as np
@@ -388,9 +388,12 @@ if __name__ == "__main__":
     trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
 
     MASK_RATIO = 0
-    encoder = Encoder28_CPD().to(device)
-    decoder = UpscaleConvNet().to(device)
-    mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+    # R = 0.5
+    # factorization='tucker'
+    # encoder = Encoder28_CPD(R, factorization=factorization).to(device)
+    # decoder = Decoder28_CPD(R, factorization=factorization).to(device)
+    # mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+    mae = AutoEncoder28().to(device)
     num_epochs_mae = 10
     mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
@@ -399,12 +402,12 @@ if __name__ == "__main__":
 
 
     count_parameters(mae)
-    # num_classes = 10
-    # classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
-    # num_epochs_classifier = 25
-    # classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
-    # eval_classifier(classifier, testset)
-    # count_parameters(classifier)
+    num_classes = 10
+    classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
+    num_epochs_classifier = 10
+    classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    eval_classifier(classifier, testset)
+    count_parameters(classifier)
 
     # normalize = transforms.Normalize(mean=np.mean([0.485, 0.456, 0.406]),
     #                              std=np.mean([0.229, 0.224, 0.225]))
