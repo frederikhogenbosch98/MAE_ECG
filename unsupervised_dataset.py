@@ -11,7 +11,7 @@ import os
 import io
 from PIL import Image
 import time
-
+from print_funs import plot_single_img
 
 # physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 physio_root = 'data/physionet/ptbxl/records500'
@@ -94,12 +94,17 @@ def create_input_tensor():
         resampled_data = []
         segs = []
 
-        output_data = np.zeros((6, 300, 12))
+        output_data = np.zeros((300, 12))
+        
         for l in range(sample_values.shape[1]):
             filtered_data = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
             # print(filtered_data)
+            # plt.plot(filtered_data)
+            # plt.show()
             resampled_data = resample(filtered_data, num=3600)
             # print(resampled_data)
+            # plt.plot(resampled_data)
+            # plt.show
             if l == 0:
                 r_idx = get_r_idx(resampled_data)
 
@@ -111,10 +116,10 @@ def create_input_tensor():
                 end_idx = strt_idx+8
                 segs = segs[strt_idx:end_idx]
                 del segs[0], segs[-1]
-                for j in range(6):
+
                     # print(segs[0])
-                    output_data[j,:,l] = np.array(segs[j])
-                    output_data[j,:,l] = normalize(output_data[j,:,l])
+                output_data[:,l] = normalize(np.mean(np.array(segs), axis=0))
+                    # print(output_data[j,:,:].shape)
                     # print(output_data[j,:,l])
                     # break
             # print(segs[0])
@@ -125,17 +130,18 @@ def create_input_tensor():
         # print(output_data[0,:,0])
         # creating tensors
             # st = time.time()
-            buf = create_img(output_data[:,:,l], 224, 224)
+
+            buf = create_img(output_data[:,l], 224, 224)
             # end = time.time()
             # print(end-st)
             buf.seek(0)
             image = Image.open(buf).convert('L')
             image_array = np.array(image)
             if l == 0:
-                img_tensor = torch.tensor(image_array[1:225, 0:224])
+                img_tensor = torch.tensor(image_array[0:225, 0:224])
                 img_tensor = img_tensor[None, :, :]
             else:
-                temp_img_tensor = torch.tensor(image_array[1:225, 0:224]) 
+                temp_img_tensor = torch.tensor(image_array[0:225, 0:224]) 
                 temp_img_tensor = temp_img_tensor[None, :, :]
                 img_tensor = torch.cat([img_tensor, temp_img_tensor], dim=0)
 
@@ -190,6 +196,7 @@ def create_img(signal, width, height):
     buf = io.BytesIO()
 
     plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
     plt.close(fig)
     
     return buf
@@ -215,7 +222,7 @@ def train_test_split(tensor, split):
 
 if __name__ == "__main__":
 
-    SAVE = True
+    SAVE = False
 
     st = time.time()
     input_tensor = create_input_tensor()

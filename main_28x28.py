@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.datasets import ImageFolder 
 from models.model_28x28 import AutoEncoder28, Classifier28
-from models.model_112x112 import AutoEncoder128, Classifier128
 from models.model_28x28_CPD import AutoEncoder28_CPD, Classifier28_CPD, Encoder28_CPD, Decoder28_CPD
 import matplotlib.pyplot as plt
 import time
@@ -108,9 +107,11 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             t_epoch_start = time.time()
             model.train()
             for data in train_loader:
-                img, _ = data
+                # img, _ = data
+                img = data
+                # print(img.shape)
                 # print(img[0,0,:,:])
-                # plot_single_img(img, 10)
+                plot_single_img(img, 10)
                 unmasked_img = img.to(device)
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
@@ -346,30 +347,19 @@ def eval_classifier(model, testset, batch_size=128):
             break
 
 
-    ### IMAGENETTE
-    # imagenette_classes = [
-    # 'tench',         # Class index 0
-    # 'English springer',  # Class index 1
-    # 'cassette player',   # Class index 2
-    # 'chain saw',      # Class index 3
-    # 'church',         # Class index 4
-    # 'French horn',    # Class index 5
-    # 'garbage truck',  # Class index 6
-    # 'gas pump',       # Class index 7
-    # 'golf ball',      # Class index 8
-    # 'parachute'       # Class index 9
-    # ]
 
-    # for idx, (images, labels) in enumerate(test_loader):
-    #     images, labels = images.to(device), labels.to(device)
-    #     x = model(images)
-    #     _, predicted = torch.max(x.data, 1)
-    #     images = images.cpu()
-    #     plot_single_img(images, 0)
-    #     print(f'prediction: {imagenette_classes[predicted[0].item()]} ----- label: {imagenette_classes[labels[0].item()]}')
-    #     if idx == 10:
-    #         break
+class ECGDataset(torch.utils.data.Dataset):
+    def __init__(self, tensors):
+            self.tensors = tensors  # Assume tensors is a list of 12-channel tensors
 
+    def __len__(self):
+        return len(self.tensors)
+
+    def __getitem__(self, idx):
+        # Directly handle tensor manipulation without converting to PIL
+        tensor = self.tensors[idx]
+        resized_tensor = F.interpolate(tensor.unsqueeze(0), size=(28, 28), mode='bilinear', align_corners=False)
+        return resized_tensor.squeeze(0)  # Remove batch dimension added for interpolation
 
 
 if __name__ == "__main__":
@@ -377,15 +367,35 @@ if __name__ == "__main__":
     dtype = torch.float32
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
+    ### MNIST
+    # transform = transforms.Compose([
+    # # transforms.Resize((128, 128)),  
+    # transforms.ToTensor(),
+    # # transforms.Normalize((0.5,), (0.5,))  
+    # ])
+
+    # mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
+    # trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
+    # trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
+
+
+    ### ECG
     transform = transforms.Compose([
-    # transforms.Resize((128, 128)),  
-    transforms.ToTensor(),
-    # transforms.Normalize((0.5,), (0.5,))  
+        transforms.Resize((28,28)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,))   
     ])
 
-    mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
-    trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
-    trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
+    trainset = torch.load('data/datasets/train_dataset_img.pt').to(dtype)
+    print(trainset[0,0,100,:])
+    trainset = trainset[:,0,:,:].unsqueeze(1)
+    
+    plot_single_img(trainset[:,:,:,:], 0)
+    print(trainset.shape)
+    testset = torch.load('data/datasets/test_dataset_img.pt').to(dtype)
+    trainset = ECGDataset(trainset)
+
+    print(type(trainset))
 
     MASK_RATIO = 0
     # R = 0.5
@@ -393,18 +403,17 @@ if __name__ == "__main__":
     # encoder = Encoder28_CPD(R, factorization=factorization).to(device)
     # decoder = Decoder28_CPD(R, factorization=factorization).to(device)
     # mae = AutoEncoder28_CPD(encoder, decoder).to(device)
-    mae = AutoEncoder28().to(device)
+    mae = AutoEncoder28(in_channels=1).to(device)
     num_epochs_mae = 10
     mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
-    
-    # eval_mae(mae, testset)
-
-
     count_parameters(mae)
-    num_classes = 10
-    classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
-    num_epochs_classifier = 10
-    classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
-    eval_classifier(classifier, testset)
-    count_parameters(classifier)
+    
+    eval_mae(mae, testset)
+
+    # num_classes = 10
+    # classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
+    # num_epochs_classifier = 10
+    # classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    # eval_classifier(classifier, testset)
+    # count_parameters(classifier)

@@ -24,9 +24,9 @@ def plotimg(test_tensor, recon):
 
 
 def plot_single_img(img, i, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
-    unnormalized_image = unnormalize(img[i], mean, std)
-    plt.imshow(unnormalized_image[:, :, :])#,cmap="gray")
-    # plt.imshow(img[i,:, :, :].permute(1,2,0).detach().numpy(),cmap="gray")
+    # unnormalized_image = unnormalize(img[i], mean, std)
+    # plt.imshow(unnormalized_image[:, :, :])#,cmap="gray")
+    plt.imshow(img[i,:, :, :].permute(1,2,0).detach().numpy(),cmap="gray")
     plt.show()
 
 

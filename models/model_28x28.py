@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class AutoEncoder28(nn.Module):
-    def __init__(self):
+    def __init__(self, in_channels=1):
         super(AutoEncoder28, self).__init__()
         self.encoder = nn.Sequential( 
             nn.Conv2d(1, 16, 3, stride=2, padding=1),
