@@ -38,6 +38,7 @@ class Classifier28(nn.Module):
         input_dim = 64
         self.classifier = nn.Sequential(
             nn.Flatten(),
+            # nn.Linear(input_dim, num_classes),
             nn.Linear(input_dim, input_dim//2),
             nn.GELU(),
             nn.Linear(input_dim//2, num_classes)
@@ -46,5 +47,5 @@ class Classifier28(nn.Module):
     def forward(self, x):
         x = self.encoder(x)
         x = self.classifier(x)
-        return F.softmax(x, dim=1)
-        # return x
+        # return F.softmax(x, dim=1)
+        return x

@@ -37,7 +37,7 @@ class Block(nn.Module):
             x = self.gamma * x
         x = x.permute(0, 3, 1, 2) # (N, H, W, C) -> (N, C, H, W)
 
-        x = input #+ self.drop_path(x)
+        x = input + x#+ self.drop_path(x)
         return x
 
     
@@ -62,7 +62,7 @@ class SelfBlock(nn.Module):
 
 
 class AutoEncoder128(nn.Module):
-    def __init__(self, in_channels=3, channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]):
+    def __init__(self, in_channels=1, channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]):
         super(AutoEncoder128, self).__init__()
         self.blocksize = 2
         self.encoder = nn.Sequential(

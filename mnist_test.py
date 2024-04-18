@@ -5,11 +5,13 @@ import torch.nn.functional as F
 from torchvision.datasets import ImageFolder 
 from models.model_28x28 import AutoEncoder28, Classifier28
 from models.model_128x128 import AutoEncoder128, Classifier128
+from models.model_28x28_CPD import AutoEncoder28_CPD, Classifier28_CPD, Encoder28_CPD, Decoder28_CPD, UpscaleConvNet
 import matplotlib.pyplot as plt
 import time
 import numpy as np
-from print_funs import plot_losses, plotimg, plot_single_img
+from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from torch.optim.lr_scheduler import StepLR
+
 
 
 class EarlyStopper:
@@ -79,9 +81,10 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset, MASK_RATIO, num_epochs=5, batch_size=64, learning_rate=4e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     torch.manual_seed(42)
     if TRAIN_MAE:
+
         criterion = nn.MSELoss() # mean square error loss
         optimizer = torch.optim.Adam(model.parameters(),
                                     lr=learning_rate, 
@@ -90,9 +93,11 @@ def train_mae(model, trainset, valset, MASK_RATIO, num_epochs=5, batch_size=64, 
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
                                                 shuffle=True, num_workers=4)
-        val_loader = torch.utils.data.DataLoader(valset, 
-                                    batch_size=batch_size, 
-                                    shuffle=False, num_workers=2)                                  
+        if valset:
+            val_loader = torch.utils.data.DataLoader(valset, 
+                                        batch_size=batch_size, 
+                                        shuffle=False, num_workers=2)
+
         outputs = []
         losses = []
 
@@ -104,12 +109,14 @@ def train_mae(model, trainset, valset, MASK_RATIO, num_epochs=5, batch_size=64, 
             model.train()
             for data in train_loader:
                 img, _ = data
+                # print(img[0,0,:,:])
                 # plot_single_img(img, 10)
                 unmasked_img = img.to(device)
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
                     # print('masking!!!')
                 # plot_single_img(img, 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                # plot_single_img(img, 10)
                 img = img.to(device)
                 recon = model(img)
                 optimizer.zero_grad()
@@ -119,18 +126,21 @@ def train_mae(model, trainset, valset, MASK_RATIO, num_epochs=5, batch_size=64, 
                 running_loss += loss.item()
             #     break
             # break
-            model.eval()
-            validation_loss = 0.0
+            if valset:
+                model.eval()
+                validation_loss = 0.0
 
-            with torch.no_grad():
-                for data in val_loader:
-                    imgs, _ = data
-                    imgs = imgs.to(device)
-                    outputs = model(imgs)
-                    loss = criterion(outputs, imgs)
-                    validation_loss += loss.item() * imgs.size(0)
+                with torch.no_grad():
+                    for data in val_loader:
+                        imgs, _ = data
+                        imgs = imgs.to(device)
+                        outputs = model(imgs)
+                        loss = criterion(outputs, imgs)
+                        validation_loss += loss.item() * imgs.size(0)
 
-            validation_loss /= len(val_loader.dataset)
+                validation_loss /= len(val_loader.dataset)
+            else:
+                validation_loss = 0
             epoch_loss = running_loss / len(train_loader)
             t_epoch_end = time.time()
             print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, duration: {:.2f}s'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start))
@@ -139,17 +149,20 @@ def train_mae(model, trainset, valset, MASK_RATIO, num_epochs=5, batch_size=64, 
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
-        # plot_losses(num_epochs, losses)        
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_imagenette/MAE_CONVNEXT_MR_00.pth'
+            save_folder = 'data/models_imagenette/MAE_CONVNEXT_MR_00_50_epochs_with_input.pth'
+            # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
 
+        plot_losses(num_epochs, losses)        
         print("\n")
         print("\n")
 
     else:
+        # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         model.load_state_dict(torch.load('data/models_imagenette/MAE_CONVNEXT_MR_00_50_epochs.pth'))
+
 
     return model
 
@@ -159,25 +172,25 @@ def eval_mae(model, testset, batch_size=128):
     model.to(device)
     model.eval()
 
-    # test_loader = torch.utils.data.DataLoader(testset, 
-    #                                         batch_size=batch_size, 
-    #                                         shuffle=True)
+    test_loader = torch.utils.data.DataLoader(testset, 
+                                            batch_size=batch_size, 
+                                            shuffle=True)
 
-    # mse_loss = nn.MSELoss(reduction='mean')
-    # total_loss = 0.0
-    # count = 0
+    mse_loss = nn.MSELoss(reduction='mean')
+    total_loss = 0.0
+    count = 0
 
-    # with torch.no_grad():  
-    #     for inputs, _ in test_loader:
-    #         inputs = inputs.to(device)  
-    #         reconstructed = model(inputs)  
-    #         loss = mse_loss(reconstructed, inputs)  
-    #         total_loss += loss.item() 
-    #         count += 1
+    with torch.no_grad():  
+        for inputs, _ in test_loader:
+            inputs = inputs.to(device)  
+            reconstructed = model(inputs)  
+            loss = mse_loss(reconstructed, inputs)  
+            total_loss += loss.item() 
+            count += 1
 
-    # average_loss = np.round(total_loss / count, 6)
+    average_loss = np.round(total_loss / count, 6)
 
-    # print(f'Average MSE Loss on Test Set: {average_loss}')
+    print(f'Average MSE Loss on Test Set: {average_loss}')
 
     data_list = []
     target_list = []
@@ -206,7 +219,7 @@ def eval_mae(model, testset, batch_size=128):
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
 
 
-def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset=None, num_epochs=25, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
@@ -218,9 +231,10 @@ def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, T
                                             batch_size=batch_size, 
                                             shuffle=True, num_workers=2)
 
-        val_loader = torch.utils.data.DataLoader(valset, 
-                            batch_size=batch_size, 
-                            shuffle=False, num_workers=2)    
+        if valset:
+            val_loader = torch.utils.data.DataLoader(valset, 
+                                batch_size=batch_size, 
+                                shuffle=False, num_workers=2)    
 
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()), lr=2e-3, weight_decay=0.05)
@@ -249,24 +263,26 @@ def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, T
                 optimizer.step()
                 running_loss += loss.item()
 
+            if valset:
+                classifier.eval()  
+                validation_loss = 0.0
+                correct = 0
+                total = 0
+                with torch.no_grad():  
+                    for data, target in val_loader:
+                        data, target = data.to(device), target.to(device)
+                        output = classifier(data)
+                        loss = loss_function(output, target)
+                        validation_loss += loss.item() * data.size(0)
+                        _, predicted = torch.max(output.data, 1)
+                        total += target.size(0)
+                        correct += (predicted == target).sum().item()
 
-            classifier.eval()  
-            validation_loss = 0.0
-            correct = 0
-            total = 0
-            with torch.no_grad():  
-                for data, target in val_loader:
-                    data, target = data.to(device), target.to(device)
-                    output = classifier(data)
-                    loss = loss_function(output, target)
-                    validation_loss += loss.item() * data.size(0)
-                    _, predicted = torch.max(output.data, 1)
-                    total += target.size(0)
-                    correct += (predicted == target).sum().item()
-
-            validation_loss /= len(val_loader.dataset)
-            accuracy = correct / total * 100
-
+                validation_loss /= len(val_loader.dataset)
+                accuracy = correct / total * 100
+            else:
+                validation_loss = 0
+                accuracy = 0
             # if early_stopper.early_stop(validation_loss):             
             #     break
 
@@ -287,7 +303,7 @@ def train_classifier(classifier, trainset, valset, num_epochs, batch_size=128, T
         print("\n")
         # print("\n")
     else:
-        classifier.load_state_dict(torch.load('data/models_imagenette/CLASSIFIER_MR_0.pth'))
+        classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
 
     return classifier
 
@@ -302,39 +318,57 @@ def eval_classifier(model, testset, batch_size=128):
                                             shuffle=True)
     correct = 0
     total = 0
+    test_accuracy = []
     with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-            _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
+            # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
+            _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
+        
+    print(f'acc: {np.mean(test_accuracy)}')
 
     accuracy = 100 * correct / total
     print(f'Accuracy: {np.round(accuracy,3)}%')
 
-    imagenette_classes = [
-    'tench',         # Class index 0
-    'English springer',  # Class index 1
-    'cassette player',   # Class index 2
-    'chain saw',      # Class index 3
-    'church',         # Class index 4
-    'French horn',    # Class index 5
-    'garbage truck',  # Class index 6
-    'gas pump',       # Class index 7
-    'golf ball',      # Class index 8
-    'parachute'       # Class index 9
-    ]
-
+    ### MNIST
     for idx, (images, labels) in enumerate(test_loader):
         images, labels = images.to(device), labels.to(device)
         x = model(images)
         _, predicted = torch.max(x.data, 1)
         images = images.cpu()
         plot_single_img(images, 0)
-        print(f'prediction: {imagenette_classes[predicted[0].item()]} ----- label: {imagenette_classes[labels[0].item()]}')
+        print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
         if idx == 10:
             break
+
+
+    ### IMAGENETTE
+    # imagenette_classes = [
+    # 'tench',         # Class index 0
+    # 'English springer',  # Class index 1
+    # 'cassette player',   # Class index 2
+    # 'chain saw',      # Class index 3
+    # 'church',         # Class index 4
+    # 'French horn',    # Class index 5
+    # 'garbage truck',  # Class index 6
+    # 'gas pump',       # Class index 7
+    # 'golf ball',      # Class index 8
+    # 'parachute'       # Class index 9
+    # ]
+
+    # for idx, (images, labels) in enumerate(test_loader):
+    #     images, labels = images.to(device), labels.to(device)
+    #     x = model(images)
+    #     _, predicted = torch.max(x.data, 1)
+    #     images = images.cpu()
+    #     plot_single_img(images, 0)
+    #     print(f'prediction: {imagenette_classes[predicted[0].item()]} ----- label: {imagenette_classes[labels[0].item()]}')
+    #     if idx == 10:
+    #         break
 
 
 
@@ -343,60 +377,67 @@ if __name__ == "__main__":
     dtype = torch.float32
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    # transform = transforms.Compose([
-    # # transforms.Resize((128, 128)),  
-    # transforms.ToTensor(),
+    transform = transforms.Compose([
+    # transforms.Resize((128, 128)),  
+    transforms.ToTensor(),
     # transforms.Normalize((0.5,), (0.5,))  
-    # ])
+    ])
 
-    # mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
-    # trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
+    mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
+    trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
+    trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
 
     MASK_RATIO = 0
+    encoder = Encoder28_CPD().to(device)
+    decoder = UpscaleConvNet().to(device)
+    mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+    num_epochs_mae = 10
+    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
-    # mae = AutoEncoder28().to(device)
-    # num_epochs_mae = 20
-    # mae = train_mae(mae, trainset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
-    # # eval_mae(mae, testset)
+    
+    # eval_mae(mae, testset)
 
 
+    count_parameters(mae)
     # num_classes = 10
-    # classifier = Classifier28(autoencoder=mae, num_classes=num_classes).to(device)
-    # num_epochs_classifier = 10
-    # classifier = train_classifier(classifier, trainset=trainset, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    # classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
+    # num_epochs_classifier = 25
+    # classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
     # eval_classifier(classifier, testset)
+    # count_parameters(classifier)
 
+    # normalize = transforms.Normalize(mean=np.mean([0.485, 0.456, 0.406]),
+    #                              std=np.mean([0.229, 0.224, 0.225]))
 
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225])
+    # transform_train = transforms.Compose([
+    #     transforms.Grayscale(num_output_channels=1),
+    #     transforms.Resize((112, 112)),
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.ToTensor(),
+    #     normalize
+    # ])
 
-    transform_train = transforms.Compose([
-        # transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112, 112)),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        normalize
-    ])
+    # transform_test = transforms.Compose([
+    #     transforms.Grayscale(num_output_channels=1),
+    #     transforms.Resize((112, 112)),
+    #     transforms.ToTensor(),
+    #     normalize
+    # ])
 
-    transform_test = transforms.Compose([
-        # transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112, 112)),
-        transforms.ToTensor(),
-        normalize
-    ])
+    # trainset = ImageFolder('data/imagenette2/train', transform=transform_train)
+    # # print(len(trainset))
+    # testset = ImageFolder('data/imagenette2/val', transform=transform_test)
+    # # testset, validation_dataset = torch.utils.data.random_split(testset, [int(0.8*len(testset)), int((1-0.8)*len(testset)+1)])
 
-    trainset = ImageFolder('data/imagenette2/train', transform=transform_train)
-    # print(len(trainset))
-    testset = ImageFolder('data/imagenette2/val', transform=transform_test)
-    testset, validation_dataset = torch.utils.data.random_split(testset, [int(0.8*len(testset)), int((1-0.8)*len(testset)+1)])
-
-    mae = AutoEncoder128(channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]).to(device)
-    num_epochs_mae = 200
-    mae = train_mae(mae, trainset, validation_dataset, MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False, p=8)
+    # # mae = AutoEncoder128(channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]).to(device)
+    # mae = AutoEncoder128(channels=[32, 64, 128, 256], depths=[3, 3, 9, 3]).to(device)
+    # num_epochs_mae = 10
+    # mae = train_mae(mae, trainset, valset=None, MASK_RATIO=0, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
+    # count_parameters(mae)
     # eval_mae(mae, testset)
 
     # num_classes = 10
     # classifier = Classifier128(autoencoder=mae, in_features=768, out_features=num_classes).to(device)
     # num_epochs_classifier = 10
-    # classifier = train_classifier(classifier, trainset=trainset, valset=validation_dataset, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True)
+    # classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True)
     # eval_classifier(classifier, testset)
