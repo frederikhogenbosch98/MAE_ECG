@@ -3,10 +3,10 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import wfdb
-from model import AutoEncoder
+from old_files.model import AutoEncoder
 from torch.utils.data import Dataset, DataLoader
-from train import train
-from eval import eval
+from old_files.train import train
+from old_files.eval import eval
 
 
 if __name__ == "__main__":

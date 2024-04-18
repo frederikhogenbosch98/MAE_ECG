@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
-from train import ECGDataset
+from old_files.train import ECGDataset
 
 
 def plot_results(model, test_tensor, i, lead=0):

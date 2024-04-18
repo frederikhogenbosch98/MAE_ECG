@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.datasets import ImageFolder 
 from models.model_28x28 import AutoEncoder28, Classifier28
-from models.model_128x128 import AutoEncoder128, Classifier128
+from models.model_112x112 import AutoEncoder128, Classifier128
 from models.model_28x28_CPD import AutoEncoder28_CPD, Classifier28_CPD, Encoder28_CPD, Decoder28_CPD
 import matplotlib.pyplot as plt
 import time
@@ -408,39 +408,3 @@ if __name__ == "__main__":
     classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
     eval_classifier(classifier, testset)
     count_parameters(classifier)
-
-    # normalize = transforms.Normalize(mean=np.mean([0.485, 0.456, 0.406]),
-    #                              std=np.mean([0.229, 0.224, 0.225]))
-
-    # transform_train = transforms.Compose([
-    #     transforms.Grayscale(num_output_channels=1),
-    #     transforms.Resize((112, 112)),
-    #     transforms.RandomHorizontalFlip(),
-    #     transforms.ToTensor(),
-    #     normalize
-    # ])
-
-    # transform_test = transforms.Compose([
-    #     transforms.Grayscale(num_output_channels=1),
-    #     transforms.Resize((112, 112)),
-    #     transforms.ToTensor(),
-    #     normalize
-    # ])
-
-    # trainset = ImageFolder('data/imagenette2/train', transform=transform_train)
-    # # print(len(trainset))
-    # testset = ImageFolder('data/imagenette2/val', transform=transform_test)
-    # # testset, validation_dataset = torch.utils.data.random_split(testset, [int(0.8*len(testset)), int((1-0.8)*len(testset)+1)])
-
-    # # mae = AutoEncoder128(channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]).to(device)
-    # mae = AutoEncoder128(channels=[32, 64, 128, 256], depths=[3, 3, 9, 3]).to(device)
-    # num_epochs_mae = 10
-    # mae = train_mae(mae, trainset, valset=None, MASK_RATIO=0, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
-    # count_parameters(mae)
-    # eval_mae(mae, testset)
-
-    # num_classes = 10
-    # classifier = Classifier128(autoencoder=mae, in_features=768, out_features=num_classes).to(device)
-    # num_epochs_classifier = 10
-    # classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True)
-    # eval_classifier(classifier, testset)

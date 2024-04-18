@@ -61,9 +61,9 @@ class SelfBlock(nn.Module):
 
 
 
-class AutoEncoder128(nn.Module):
+class AutoEncoder112(nn.Module):
     def __init__(self, in_channels=1, channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]):
-        super(AutoEncoder128, self).__init__()
+        super(AutoEncoder112, self).__init__()
         self.blocksize = 2
         self.encoder = nn.Sequential(
             # DOWNSAMPLE 1
@@ -162,9 +162,9 @@ class AutoEncoder128(nn.Module):
 #         # x = self.drop(x)
 #         return x
 
-class Classifier128(nn.Module):
+class Classifier112(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
-        super(Classifier128, self).__init__()
+        super(Classifier112, self).__init__()
         self.encoder = autoencoder.encoder
         # self.decoder = autoencoder.decoder
         # self.classifier = nn.Sequential(
