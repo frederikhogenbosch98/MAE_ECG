@@ -380,6 +380,8 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
 
+    print(f'SELECTED DEVICE: {device}')
+
     MASK_RATIO = 0
 
     normalize = transforms.Normalize(mean=np.mean([0.485, 0.456, 0.406]),

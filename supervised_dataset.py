@@ -1,16 +1,52 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import pandas as pd
+import ast
+import torch
+
+def aggregate_supclass_diagnostic(y_dic):
+    agg_df = pd.read_csv('data/physionet/ptbxl/scp_statements.csv', index_col=0)
+    agg_df = agg_df[agg_df.diagnostic == 1]
+    tmp = []
+    for key in y_dic.keys():
+        if key in agg_df.index:
+            tmp.append(agg_df.loc[key].diagnostic_class)
+    return list(set(tmp))
+    
 
 
-def train_test_split(tensor, split):
-    split_idx = int(tensor.size(dim=0)*split)
-    train_tensor = tensor[0:split_idx,:,:,:]
-    test_tensor = tensor[split_idx+1:-1,:,:,:]
+def create_label_tensor():
 
-    return train_tensor, test_tensor 
+    Y = pd.read_csv('data/physionet/ptbxl/ptbxl_database.csv', index_col='ecg_id')
+    Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
+    print(Y[['scp_codes']])
+    print(Y.describe().transpose())
+    
+
+   # Apply diagnostic superclass
+    Y['diagnostic_superclass'] = Y.scp_codes.apply(aggregate_supclass_diagnostic)
+    Y['diagnostic_superclass_len'] = Y['diagnostic_superclass'].apply(len)
+    print(Y.loc[Y.diagnostic_superclass_len > 1, 'diagnostic_superclass'])
+    print(Y[0:50])
 
 
+    labels = []
+    for idx, row in Y.iterrows():
+        label = []
+        if 'NORM' in row['diagnostic_superclass']:
+            label.append(0)
+        if 'CD' in row['diagnostic_superclass']:
+            label.append(1)
+        if 'STCC' in row['diagnostic_superclass']:
+            label.append(2) 
+        if 'HYP' in row['diagnostic_superclass']:
+            label.append(3) 
+        if 'MI' in row['diagnostic_superclass']:
+            label.append(4) 
+        labels.append(label)
+
+    return labels 
 
 
 
@@ -18,26 +54,27 @@ if __name__ == "__main__":
 
     SAVE = True
 
+    unsupervised_dataset = torch.load('data/datasets/subsets/dataset_20k_224_1000.pt')
+
     st = time.time()
-    input_tensor = create_input_tensor()
+    labels = create_label_tensor()
     end = time.time()
     print(f'total tensor creation time: {end-st}s')
-    # input_tensor = input_tensor.permute(0,2,1)
-    # input_tensor = input_tensor[:, :, 0:4992]
+    
+    supervised_dataset = unsupervised_dataset[0].unsqueeze(0)
+    labels_corr = []
+    # for i in range(1,len(labels)):
+    for i in range(1,1000):
+        if not labels[i] or len(labels[i]) > 1:
+            continue
+        labels_corr.append(labels[i])
+        supervised_dataset = torch.cat([supervised_dataset, unsupervised_dataset[i].unsqueeze(0)], dim=0)
+        
+    print(len(labels_corr))
+    print(supervised_dataset.shape)
 
-    # shuffle tensors with some sort of seed
-
-    train_tensor, test_tensor = train_test_split(input_tensor, 0.7)
-
-    print(train_tensor.size())
-    print(test_tensor.size())
-
-    # train_dataset = ECGDataset(train_tensor)
-    # test_dataset = ECGDataset(test_tensor)
-    # for i in range(50):
-        # plot_resulting_tensors(train_tensor,i)
-    if SAVE:
-        save_dir = 'data/datasets/'
-        torch.save(train_tensor, f'{save_dir}train_dataset.pt')
-        torch.save(test_tensor, f'{save_dir}test_dataset.pt')
-        print(f'tensors saved to {save_dir}')
+    print(labels_corr[0:50])
+    # print(supervised_dataset[0:50])
+    # if SAVE:
+    #     save_dir = 'data/datasets/'
+    #     print(f'tensors saved to {save_dir}')
