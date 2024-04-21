@@ -41,25 +41,6 @@ class Block(nn.Module):
         return x
 
     
-class SelfBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(SelfBlock, self).__init__()
-
-        self.conv1x1_1 = nn.Conv2d(in_channels, out_channels, kernel_size=1)#, stride=1, padding=1)
-        self.conv1x1_2 = nn.Conv2d(in_channels, out_channels, kernel_size=1)#, stride=1, padding=1)
-        self.conv3x3 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, )
-        self.bn = nn.BatchNorm2d(out_channels)
-        self.gelu = nn.GELU()
-
-    def forward(self, x):
-        residual = x
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.gelu(x)
-        x += residual
-        return x
-
-
 
 class AutoEncoder112(nn.Module):
     def __init__(self, in_channels=1, channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]):
@@ -109,28 +90,8 @@ class AutoEncoder112(nn.Module):
             # UPSAMPLE 1
             nn.ConvTranspose2d(channels[0],in_channels, 3, stride=2, padding=1, output_padding=1),
             LayerNorm(in_channels, eps=1e-6, data_format="channels_first")
-
-
-
-            # nn.ConvTranspose2d(256, 256, 3, stride=2, padding=1, output_padding=1),
-            # nn.GELU(),
-            # # nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1),
-            # # nn.GELU(),
-            # *[SelfBlock(256,256) for i in range(self.blocksize)],
-            # nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1),
-            # nn.GELU(),
-            # *[SelfBlock(128,128) for i in range(self.blocksize)],
-            # nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1),
-            # nn.GELU(),
-            # *[SelfBlock(64,64) for i in range(self.blocksize)],
-            # nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1),
-            # nn.GELU(),
-            # *[SelfBlock(32,32) for i in range(self.blocksize)],
-            # nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
-            # nn.GELU(),
-            # nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1),
-            # nn.Sigmoid()
         )
+
 
     def forward(self, x):
         x = self.encoder(x)

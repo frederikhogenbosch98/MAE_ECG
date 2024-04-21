@@ -78,9 +78,8 @@ def mask(batch, ratio, p):
     # plt.show()
 
 
-
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
-    torch.manual_seed(42)
+# learning_rate 4e-3
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_size=128, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     if TRAIN_MAE:
 
         criterion = nn.MSELoss() # mean square error loss
@@ -148,7 +147,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_imagenette/MAE_CONVNEXT_MR_00_50_epochs_with_input.pth'
+            save_folder = 'data/models_imagenette/MAE_CONVNEXT_TESTEPOCHS.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -159,7 +158,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_imagenette/MAE_CONVNEXT_MR_00_50_epochs.pth'))
+        model.load_state_dict(torch.load('data/models_imagenette/MAE_CONVNEXT_TESTEPOCHS.pth'))
 
 
     return model
@@ -208,8 +207,7 @@ def eval_mae(model, testset, batch_size=128):
 
     x = model(test_data_tensor[0:64,:,:,:])
     embedding = model.encoder(x)
-    e1 = embedding
-    recon = model.decoder(e1)
+    recon = model.decoder(embedding)
     print(recon.shape)
     for i in range(64):
         recon_cpu = recon[i,:,:,:]#.detach().numpy()
@@ -332,46 +330,36 @@ def eval_classifier(model, testset, batch_size=128):
     accuracy = 100 * correct / total
     print(f'Accuracy: {np.round(accuracy,3)}%')
 
-    ### MNIST
+
+    ## IMAGENETTE
+    imagenette_classes = [
+    'tench',         # Class index 0
+    'English springer',  # Class index 1
+    'cassette player',   # Class index 2
+    'chain saw',      # Class index 3
+    'church',         # Class index 4
+    'French horn',    # Class index 5
+    'garbage truck',  # Class index 6
+    'gas pump',       # Class index 7
+    'golf ball',      # Class index 8
+    'parachute'       # Class index 9
+    ]
+
     for idx, (images, labels) in enumerate(test_loader):
         images, labels = images.to(device), labels.to(device)
         x = model(images)
         _, predicted = torch.max(x.data, 1)
         images = images.cpu()
         plot_single_img(images, 0)
-        print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
+        print(f'prediction: {imagenette_classes[predicted[0].item()]} ----- label: {imagenette_classes[labels[0].item()]}')
         if idx == 10:
             break
-
-
-    ### IMAGENETTE
-    # imagenette_classes = [
-    # 'tench',         # Class index 0
-    # 'English springer',  # Class index 1
-    # 'cassette player',   # Class index 2
-    # 'chain saw',      # Class index 3
-    # 'church',         # Class index 4
-    # 'French horn',    # Class index 5
-    # 'garbage truck',  # Class index 6
-    # 'gas pump',       # Class index 7
-    # 'golf ball',      # Class index 8
-    # 'parachute'       # Class index 9
-    # ]
-
-    # for idx, (images, labels) in enumerate(test_loader):
-    #     images, labels = images.to(device), labels.to(device)
-    #     x = model(images)
-    #     _, predicted = torch.max(x.data, 1)
-    #     images = images.cpu()
-    #     plot_single_img(images, 0)
-    #     print(f'prediction: {imagenette_classes[predicted[0].item()]} ----- label: {imagenette_classes[labels[0].item()]}')
-    #     if idx == 10:
-    #         break
 
 
 
 if __name__ == "__main__":
 
+    # torch.manuel_seed(42)
     dtype = torch.float32
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -384,32 +372,36 @@ if __name__ == "__main__":
 
     MASK_RATIO = 0
 
-    normalize = transforms.Normalize(mean=np.mean([0.485, 0.456, 0.406]),
-                                 std=np.mean([0.229, 0.224, 0.225]))
+    # normalize = transforms.Normalize(mean=np.mean([0.485, 0.456, 0.406]),
+    #                              std=np.mean([0.229, 0.224, 0.225]))
 
+    # normalize = transforms.Normalize(mean=[0.459], std=[0.150])
+    # normalize = transforms.Normalize((0.5, ), (0.5, ))
+    # normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                #  std=[0.229, 0.224, 0.225])
     transform_train = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((112, 112)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        normalize
+        # normalize
     ])
 
     transform_test = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((112, 112)),
         transforms.ToTensor(),
-        normalize
+        # normalize
     ])
 
     trainset = ImageFolder('data/imagenette2/train', transform=transform_train)
     # print(len(trainset))
     testset = ImageFolder('data/imagenette2/val', transform=transform_test)
-    # testset, validation_dataset = torch.utils.data.random_split(testset, [int(0.8*len(testset)), int((1-0.8)*len(testset)+1)])
+    # testset, valset = torch.utils.data.random_split(testset, [int(0.8*len(testset)), int((1-0.8)*len(testset)+1)])
 
-    # mae = AutoEncoder128(channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]).to(device)
-    mae = AutoEncoder112(channels=[32, 64, 128, 256], depths=[3, 3, 9, 3]).to(device)
-    num_epochs_mae = 10
+    # mae = AutoEncoder112(in_channels=3, channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]).to(device)
+    mae = AutoEncoder112(in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 3, 1]).to(device)
+    num_epochs_mae = 15
     mae = train_mae(mae, trainset, valset=None, MASK_RATIO=0, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
     count_parameters(mae)
     eval_mae(mae, testset)
@@ -417,5 +409,5 @@ if __name__ == "__main__":
     num_classes = 10
     classifier = Classifier112(autoencoder=mae, in_features=768, out_features=num_classes).to(device)
     num_epochs_classifier = 10
-    classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True)
+    classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
     eval_classifier(classifier, testset)

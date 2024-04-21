@@ -111,7 +111,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
                 img = data
                 # print(img.shape)
                 # print(img[0,0,:,:])
-                plot_single_img(img, 10)
+                # plot_single_img(img, 10)
                 unmasked_img = img.to(device)
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
@@ -348,18 +348,18 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 
-class ECGDataset(torch.utils.data.Dataset):
-    def __init__(self, tensors):
-            self.tensors = tensors  # Assume tensors is a list of 12-channel tensors
+# class ECGDataset(torch.utils.data.Dataset):
+#     def __init__(self, tensors):
+#             self.tensors = tensors  # Assume tensors is a list of 12-channel tensors
 
-    def __len__(self):
-        return len(self.tensors)
+#     def __len__(self):
+#         return len(self.tensors)
 
-    def __getitem__(self, idx):
-        # Directly handle tensor manipulation without converting to PIL
-        tensor = self.tensors[idx]
-        resized_tensor = F.interpolate(tensor.unsqueeze(0), size=(28, 28), mode='bilinear', align_corners=False)
-        return resized_tensor.squeeze(0)  # Remove batch dimension added for interpolation
+#     def __getitem__(self, idx):
+#         # Directly handle tensor manipulation without converting to PIL
+#         tensor = self.tensors[idx]
+#         resized_tensor = F.interpolate(tensor.unsqueeze(0), size=(28, 28), mode='bilinear', align_corners=False)
+#         return resized_tensor.squeeze(0)  # Remove batch dimension added for interpolation
 
 
 if __name__ == "__main__":
@@ -372,35 +372,37 @@ if __name__ == "__main__":
     else:
         device = torch.device("cpu")
 
-    ### MNIST
-    # transform = transforms.Compose([
-    # # transforms.Resize((128, 128)),  
-    # transforms.ToTensor(),
-    # # transforms.Normalize((0.5,), (0.5,))  
-    # ])
+    print(f'SELECTED DEVICE: {device}')
 
-    # mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
-    # trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
-    # trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
-
-
-    ### ECG
+    ## MNIST
     transform = transforms.Compose([
-        transforms.Resize((28,28)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,))   
+    # transforms.Resize((128, 128)),  
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))  
     ])
 
-    trainset = torch.load('data/datasets/train_dataset_img.pt').to(dtype)
-    print(trainset[0,0,100,:])
-    trainset = trainset[:,0,:,:].unsqueeze(1)
-    
-    plot_single_img(trainset[:,:,:,:], 0)
-    print(trainset.shape)
-    testset = torch.load('data/datasets/test_dataset_img.pt').to(dtype)
-    trainset = ECGDataset(trainset)
+    mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
+    trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
+    trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
 
-    print(type(trainset))
+
+    # ### ECG
+    # transform = transforms.Compose([
+    #     transforms.Resize((28,28)),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize((0.5,), (0.5,))   
+    # ])
+
+    # trainset = torch.load('data/datasets/train_dataset_img.pt').to(dtype)
+    # print(trainset[0,0,100,:])
+    # trainset = trainset[:,0,:,:].unsqueeze(1)
+    
+    # plot_single_img(trainset[:,:,:,:], 0)
+    # print(trainset.shape)
+    # testset = torch.load('data/datasets/test_dataset_img.pt').to(dtype)
+    # # trainset = ECGDataset(trainset)
+
+    # print(type(trainset))
 
     MASK_RATIO = 0
     # R = 0.5

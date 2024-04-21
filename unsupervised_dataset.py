@@ -14,7 +14,6 @@ import time
 from print_funs import plot_single_img
 import argparse
 
-# physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 physio_root = 'data/physionet/ptbxl/records500'
 
 
@@ -74,11 +73,6 @@ def create_input_tensor(folder):
     high_cut = 100
     fs = 500
 
-    # # init_sample, init_field = wfdb.rdsamp(f'{physio_root}/01/010/JS00001')
-    # init_sample, init_field = wfdb.rdsamp(f'{physio_root}/00000/00001_hr')
-    # init_filtered = butter_bandpass_filter(np.array(init_sample), low_cut, high_cut, fs, order=5)
-    # input_tensor = torch.Tensor(init_filtered).unsqueeze(0)
-
     directory_path = Path(f'{physio_root}')
     num_folders = len(next(os.walk(f'{physio_root}'))[1])
     mat_files = [file for file in directory_path.rglob('*.dat')]
@@ -107,51 +101,27 @@ def create_input_tensor(folder):
         
         for l in range(sample_values.shape[1]):
             filtered_data = butter_bandpass_filter(sample_values[:,l], low_cut, high_cut, fs, order=5)
-            # print(filtered_data)
-            # plt.plot(filtered_data)
-            # plt.show()
             resampled_data = resample(filtered_data, num=3600)
-            # print(resampled_data)
-            # plt.plot(resampled_data)
-            # plt.show
+
             if l == 0:
                 r_idx = get_r_idx(resampled_data)
 
             segs = extract_segments(resampled_data, r_idx)
-            # print(segs)
             if segs and len(segs) > 7:
                 mid_idx = len(segs) // 2
                 strt_idx = max(0, mid_idx-4)
                 end_idx = strt_idx+8
                 segs = segs[strt_idx:end_idx]
                 del segs[0], segs[-1]
-
-                    # print(segs[0])
                 output_data[:,l] = normalize(np.mean(np.array(segs), axis=0))
-                    # print(output_data[j,:,:].shape)
-                    # print(output_data[j,:,l])
-                    # break
-            # print(segs[0])
-            # plt.plot(segs[0])
-            # break
-        # plt.plot(output_data[0,:,0])
-        # plt.show()
-        # print(output_data[0,:,0])
-        # creating tensors
-            # st = time.time()
+
 
             buf = create_img(output_data[:,l], 224, 224)
-            # end = time.time()
-            # print(end-st)
             buf.seek(0)
             image = Image.open(buf).convert('L')
             image_array = np.array(image)
-            # plt.imshow(image_array, cmap="gray")
-            # plt.show()
             if l == 0:  
-                # print(image_array.shape)
                 img_tensor = torch.tensor(image_array[0:224, 0:224])
-                # print(img_tensor.shape)
                 img_tensor = img_tensor[None, :, :]
             else:
                 temp_img_tensor = torch.tensor(image_array[0:224, 0:224]) 
@@ -161,37 +131,10 @@ def create_input_tensor(folder):
         if idx % 100 == 0 and idx != 0:
             print(idx)
 
-        # save_idx = 1000
-        # if idx % save_idx == 0 and idx != 0:
-        #     t_end = time.time()
-        #     print(f'elapsed time for {idx}: {np.round((t_end - t_start), 2)}s')
-        #     save_dir = 'data/datasets/subsets/'
-        #     torch.save(input_tensor, f'{save_dir}dataset_20k_224_{idx}.pt')
-        #     del input_tensor, image_array, buf, image, output_data 
-        #     t_start = time.time()
-            
-        # print(img_tensor.shape)
         if idx == lower_limit:
             input_tensor = img_tensor.unsqueeze(0)
         else:
             input_tensor = torch.cat([input_tensor, img_tensor.unsqueeze(0)], dim=0)
-            # print(input_tensor.shape)
-
-        # if idx == 0:
-        #     input_tensor = torch.Tensor(output_data).unsqueeze(0)
-        #     # plt.plot(input_tensor[0,0,:,0])
-        #     # plt.show()
-        #     # print(input_tensor)
-        # else:
-        #     # print(output_data[])
-        #     sample_tensor = torch.Tensor(output_data).unsqueeze(0)
-        #     # print(sample_tensor[0,:,:,:])
-        #     input_tensor = torch.cat([input_tensor, sample_tensor], dim=0) 
-        # break
-        # if idx == 100:
-        #     plot_resulting_tensors(input_tensor, 27)
-        # if idx == 100:
-        #     break
 
 
     print(input_tensor.size())
@@ -256,19 +199,6 @@ if __name__ == "__main__":
     input_tensor = create_input_tensor(int(args.folder))
     end = time.time()
     print(f'total tensor creation time: {end-st}s')
-    # input_tensor = input_tensor.permute(0,2,1)
-    # input_tensor = input_tensor[:, :, 0:4992]
-
-    # shuffle tensors with some sort of seed
-
-    # train_tensor, test_tensor = train_test_split(input_tensor, 0.7)
-
-    # print(train_tensor.size())
-    # print(test_tensor.size())
-    # train_dataset = ECGDataset(train_tensor)
-    # test_dataset = ECGDataset(test_tensor)
-    # for i in range(50):
-        # plot_resulting_tensors(train_tensor,i)
     series = (int(args.folder)+1) * 1000
     if SAVE:
         save_dir = 'data/datasets/'
@@ -276,7 +206,3 @@ if __name__ == "__main__":
         # torch.save(test_tensor, f'{save_dir}test_dataset_20k_224.pt')
         print(f'tensors saved to {save_dir}')
 
-
-    # for i in range(50):
-    #     plt.imshow(train_tensor[i,0, :, :].detach().numpy(),cmap="gray")
-    #     plt.show()

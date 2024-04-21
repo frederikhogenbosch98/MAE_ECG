@@ -14,12 +14,12 @@ def plotimg(test_tensor, recon):
     test_tensor = test_tensor.cpu()#.detach().numpy()
     # print(test_tensor[0,:,:])
     plt.subplot(2, 2, 1)
-    plt.imshow(unnormalize(test_tensor[:,:,:]))#, cmap="gray")
-    # plt.imshow(test_tensor[:,:,:].permute(1,2,0).detach().numpy(), cmap="gray")
+    # plt.imshow(unnormalize(test_tensor[:,:,:]))#, cmap="gray")
+    plt.imshow(test_tensor[:,:,:].permute(1,2,0).detach().numpy(), cmap="gray")
     plt.subplot(2, 2, 2)
     # print(recon)
-    plt.imshow(unnormalize(recon))#,cmap="gray")
-    # plt.imshow(recon.permute(1,2,0).detach().numpy(), cmap="gray")
+    # plt.imshow(unnormalize(recon))#,cmap="gray")
+    plt.imshow(recon.permute(1,2,0).detach().numpy(), cmap="gray")
     plt.show()
 
 
