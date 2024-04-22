@@ -140,7 +140,7 @@ class Classifier112(nn.Module):
         # )
         self.norm = nn.LayerNorm(in_features, eps=1e-6) 
         self.classifier = nn.Sequential(
-            # nn.Flatten()
+            # nn.Flatten(),
             nn.Linear(in_features, in_features),
             nn.GELU(),
             nn.Linear(in_features, out_features)
@@ -151,8 +151,12 @@ class Classifier112(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
+        # print(x.shape)
         # x = self.decoder(x)
+        # x = x.mean([-2,-1])
+        # print(x.shape)
         x = self.norm(x.mean([-2,-1]))
+        # print(x.shape)
         x = self.classifier(x)
         # return F.softmax(x, dim=1)
         return x
