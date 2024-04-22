@@ -53,6 +53,7 @@ def create_label_tensor():
 if __name__ == "__main__":
 
     SAVE = True
+    save_path = 'data/datasets/supervised_dataset_22k.pt'
 
     unsupervised_dataset = torch.load('data/datasets/subsets/dataset_20k_224_1000.pt')
 
@@ -63,6 +64,7 @@ if __name__ == "__main__":
     
     supervised_dataset = unsupervised_dataset[0].unsqueeze(0)
     labels_corr = []
+    labels_corr.append(0)
     # for i in range(1,len(labels)):
     for i in range(1,1000):
         if not labels[i] or len(labels[i]) > 1:
@@ -70,11 +72,11 @@ if __name__ == "__main__":
         labels_corr.append(labels[i])
         supervised_dataset = torch.cat([supervised_dataset, unsupervised_dataset[i].unsqueeze(0)], dim=0)
         
-    print(len(labels_corr))
-    print(supervised_dataset.shape)
+    # print(len(labels_corr))
+    # print(supervised_dataset.shape)
 
-    print(labels_corr[0:50])
-    # print(supervised_dataset[0:50])
-    # if SAVE:
-    #     save_dir = 'data/datasets/'
-    #     print(f'tensors saved to {save_dir}')
+    # print(labels_corr[0:50])
+    
+    if SAVE:
+        torch.save({'data': supervised_dataset, 'labels': labels_corr}, save_path)
+        print(f'Supervised dataset saved to {save_path}')
