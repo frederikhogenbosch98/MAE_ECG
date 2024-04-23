@@ -410,7 +410,7 @@ if __name__ == "__main__":
     decoder = Decoder28_CPD(R, factorization=factorization).to(device)
     mae = AutoEncoder28_CPD(encoder, decoder).to(device)
     # mae = AutoEncoder28(in_channels=1).to(device)
-    num_epochs_mae = 25
+    num_epochs_mae = 20
     mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
 
     count_parameters(mae)

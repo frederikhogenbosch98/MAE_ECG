@@ -8,25 +8,26 @@ from tensorly.decomposition import parafac
 
 tl.set_backend('pytorch')
 
-class ParafacConvolution2D():
-    def __init__(self, conv, R) -> None:
-        layer = conv.weight
-        print(f'layer shape: {conv.weight.shape}')
-        weights, factors = parafac(layer, rank=R)
-        print(f'weights: {len(weights)}')
-        print(f'factors: {len(factors)}')
-        for i in range(len(factors)):
-            print(f'factor {i}: {factors[i].shape}')
+class ParafacConvolution2D(nn.Module):
+    def __init__(self, conv, R):
+        super(ParafacConvolution2D,self).__init__()
+        weights, factors = parafac(conv.weight.detach(), rank=R)
 
-        
-        self.s_to_r = nn.Conv2d(conv.in_channels, R, (1, 1), bias=False)
-        self.s_to_r.weight.data = factors[1].unsqueeze(-1).unsqueeze(-1)
-        self.depth_vert = self.depth_vert = nn.Conv2d(R, R, (factors[2].shape[0], 1), groups=R, bias=False)
-        self.depth_vert.weight.data = factors[2].unsqueeze(1).unsqueeze(-1)
-        self.depth_hor = self.depth_hor = nn.Conv2d(R, R, (1, factors[3].shape[0]), groups=R, bias=False)
-        self.depth_hor.weight.data = factors[3].unsqueeze(1).unsqueeze(1)
-        self.r_to_t = self.r_to_t = nn.Conv2d(R, conv.out_channels, (1, 1), bias=False)
+        print(conv.stride)
+        print(conv.padding)
+        self.s_to_r = nn.Conv2d(conv.in_channels, R, (1, 1), stride=1, padding=0, bias=False)
+        self.s_to_r.weight.data = factors[1].permute(1,0).unsqueeze(-1).unsqueeze(-1)
+
+        self.depth_vert = nn.Conv2d(R, R, (factors[2].shape[0], 1), groups=R, stride=(conv.stride[0],1), padding=(conv.padding[0],0), bias=False)
+        self.depth_vert.weight.data = factors[2].permute(1,0).unsqueeze(1).unsqueeze(-1)
+
+        self.depth_hor = nn.Conv2d(R, R, (1, factors[3].shape[0]), groups=R, stride=(1, conv.stride[1]), padding=(0, conv.padding[1]), bias=False)
+        self.depth_hor.weight.data = factors[3].permute(1,0).unsqueeze(1).unsqueeze(1)
+
+        self.r_to_t = nn.Conv2d(R, conv.out_channels, (1, 1), stride=1, padding=0, bias=False)
         self.r_to_t.weight.data = factors[0].unsqueeze(-1).unsqueeze(-1)
+        # if conv.bias is not None:
+        #     self.r_to_t.bias.data = conv.bias.data
     
     def forward(self, x):
         x = self.s_to_r(x)
@@ -42,17 +43,18 @@ class Encoder28_CPD(nn.Module):
         self.conv1 = nn.Conv2d(1, 16, 3, stride=2, padding=1)
         self.conv2 = nn.Conv2d(16, 32, 3, stride=2, padding=1)
         self.conv3 = nn.Conv2d(32, 64, 7)
-        self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization, implementation='factorized')
+        print(self.conv3.weight.shape)
+        # self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization, implementation='factorized')
 
-        self.test_fact = ParafacConvolution2D(self.conv3, R=5)
+        self.fact_conv1 = ParafacConvolution2D(self.conv1, R=R)
+        self.fact_conv2 = ParafacConvolution2D(self.conv2, R=R)
+        self.fact_conv3 = ParafacConvolution2D(self.conv3, R=R)
 
         self.gelu = nn.GELU() 
          
     def forward(self, x):
-        print(self.conv3.weight.size())
-        print(self.fact_conv3.weight.size())
         x = self.fact_conv1(x) 
         x = self.gelu(x)
         x = self.fact_conv2(x)
@@ -69,12 +71,16 @@ class Decoder28_CPD(nn.Module):
         self.conv1 = nn.Conv2d(64, 32, 7, padding=3)
         self.conv2 = nn.Conv2d(32, 16, 3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(16, 1, 3, stride=1, padding=1)
-        self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization)
 
         self.up1 = nn.Upsample(size=(7, 7), mode='bilinear', align_corners=False)
         self.up2 = nn.Upsample(size=(28, 28), mode='bilinear', align_corners=False)
+
+        self.fact_conv1 = ParafacConvolution2D(self.conv1, R=R)
+        self.fact_conv2 = ParafacConvolution2D(self.conv2, R=R)
+        self.fact_conv3 = ParafacConvolution2D(self.conv3, R=R)
 
     def forward(self, x):
         # print(x.shape)
