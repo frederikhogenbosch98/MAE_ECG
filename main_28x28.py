@@ -12,24 +12,11 @@ from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from torch.optim.lr_scheduler import StepLR
 
 
-
-class EarlyStopper:
-    def __init__(self, patience=1, min_delta=0):
-        self.patience = patience
-        self.min_delta = min_delta
-        self.counter = 0
-        self.min_validation_loss = float('inf')
-
-    def early_stop(self, validation_loss):
-        if validation_loss < self.min_validation_loss:
-            self.min_validation_loss = validation_loss
-            self.counter = 0
-        elif validation_loss > (self.min_validation_loss + self.min_delta):
-            self.counter += 1
-            if self.counter >= self.patience:
-                return True
+def early_stopper(loss):
+    if np.mean([np.abs(loss[-1] - loss[-2]), np.abs(loss[-2] - loss[-3])]) < 0.0002:
+        return True
+    else:
         return False
-
 
 def apply_mask(x, ratio, p):
     x = x.permute(0,5,1,2,3,4)
@@ -88,7 +75,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         optimizer = torch.optim.Adam(model.parameters(),
                                     lr=learning_rate, 
                                     weight_decay=1e-4)
-        # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+        scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
                                                 shuffle=True, num_workers=4)
@@ -145,7 +132,9 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             t_epoch_end = time.time()
             print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, duration: {:.2f}s'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start))
             losses.append(epoch_loss)
-            # scheduler.step()
+            if len(losses) > 10 and early_stopper(losses):
+                break
+            scheduler.step()
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
@@ -155,7 +144,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
 
-        plot_losses(num_epochs, losses)        
+        plot_losses(epoch+1, losses)        
         print("\n")
         print("\n")
 
@@ -404,14 +393,14 @@ if __name__ == "__main__":
     # print(type(trainset))
 
     MASK_RATIO = 0
-    R = 16
+    R = 8
     factorization='cp'
     encoder = Encoder28_CPD(R, factorization=factorization).to(device)
     decoder = Decoder28_CPD(R, factorization=factorization).to(device)
     mae = AutoEncoder28_CPD(encoder, decoder).to(device)
     # mae = AutoEncoder28(in_channels=1).to(device)
-    num_epochs_mae = 20
-    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
+    num_epochs_mae = 50
+    mae = train_mae(mae, trainset, valset=valset, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
 
     count_parameters(mae)
     
