@@ -106,19 +106,18 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             running_loss = 0.0
             t_epoch_start = time.time()
             model.train()
-            for data in train_loader:
+            for data, labels in train_loader:
                 # img, _ = data
-                img = data
+                img = data.to(device)
                 # print(img.shape)
                 # print(img[0,0,:,:])
                 # plot_single_img(img, 10)
-                unmasked_img = img.to(device)
+                unmasked_img = img
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
                     # print('masking!!!')
                 # plot_single_img(img, 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 # plot_single_img(img, 10)
-                img = img.to(device)
                 recon = model(img)
                 optimizer.zero_grad()
                 loss = criterion(recon, unmasked_img)
@@ -151,7 +150,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_imagenette/MAE_CONVNEXT_MR_00_50_epochs_with_input.pth'
+            save_folder = 'data/models_mnist/cpd_R_16.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -162,7 +161,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_imagenette/MAE_CONVNEXT_MR_00_50_epochs.pth'))
+        model.load_state_dict(torch.load('data/models_mnist/cpd_R_2.pth'))
 
 
     return model
@@ -214,7 +213,7 @@ def eval_mae(model, testset, batch_size=128):
     e1 = embedding
     recon = model.decoder(e1)
     print(recon.shape)
-    for i in range(64):
+    for i in range(10):
         recon_cpu = recon[i,:,:,:]#.detach().numpy()
         recon_cpu = recon_cpu.cpu()
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
@@ -405,22 +404,22 @@ if __name__ == "__main__":
     # print(type(trainset))
 
     MASK_RATIO = 0
-    # R = 0.5
-    # factorization='tucker'
-    # encoder = Encoder28_CPD(R, factorization=factorization).to(device)
-    # decoder = Decoder28_CPD(R, factorization=factorization).to(device)
-    # mae = AutoEncoder28_CPD(encoder, decoder).to(device)
-    mae = AutoEncoder28(in_channels=1).to(device)
-    num_epochs_mae = 10
-    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
+    R = 16
+    factorization='cp'
+    encoder = Encoder28_CPD(R, factorization=factorization).to(device)
+    decoder = Decoder28_CPD(R, factorization=factorization).to(device)
+    mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+    # mae = AutoEncoder28(in_channels=1).to(device)
+    num_epochs_mae = 25
+    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
 
     count_parameters(mae)
     
     eval_mae(mae, testset)
 
-    # num_classes = 10
-    # classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
-    # num_epochs_classifier = 10
-    # classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
-    # eval_classifier(classifier, testset)
-    # count_parameters(classifier)
+    num_classes = 10
+    classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
+    num_epochs_classifier = 10
+    classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    eval_classifier(classifier, testset)
+    count_parameters(classifier)

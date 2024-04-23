@@ -4,7 +4,7 @@ import torch
 
 def plot_losses(NUM_EPOCHS, losses):
     plt.plot(np.arange(NUM_EPOCHS), losses)
-    plt.title('validation loss function')
+    plt.title('loss function')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.show()
