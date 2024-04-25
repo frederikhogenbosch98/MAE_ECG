@@ -10,7 +10,7 @@ import time
 import numpy as np
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from torch.optim.lr_scheduler import StepLR
-
+from ptflops import get_model_complexity_info
 
 def early_stopper(loss):
     if np.mean([np.abs(loss[-1] - loss[-2]), np.abs(loss[-2] - loss[-3])]) < 0.0002:
@@ -394,16 +394,21 @@ if __name__ == "__main__":
     # print(type(trainset))
 
     MASK_RATIO = 0
-    R = 0.5
+    R = 50
     factorization='cp'
-    encoder = Encoder28_CPD(R, factorization=factorization).to(device)
-    decoder = Decoder28_CPD(R, factorization=factorization).to(device)
-    mae = AutoEncoder28_CPD(encoder, decoder).to(device)
-    # mae = AutoEncoder28(in_channels=1).to(device)
+    # encoder = Encoder28_CPD(R, factorization=factorization).to(device)
+
+    # decoder = Decoder28_CPD(R, factorization=factorization).to(device)
+    # mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+    mae = AutoEncoder28(in_channels=1).to(device)
+    macs, params = get_model_complexity_info(mae, (1, 28, 28), as_strings=True,
+                                           print_per_layer_stat=True, verbose=True)
+    print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+    print('{:<30}  {:<8}'.format('Number of parameters: ', params))
     num_epochs_mae = 50
     mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
-    count_parameters(mae)
+    # count_parameters(mae)
     
     eval_mae(mae, testset)
 

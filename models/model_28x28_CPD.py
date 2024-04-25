@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import tltorch
 import tensorly as tl
 from tensorly.decomposition import parafac
+import numpy as np
 
 tl.set_backend('pytorch')
 
@@ -36,17 +37,22 @@ class ParafacConvolution2D(nn.Module):
         return x
 
 
+
 class Encoder28_CPD(nn.Module):
     def __init__(self, R, factorization='cp'):
         super(Encoder28_CPD, self).__init__()
-        self.conv1 = nn.Conv2d(1, 16, 3, stride=2, padding=1)
-        self.conv2 = nn.Conv2d(16, 32, 3, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(32, 64, 7)
-        # print(self.conv3.weight.shape)
-        self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization, implementation='factorized')
 
+        self.fact_conv1 = tltorch.FactorizedConv.from_conv(nn.Conv2d(1, 16, 3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_conv2 = tltorch.FactorizedConv.from_conv(nn.Conv2d(16, 32, 3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_conv3 = tltorch.FactorizedConv.from_conv(nn.Conv2d(32, 64, 7), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized')
+
+        self.params = 0
+        for i in range(4):
+            self.params += self.fact_conv1.weight.factors[i].shape[0] * self.fact_conv1.weight.factors[i].shape[1]
+            self.params += self.fact_conv2.weight.factors[i].shape[0] * self.fact_conv2.weight.factors[i].shape[1]
+            self.params += self.fact_conv3.weight.factors[i].shape[0] * self.fact_conv3.weight.factors[i].shape[1]
+
+        print(f'number of parameters: {self.params}')
         # self.fact_conv1 = ParafacConvolution2D(self.conv1, R=R)
         # self.fact_conv2 = ParafacConvolution2D(self.conv2, R=R)
         # self.fact_conv3 = ParafacConvolution2D(self.conv3, R=R)
@@ -75,7 +81,6 @@ class Decoder28_CPD(nn.Module):
         self.transconv1 = nn.ConvTranspose2d(64, 32, 7)
         self.transconv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1)
         self.transconv3 = nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1)
-        print(self.transconv1.weight.shape)
         # self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
         # self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
         # self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization)
