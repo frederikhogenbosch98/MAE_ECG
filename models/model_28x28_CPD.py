@@ -5,6 +5,7 @@ import tltorch
 import tensorly as tl
 from tensorly.decomposition import parafac
 import numpy as np
+from ConvTranpose_CP import FactorizedConvTranspose
 
 tl.set_backend('pytorch')
 
@@ -65,6 +66,7 @@ class Encoder28_CPD(nn.Module):
         x = self.fact_conv2(x)
         x = self.gelu(x)
         x = self.fact_conv3(x)
+        print(f'aftet encoder: {x.shape}')
         # print(x.shape)
         return x
 
@@ -73,9 +75,16 @@ class Decoder28_CPD(nn.Module):
     def __init__(self, R, factorization='cp'):
         super(Decoder28_CPD, self).__init__()
         
-        self.conv1 = nn.Conv2d(64, 32, 7, padding=3)
+        self.conv1 = nn.Conv2d(64, 32, 7, padding=3) 
         self.conv2 = nn.Conv2d(32, 16, 3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(16, 1, 3, stride=1, padding=1)
+
+        self.tryout1 = FactorizedConvTranspose(64, 32, 7, order=2, rank=R,  factorization=factorization)
+        self.tryout2 = FactorizedConvTranspose(32, 16, 3, order=2, stride=2, padding=1, output_padding=1, rank=R, factorization=factorization)
+        self.tryout3 = FactorizedConvTranspose(16, 1, 3,  order=2,stride=2, padding=1, output_padding=1, rank=R, factorization=factorization)
+
+        print(type(self.tryout1))
+        print(self.tryout1.weight.shape)
 
 
         self.transconv1 = nn.ConvTranspose2d(64, 32, 7)
@@ -131,8 +140,18 @@ class Decoder28_CPD(nn.Module):
         # x = self.fact_conv3(x)
         # x = self.fact_convtrans3(x)
         # x = self.sigmoid(x)
-        x = self.decoder(x)
+        # x = self.decoder(x)
 
+        x = self.tryout1(x)
+        # print(x.shape)
+        x = self.gelu(x)
+        x = self.tryout2(x)
+        # print(x.shape)
+        x = self.gelu(x)
+        x = self.tryout3(x)
+        # print(x.shape)
+
+        x = self.sigmoid(x)
         return x
 
 

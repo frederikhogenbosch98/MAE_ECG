@@ -394,17 +394,17 @@ if __name__ == "__main__":
     # print(type(trainset))
 
     MASK_RATIO = 0
-    R = 50
+    R = 10
     factorization='cp'
-    # encoder = Encoder28_CPD(R, factorization=factorization).to(device)
+    encoder = Encoder28_CPD(R, factorization=factorization).to(device)
 
-    # decoder = Decoder28_CPD(R, factorization=factorization).to(device)
-    # mae = AutoEncoder28_CPD(encoder, decoder).to(device)
-    mae = AutoEncoder28(in_channels=1).to(device)
-    macs, params = get_model_complexity_info(mae, (1, 28, 28), as_strings=True,
-                                           print_per_layer_stat=True, verbose=True)
-    print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
-    print('{:<30}  {:<8}'.format('Number of parameters: ', params))
+    decoder = Decoder28_CPD(R, factorization=factorization).to(device)
+    mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+    # mae = AutoEncoder28(in_channels=1).to(device)
+    # macs, params = get_model_complexity_info(mae, (1, 28, 28), as_strings=True,
+    #                                        print_per_layer_stat=True, verbose=True)
+    # print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+    # print('{:<30}  {:<8}'.format('Number of parameters: ', params))
     num_epochs_mae = 50
     mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
