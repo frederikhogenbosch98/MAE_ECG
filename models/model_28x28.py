@@ -14,9 +14,37 @@ class AutoEncoder28(nn.Module):
             # nn.Conv2d(64, 128, 7)
             
         )
+
+        # self.decoder = nn.Sequential(
+        #     nn.Upsample(size=(7, 7), mode='bilinear', align_corners=False),
+        #     nn.Conv2d(64,32,7, padding=3),
+        #     nn.GELU(),
+        #     nn.Conv2d(32, 16, 3, stride=1, padding=1),
+        #     nn.GELU(),
+        #     nn.Upsample(size=(28, 28), mode='bilinear', align_corners=False),
+        #     nn.Conv2d(16, 1, 3, stride=1, padding=1),
+        #     nn.Sigmoid()
+        # )
+
+        # self.decoder = nn.Sequential(
+        #     # Start: [128, 64, 1, 1]
+        #     # Upsample to 7x7
+        #     nn.Upsample(size=(7, 7), mode='nearest'),  # Explicit size setting to ensure matching
+        #     nn.Conv2d(64, 32, kernel_size=7, padding=3),  # No padding, the kernel fits exactly
+        #     nn.GELU(),
+
+        #     # Next layer, upsample from 7x7 to 14x14
+        #     nn.Upsample(scale_factor=2, mode='nearest'),  # Upscaling to 14x14
+        #     nn.Conv2d(32, 16, kernel_size=3, stride=1, padding=1),
+        #     nn.GELU(),
+
+        #     # Finally, upsample from 14x14 to 28x28
+        #     nn.Upsample(scale_factor=2, mode='nearest'),  # Upscaling to 28x28
+        #     nn.Conv2d(16, 1, kernel_size=3, stride=1, padding=1),
+        #     nn.Sigmoid()
+        # )
+
         self.decoder = nn.Sequential(
-            # nn.ConvTranspose2d(128, 64, 7),
-            # nn.GELU(),
             nn.ConvTranspose2d(64, 32, 7),
             nn.GELU(),
             nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),

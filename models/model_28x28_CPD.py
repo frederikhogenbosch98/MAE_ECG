@@ -7,6 +7,7 @@ from tensorly.decomposition import parafac
 
 tl.set_backend('pytorch')
 
+
 class ParafacConvolution2D(nn.Module):
     def __init__(self, conv, R):
         super(ParafacConvolution2D,self).__init__()
@@ -69,29 +70,64 @@ class Decoder28_CPD(nn.Module):
         self.conv1 = nn.Conv2d(64, 32, 7, padding=3)
         self.conv2 = nn.Conv2d(32, 16, 3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(16, 1, 3, stride=1, padding=1)
-        self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization)
+
+
+        self.transconv1 = nn.ConvTranspose2d(64, 32, 7)
+        self.transconv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1)
+        self.transconv3 = nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1)
+        print(self.transconv1.weight.shape)
+        # self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_convtrans1 = tltorch.FactorizedConv.from_conv(self.transconv1, rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_convtrans2 = tltorch.FactorizedConv.from_conv(self.transconv2, rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_convtrans3 = tltorch.FactorizedConv.from_conv(self.transconv3, rank=R, decompose_weights=True, factorization=factorization)
+        # print(self.fact_convtrans.weight.shape)
 
         self.up1 = nn.Upsample(size=(7, 7), mode='bilinear', align_corners=False)
         self.up2 = nn.Upsample(size=(28, 28), mode='bilinear', align_corners=False)
+
+        self.gelu = nn.GELU() 
+        self.sigmoid = nn.Sigmoid()
 
         # self.fact_conv1 = ParafacConvolution2D(self.conv1, R=R)
         # self.fact_conv2 = ParafacConvolution2D(self.conv2, R=R)
         # self.fact_conv3 = ParafacConvolution2D(self.conv3, R=R)
 
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(64, 32, 7),
+            nn.GELU(),
+            nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
+            nn.GELU(),
+            nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1),
+            nn.Sigmoid()
+        )
+
+    # def forward(self, x):
+    #     # print(x.shape)
+    #     x = self.up1(x)
+    #     # print(x.shape)
+    #     x = self.fact_conv1(x)
+    #     # print(x.shape)
+    #     x = self.fact_conv2(x)
+    #     # print(x.shape)
+    #     x = self.up2(x)
+    #     # print(x.shape)
+    #     x = self.fact_conv3(x)
+    #     # print(x.shape)
+    #     return x
     def forward(self, x):
-        # print(x.shape)
-        x = self.up1(x)
-        # print(x.shape)
-        x = self.fact_conv1(x)
-        # print(x.shape)
-        x = self.fact_conv2(x)
-        # print(x.shape)
-        x = self.up2(x)
-        # print(x.shape)
-        x = self.fact_conv3(x)
-        # print(x.shape)
+        # x = self.fact_convtrans1(x)
+        # x = self.fact_conv1(x)
+        # x = self.gelu(x)
+        # x = self.fact_conv2(x)
+        # x = self.fact_convtrans2(x)
+        # x = self.gelu(x)
+        # x = self.fact_conv3(x)
+        # x = self.fact_convtrans3(x)
+        # x = self.sigmoid(x)
+        x = self.decoder(x)
+
         return x
 
 

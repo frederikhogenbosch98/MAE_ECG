@@ -67,7 +67,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_size=64, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_size=128, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -75,7 +75,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         optimizer = torch.optim.Adam(model.parameters(),
                                     lr=learning_rate, 
                                     weight_decay=1e-4)
-        scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+        # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
                                                 shuffle=True, num_workers=4)
@@ -134,7 +134,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             losses.append(epoch_loss)
             if len(losses) > 10 and early_stopper(losses):
                 break
-            scheduler.step()
+            # scheduler.step()
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
@@ -365,13 +365,14 @@ if __name__ == "__main__":
     ## MNIST
     transform = transforms.Compose([
     # transforms.Resize((128, 128)),  
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))  
+    # transforms.RandomHorizontalFlip(),
+    transforms.ToTensor()
+    # transforms.Normalize((0.5,), (0.5,))  
     ])
 
     mnist_data = datasets.MNIST('data', train=True, download=True, transform=transform)
     trainset, testset = torch.utils.data.random_split(mnist_data, [50000, 10000])
-    trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
+    # trainset, valset =  torch.utils.data.random_split(trainset, [45000, 5000]) 
 
 
     # ### ECG
@@ -393,14 +394,14 @@ if __name__ == "__main__":
     # print(type(trainset))
 
     MASK_RATIO = 0
-    R = 8
+    R = 0.5
     factorization='cp'
     encoder = Encoder28_CPD(R, factorization=factorization).to(device)
     decoder = Decoder28_CPD(R, factorization=factorization).to(device)
     mae = AutoEncoder28_CPD(encoder, decoder).to(device)
     # mae = AutoEncoder28(in_channels=1).to(device)
     num_epochs_mae = 50
-    mae = train_mae(mae, trainset, valset=valset, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
+    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
     count_parameters(mae)
     
