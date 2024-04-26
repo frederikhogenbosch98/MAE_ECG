@@ -438,7 +438,7 @@ def cp_conv_transpose(x, cp_tensor, bias=None, stride=1, padding=0, output_paddi
 
 
 
-    # print(x.shape)
+    print(f'x input shape: {x.shape}')
     x = x.reshape((batch_size, x.shape[1], -1)).contiguous()
     # print(x.shape)
     print(1)
@@ -455,9 +455,11 @@ def cp_conv_transpose(x, cp_tensor, bias=None, stride=1, padding=0, output_paddi
     print(f'padding: {padding[0]}')
     print(f'kernel_size: {cp_tensor.factors[2].shape}')
     print(f'output_padding: {output_padding[0]}')
+    
     # Transposed convolutions over non-channels dimensions
     for i in range(order):
         kernel = tl.transpose(cp_tensor.factors[i+2]).unsqueeze(1)
+        print(f'kernel shape: {kernel.shape}')
         x = F.conv_transpose1d(
             x.contiguous(), kernel, stride=stride[i], padding=padding[i], 
             output_padding=output_padding[i], groups=rank
@@ -480,6 +482,7 @@ def cp_conv_transpose(x, cp_tensor, bias=None, stride=1, padding=0, output_paddi
 
 
     x_shape[1] = x.shape[1]  # Update to out_channels
+    x_shape[2] = x.shape[2]
     x = x.reshape(x_shape)
     print(5)
     print(x.shape)

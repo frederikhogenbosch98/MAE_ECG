@@ -401,14 +401,14 @@ if __name__ == "__main__":
 
     # mae = AutoEncoder112(in_channels=3, channels=[96, 192, 384, 768], depths=[3, 3, 9, 3]).to(device)
     mae = AutoEncoder112(in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 3, 1]).to(device)
-    num_epochs_mae = 1
-    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=0, num_epochs=num_epochs_mae, TRAIN_MAE=False, SAVE_MODEL_MAE=True, p=8)
+    num_epochs_mae = 50
+    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=0, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=8)
     count_parameters(mae)
     # eval_mae(mae, testset)
 
     num_classes = 10
     classifier = Classifier112(autoencoder=mae, in_features=256, out_features=num_classes).to(device)
-    num_epochs_classifier = 1
+    num_epochs_classifier = 20
     classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier,  TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
     count_parameters(classifier)
-    eval_classifier(classifier, testset)
+    # eval_classifier(classifier, testset)
