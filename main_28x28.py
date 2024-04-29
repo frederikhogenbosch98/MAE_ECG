@@ -132,25 +132,25 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             t_epoch_end = time.time()
             print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, duration: {:.2f}s'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start))
             losses.append(epoch_loss)
-            if len(losses) > 10 and early_stopper(losses):
+            if len(losses) > 15 and early_stopper(losses):
                 break
             # scheduler.step()
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_mnist/cpd_R_16.pth'
+            save_folder = 'data/models_mnist/testrun_R=25.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
 
-        plot_losses(epoch+1, losses)        
+        # plot_losses(epoch+1, losses)        
         print("\n")
         print("\n")
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_mnist/cpd_R_2.pth'))
+        model.load_state_dict(torch.load('data/models_mnist/testrun_R=25.pth'))
 
 
     return model
@@ -324,15 +324,17 @@ def eval_classifier(model, testset, batch_size=128):
     print(f'Accuracy: {np.round(accuracy,3)}%')
 
     ### MNIST
-    for idx, (images, labels) in enumerate(test_loader):
-        images, labels = images.to(device), labels.to(device)
-        x = model(images)
-        _, predicted = torch.max(x.data, 1)
-        images = images.cpu()
-        plot_single_img(images, 0)
-        print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
-        if idx == 10:
-            break
+    # for idx, (images, labels) in enumerate(test_loader):
+    #     images, labels = images.to(device), labels.to(device)
+    #     x = model(images)
+    #     _, predicted = torch.max(x.data, 1)
+    #     images = images.cpu()
+    #     plot_single_img(images, 0)
+    #     print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
+    #     if idx == 10:
+    #         break
+
+    return accuracy
 
 
 
@@ -394,27 +396,40 @@ if __name__ == "__main__":
     # print(type(trainset))
 
     MASK_RATIO = 0
-    R = 10
-    factorization='cp'
-    encoder = Encoder28_CPD(R, factorization=factorization).to(device)
+    R_LIST = [25, 26, 27]
+    num_params = []
+    accuracies = []
+    for R in R_LIST:
+        # R = 25
+        print(f'R: {R}')
+        # R = [5, 5, 10, 10]
+        factorization='tucker'
+        encoder = Encoder28_CPD(R, factorization=factorization).to(device)
 
-    decoder = Decoder28_CPD(R, factorization=factorization).to(device)
-    mae = AutoEncoder28_CPD(encoder, decoder).to(device)
-    # mae = AutoEncoder28(in_channels=1).to(device)
-    # macs, params = get_model_complexity_info(mae, (1, 28, 28), as_strings=True,
-    #                                        print_per_layer_stat=True, verbose=True)
-    # print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
-    # print('{:<30}  {:<8}'.format('Number of parameters: ', params))
-    num_epochs_mae = 50
-    mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
+        decoder = Decoder28_CPD(R, factorization=factorization).to(device)
+        mae = AutoEncoder28_CPD(encoder, decoder).to(device)
+        # mae = AutoEncoder28(in_channels=1).to(device)
+        # macs, params = get_model_complexity_info(mae, (1, 28, 28), as_strings=True,
+        #                                        print_per_layer_stat=True, verbose=True)
+        # print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
+        # print('{:<30}  {:<8}'.format('Number of parameters: ', params))
+        num_epochs_mae = 50
+        mae = train_mae(mae, trainset, valset=None, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=False)
 
-    # count_parameters(mae)
-    
-    eval_mae(mae, testset)
+        current_pams = count_parameters(mae)
+        print(f'num params: {current_pams}')
+        num_params.append(current_pams)
+        
+        
+        eval_mae(mae, testset)
 
-    num_classes = 10
-    classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
-    num_epochs_classifier = 10
-    classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
-    eval_classifier(classifier, testset)
-    count_parameters(classifier)
+        num_classes = 10
+        classifier = Classifier28_CPD(autoencoder=mae, num_classes=num_classes).to(device)
+        num_epochs_classifier = 10
+        classifier = train_classifier(classifier, trainset=trainset, valset=None, num_epochs=num_epochs_classifier, batch_size=64, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+        accuracies.append(eval_classifier(classifier, testset))
+        # count_parameters(classifier)
+
+
+    print(accuracies)
+    print(num_params)
