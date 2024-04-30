@@ -11,6 +11,7 @@ import numpy as np
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
+from linear_warmup_cosine_annealing_warm_restarts_weight_decay import ChainedScheduler
 
 
 
@@ -25,7 +26,7 @@ class EarlyStopper:
         if validation_loss < self.min_validation_loss:
             self.min_validation_loss = validation_loss
             self.counter = 0
-        elif validation_loss > (self.min_validation_loss + self.min_delta):
+        elif np.abs(validation_loss - self.min_validation_loss) < self.min_delta:
             self.counter += 1
             if self.counter >= self.patience:
                 return True
@@ -99,13 +100,22 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
                                                 shuffle=True)#, num_workers=4)
+        num_iters = len(train_loader)
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=4, factor=0.1, threshold=0.001)
-
-        early_stopper = EarlyStopper()
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+            # scheduler = ChainedScheduler(
+            # optimizer,
+            #     T_0 = 20,
+            #     T_mul = 1,
+            #     eta_min = 0.0,
+            #     gamma = 0.1,
+            #     max_lr = 0.01,
+            #     warmup_steps= 5,
+            #     )
+            early_stopper = EarlyStopper(patience=3)
 
         outputs = []
         losses = []
@@ -116,7 +126,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             running_loss = 0.0
             t_epoch_start = time.time()
             model.train()
-            for data in train_loader:
+            for i, data in enumerate(train_loader):
                 img = data.to(device)
 
                 # plot_single_img(img.cpu(), 10)
@@ -128,12 +138,15 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
                     # print('masking!!!')
                 # plot_single_img(img, 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 # plot_single_img(img, 10)
+                img = img.to(device)
                 recon = model(img)
                 optimizer.zero_grad()
                 loss = criterion(recon, unmasked_img)
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
+                scheduler.step(epoch + i / num_iters)
+                # scheduler.step()
             #     break
             # break
             if valset:
@@ -149,7 +162,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
                         validation_loss += loss.item() * imgs.size(0)
 
                 validation_loss /= len(val_loader.dataset)
-                scheduler.step(validation_loss)
+                
                 if early_stopper.early_stop(validation_loss):             
                     print(f"EARLY STOPPING AT EPOCH: {epoch}")
                     break
@@ -157,9 +170,9 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
                 validation_loss = 0
             epoch_loss = running_loss / len(train_loader)
             t_epoch_end = time.time()
-            for  param_group in optimizer.param_groups:
-                lr = param_group['lr']
-            print('epoch {}: average loss: {:.7f}, val loss: {:.4f}, duration: {:.2f}s, lr: {:.5f}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, lr))
+            # for  param_group in optimizer.param_groups:
+            #     lr = param_group['lr']
+            print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:5f}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
             losses.append(epoch_loss)
             # if len(losses) > 5 and early_stopper(losses):
             #     break
@@ -168,7 +181,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_ecg/basic_model_largefirst.pth'
+            save_folder = 'data/models_ecg/3393_R20_old_model_overnight_30_4.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -179,7 +192,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_ecg/basic_model_largefirst.pth'))
+        model.load_state_dict(torch.load('data/models_ecg/3393_R20.pth'))
 
 
     return model
@@ -244,19 +257,24 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
         train_loader = torch.utils.data.DataLoader(trainset, 
                                             batch_size=batch_size, 
                                             shuffle=True, num_workers=2)
+        
+        num_iters = len(train_loader)
 
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()), lr=learning_rate, weight_decay=1e-4)
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
                                 shuffle=False, num_workers=2)    
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=4, factor=0.1, threshold=0.001)
+
+
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+
 
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
         # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
         loss_function =  nn.CrossEntropyLoss().to(device)
 
-        early_stopper = EarlyStopper()
+        early_stopper = EarlyStopper(patience=7, min_delta=0.001)
 
         losses = []
         print(f"Start CLASSIFIER training for {num_epochs} epochs")
@@ -265,7 +283,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
             running_loss = 0.0
             classifier.train()
             t_epoch_start = time.time()
-            for inputs, labels in train_loader:
+            for i, (inputs, labels) in enumerate(train_loader):
                 inputs, labels = inputs.to(device), labels.squeeze().to(device)
                 # print(labels[0:64])
                 # plot_single_img(inputs.cpu(), 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -278,6 +296,8 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
+                scheduler.step(epoch + i / num_iters)
+
 
             if valset:
                 classifier.eval()  
@@ -296,7 +316,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
 
                 validation_loss /= len(val_loader.dataset)
                 accuracy = correct / total * 100
-                scheduler.step(validation_loss)
+                # scheduler.step(validation_loss)
                 if early_stopper.early_stop(validation_loss):             
                     print(f"EARLY STOPPING AT EPOCH: {epoch}")
                     break
@@ -304,12 +324,12 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
                 validation_loss = 0
             epoch_loss = running_loss / len(train_loader)
             t_epoch_end = time.time()
-            for  param_group in optimizer.param_groups:
-                lr = param_group['lr']
+            # for  param_group in optimizer.param_groups:
+            #     lr = param_group['lr']
             t_epoch_end = time.time()
             # print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
             epoch_loss = running_loss / len(train_loader)
-            print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.5f}'.format(epoch+1, epoch_loss, validation_loss, accuracy, t_epoch_end - t_epoch_start), lr)
+            print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.5f}'.format(epoch+1, epoch_loss, validation_loss, accuracy, (t_epoch_end - t_epoch_start), optimizer.param_groups[0]['lr']))
             losses.append(epoch_loss)
             # scheduler.step()
         t_end = time.time()
@@ -397,17 +417,10 @@ class SupervisedDataset(torch.utils.data.Dataset):
         loaded_data = torch.load(data_path)
         self.data = loaded_data['data']
         self.data = self.data[:,0,:,:].unsqueeze(1)
-        self.labels = torch.tensor(loaded_data['labels'])
+        self.labels = loaded_data['labels']
         self.labels = self.labels.long() 
-        for i in range(50):
-            print(i, self.labels[i])
-
 
         assert len(self.data) == len(self.labels), "Data and labels must have the same length"
-
-
-        print(len(self.labels))
-        print(len(self.data))
 
         self.transform = transforms.Compose([
             transforms.ToPILImage(),  
@@ -447,7 +460,7 @@ if __name__ == "__main__":
     ### ECG SUPERVISED
     dataset_sup = SupervisedDataset('data/datasets/supervised_dataset_22k.pt')
     # print(len(dataset_sup))
-    trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 3722])
+    trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4243])
     trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
 
     MASK_RATIO = 0
@@ -456,20 +469,20 @@ if __name__ == "__main__":
     factorization='cp'
     # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
     # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
-    mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 1, 1]).to(device)
-    # mae = AutoEncoder56().to(device)
+    # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
+    mae = AutoEncoder56().to(device)
 
-    num_epochs_mae = 50
-    mae = train_mae(mae, trainset_un, valset=valset_un, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=False, SAVE_MODEL_MAE=True)
+    num_epochs_mae = 250
+    mae = train_mae(mae, trainset_un, valset=valset_un, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
 
     current_pams = count_parameters(mae)
     print(f'num params: {current_pams}')
    
-    # eval_mae(mae, testset_un)
+    eval_mae(mae, testset_un)
 
-    num_classes = 5
-    classifier = Classifier56_CPD(autoencoder=mae, in_features=128, out_features=num_classes).to(device)
-    num_epochs_classifier = 50
-    classifier = train_classifier(classifier, trainset=trainset_sup, valset=testset_sup, num_epochs=num_epochs_classifier, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
-    eval_classifier(classifier, testset_sup)
+    # num_classes = 5
+    # classifier = Classifier56_CPD(autoencoder=mae, in_features=128, out_features=num_classes).to(device)
+    # num_epochs_classifier = 100
+    # classifier = train_classifier(classifier, trainset=trainset_sup, valset=valset_sup, num_epochs=num_epochs_classifier, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    # eval_classifier(classifier, testset_sup)
 
