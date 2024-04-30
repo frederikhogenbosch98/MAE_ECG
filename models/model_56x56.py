@@ -4,12 +4,12 @@ import torch.nn.functional as F
 
 
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 3]):
+    def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 3, 1]):
         super(AutoEncoder56, self).__init__()
         self.blocksize = 2
         self.encoder = nn.Sequential(
             # DOWNSAMPLE 1
-            nn.Conv2d(in_channels, channels[0], 3, stride=2, padding=1),
+            nn.Conv2d(in_channels, channels[0], kernel_size=2, stride=2),
             LayerNorm(channels[0], eps=1e-6, data_format="channels_first"),
             # BLOCK 1
             *[Block(channels[0], channels[0]) for i in range(depths[0])],
@@ -22,35 +22,35 @@ class AutoEncoder56(nn.Module):
             LayerNorm(channels[1], eps=1e-6, data_format="channels_first"),
             nn.Conv2d(channels[1], channels[2], kernel_size=2, stride=2),
             # BLOCK 3
-            *[Block(channels[2], channels[2]) for i in range(depths[2])] 
+            *[Block(channels[2], channels[2]) for i in range(depths[2])],
             # DOWNSAMPLE 4
-            # LayerNorm(channels[2], eps=1e-6, data_format="channels_first"),
-            # nn.Conv2d(channels[2], channels[3], kernel_size=2, stride=2),
+            LayerNorm(channels[2], eps=1e-6, data_format="channels_first"),
+            nn.Conv2d(channels[2], channels[3], kernel_size=7, stride=1),
             # # BLOCK 4
-            # *[Block(channels[3], channels[3]) for i in range(depths[3])] 
+            *[Block(channels[3], channels[3]) for i in range(depths[3])] 
             
         )
         self.decoder = nn.Sequential(
             # BLOCK 4
-            # *[Block(channels[3], channels[3]) for i in range(depths[3])], 
-            # # UPSAMPLE 4
-            # LayerNorm(channels[3], eps=1e-6, data_format="channels_first"),
-            # nn.ConvTranspose2d(channels[3], channels[2], kernel_size=2, stride=2),
+            *[Block(dim=channels[3]) for i in range(depths[3])], 
+            # UPSAMPLE 4
+            LayerNorm(channels[3], eps=1e-6, data_format="channels_first"),
+            nn.ConvTranspose2d(channels[3], channels[2], kernel_size=7, stride=1),
             # BLOCK 3
-            *[Block(channels[2], channels[2]) for i in range(depths[2])], 
+            *[Block(dim=channels[2]) for i in range(depths[2])], 
             # UPSAMPLE 3
             LayerNorm(channels[2], eps=1e-6, data_format="channels_first"),
             nn.ConvTranspose2d(channels[2], channels[1], kernel_size=2, stride=2),
             # BLOCK 2
-            *[Block(channels[1], channels[1]) for i in range(depths[1])], 
+            *[Block(dim=channels[1]) for i in range(depths[1])], 
             # UPSAMPLE 2
             LayerNorm(channels[1], eps=1e-6, data_format="channels_first"),
             nn.ConvTranspose2d(channels[1], channels[0], kernel_size=2, stride=2),
             # BLOCK 1
-            *[Block(channels[0], channels[0]) for i in range(depths[0])],
+            *[Block(dim=channels[0]) for i in range(depths[0])],
             # UPSAMPLE 1
-            nn.ConvTranspose2d(channels[0],in_channels, 3, stride=2, padding=1, output_padding=1),
-            LayerNorm(in_channels, eps=1e-6, data_format="channels_first")
+            LayerNorm(in_channels, eps=1e-6, data_format="channels_first"),
+            nn.ConvTranspose2d(channels[0],in_channels, kernel_size=2, stride=2, padding=0, output_padding=0),
         )
 
 

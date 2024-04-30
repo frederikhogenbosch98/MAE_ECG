@@ -20,14 +20,14 @@ def create_label_tensor():
 
     Y = pd.read_csv('data/physionet/ptbxl/ptbxl_database.csv', index_col='ecg_id')
     Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
-    print(Y[['scp_codes']])
-    print(Y.describe().transpose())
+    # print(Y[['scp_codes']])
+    # print(Y.describe().transpose())
     
 
    # Apply diagnostic superclass
     Y['diagnostic_superclass'] = Y.scp_codes.apply(aggregate_supclass_diagnostic)
     Y['diagnostic_superclass_len'] = Y['diagnostic_superclass'].apply(len)
-    print(Y.loc[Y.diagnostic_superclass_len > 1, 'diagnostic_superclass'])
+    # print(Y.loc[Y.diagnostic_superclass_len > 1, 'diagnostic_superclass'])
     print(Y[0:50])
 
 
@@ -38,7 +38,7 @@ def create_label_tensor():
             label.append(0)
         if 'CD' in row['diagnostic_superclass']:
             label.append(1)
-        if 'STCC' in row['diagnostic_superclass']:
+        if 'STTC' in row['diagnostic_superclass']:
             label.append(2) 
         if 'HYP' in row['diagnostic_superclass']:
             label.append(3) 
@@ -63,6 +63,7 @@ if __name__ == "__main__":
     end = time.time()
     print(f'total tensor creation time: {end-st}s')
     print(len(labels))
+    print(len(unsupervised_dataset))
     
     # supervised_dataset = unsupervised_dataset[0].unsqueeze(0)
     labels_corr = []
@@ -73,15 +74,20 @@ if __name__ == "__main__":
     #         continue
     #     labels_corr.append(labels[i])
     #     supervised_dataset = torch.cat([supervised_dataset, unsupervised_dataset[i].unsqueeze(0)], dim=0)
-
-    valid_indices = [i for i in range(len(labels)-1) if labels[i] and len(labels[i]) == 1]
+    valid_indices = [i for i in range(len(labels)-1) if len(labels[i]) == 1]
     supervised_dataset = torch.empty((len(valid_indices),) + unsupervised_dataset[0].shape)
-    print(len(unsupervised_dataset))
+    labels_corr = torch.empty(len(valid_indices))
     for idx, i in enumerate(valid_indices):
         supervised_dataset[idx] = unsupervised_dataset[i]
-        labels_corr.append(labels[i])
+        labels_corr[idx] = labels[i][0]
+        # print(idx, i+1, labels[i][0])
+        # if idx == 50:
+        #     break
         
-    # print(len(labels_corr))
+
+    # for i in range(25):
+    #     print(i)
+    #     print(labels_corr[i])
     # print(supervised_dataset.shape)
 
     # print(labels_corr[0:50])
