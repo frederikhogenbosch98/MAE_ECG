@@ -23,7 +23,7 @@ class SupervisedDataset(torch.utils.data.Dataset):
 
 
 dataset = SupervisedDataset('data/datasets/supervised_dataset_22k.pt')
-
+print(len(dataset))
 loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True)
 
 for data, labels in loader:

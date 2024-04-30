@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import tltorch
 import tensorly as tl
-from tensorly.decomposition import parafac, tucker, parafac2 
+from tensorly.decomposition import parafac, tucker, parafac2, partial_tucker
 import numpy as np
 from ConvTranpose_CP import FactorizedConvTranspose
 
@@ -88,10 +88,8 @@ class ParafacConvolutionTranspose2D(nn.Module):
         weights, factors = parafac(conv.weight.detach(), init='svd', rank=R)
         # weights, factors = tucker(conv.weight.detach(), init='svd', rank=R)
 
-        # for i in range(4):
-            # print(factors[i].shape)
-        self.s_to_r = nn.ConvTranspose2d(conv.out_channels, R, (1, 1), stride=1, padding=0, bias=False)
-        self.s_to_r.weight = nn.Parameter(factors[0].unsqueeze(-1).unsqueeze(-1))
+        self.s_to_r = nn.Conv2d(conv.in_channels, R, (1, 1), stride=1, padding=0, bias=False)
+        self.s_to_r.weight = nn.Parameter(factors[0].permute(1,0).unsqueeze(-1).unsqueeze(-1))
         # print(self.s_to_r.weight.data.shape)
 
         self.depth_vert = nn.ConvTranspose2d(R, R, (factors[2].shape[0], 1), groups=R, stride=(conv.stride[0], 1), 
@@ -103,8 +101,8 @@ class ParafacConvolutionTranspose2D(nn.Module):
                                             padding=(0, conv.padding[1]), output_padding=(0, conv.output_padding[1]), bias=False)
         self.depth_hor.weight = nn.Parameter(factors[3].permute(1, 0).unsqueeze(1).unsqueeze(1))
         # print(self.depth_hor.weight.data.shape)
-        self.r_to_t = nn.ConvTranspose2d(R, conv.in_channels, (1, 1), stride=1, padding=0, bias=True)
-        self.r_to_t.weight = nn.Parameter(factors[1].permute(1, 0).unsqueeze(-1).unsqueeze(-1))
+        self.r_to_t = nn.Conv2d(R, conv.out_channels, (1, 1), stride=1, padding=0, bias=True)
+        self.r_to_t.weight = nn.Parameter(factors[1].unsqueeze(-1).unsqueeze(-1))
         # print(self.r_to_t.weight.data.shape)
         if conv.bias is not None:
             self.r_to_t.bias.data = conv.bias.data
@@ -119,8 +117,6 @@ class ParafacConvolutionTranspose2D(nn.Module):
         x = self.r_to_t(x)
         # print(x.shape)
         return x
-
-
 
 
 class TuckerConvolutionTranspose2D(nn.Module):
@@ -140,7 +136,7 @@ class TuckerConvolutionTranspose2D(nn.Module):
         self.core_conv = nn.ConvTranspose2d(rank_s, rank_t, conv.kernel_size, stride=conv.stride, 
                                             padding=conv.padding, output_padding=conv.output_padding, 
                                             groups=1, bias=False)
-        self.core_conv.weight = nn.Parameter(core.permute(3, 2, 0, 1))
+        self.core_conv.weight = nn.Parameter(core)#.permute(3, 2, 0, 1))
         
         self.rt_to_t = nn.ConvTranspose2d(rank_t, conv.out_channels, (1, 1), stride=1, padding=0, bias=True)
         self.rt_to_t.weight = nn.Parameter(factors[1].permute(1, 0).unsqueeze(-1).unsqueeze(-1))
@@ -158,10 +154,12 @@ class TuckerConvolutionTranspose2D(nn.Module):
 class Encoder28_CPD(nn.Module):
     def __init__(self, R, factorization='cp'):
         super(Encoder28_CPD, self).__init__()
-        self.TuckerRank = [15, 15, 15, R-10]
-        self.fact_conv1 = tltorch.FactorizedConv.from_conv(nn.Conv2d(1, 16, 3, stride=2, padding=1), rank=self.TuckerRank, decompose_weights=True, factorization=factorization)
-        self.fact_conv2 = tltorch.FactorizedConv.from_conv(nn.Conv2d(16, 32, 3, stride=2, padding=1), rank=self.TuckerRank, decompose_weights=True, factorization=factorization)
-        self.fact_conv3 = tltorch.FactorizedConv.from_conv(nn.Conv2d(32, 64, 7), rank=self.TuckerRank, decompose_weights=True, factorization=factorization, implementation='factorized')
+        # self.TuckerRank = [15, 15, 15, R-10
+        # R = R*np.ones(4)
+        # print(R)
+        self.fact_conv1 = tltorch.FactorizedConv.from_conv(nn.Conv2d(1, 16, 3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_conv2 = tltorch.FactorizedConv.from_conv(nn.Conv2d(16, 32, 3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization)
+        self.fact_conv3 = tltorch.FactorizedConv.from_conv(nn.Conv2d(32, 64, 7), rank=R, decompose_weights=True, factorization=factorization)
 
         # self.encoder = nn.Sequential( 
         #     tltorch.FactorizedConv.from_conv(nn.Conv2d(1, 16, 3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization),
@@ -209,6 +207,7 @@ class Encoder28_CPD(nn.Module):
         # x = self.bn2(x)
         x = self.gelu(x)
         x = self.fact_conv3(x)
+        x = self.gelu(x) 
         # x = self.bn3(x)
         # print(f'aftet encoder: {x.shape}')
         # print(x.shape)
@@ -223,9 +222,6 @@ class Decoder28_CPD(nn.Module):
         # self.conv1 = nn.Conv2d(64, 32, 7, padding=3) 
         # self.conv2 = nn.Conv2d(32, 16, 3, stride=1, padding=1)
         # self.conv3 = nn.Conv2d(16, 1, 3, stride=1, padding=1)
-
-
-
         # self.tryout1 = FactorizedConvTranspose(64, 32, 7, order=2, rank=R)
         # self.tryout2 = FactorizedConvTranspose(32, 16, 3, order=2, stride=2, padding=1, output_padding=1, rank=R)
         # self.tryout3 = FactorizedConvTranspose(16, 1, 3,  order=2, stride=2, padding=1, output_padding=1, rank=R)
@@ -233,112 +229,58 @@ class Decoder28_CPD(nn.Module):
         # print(type(self.tryout1))
         # print(self.tryout1.weight.shape)
 
+        # self.transconv1 = nn.ConvTranspose2d(64, 32, 7)
+        # self.transconv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1)
+        # self.transconv3 = nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1)
 
-        self.transconv1 = nn.ConvTranspose2d(64, 32, 7)
-        self.transconv2 = nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1)
-        self.transconv3 = nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1)
+        # # self.tucker_layer2 = TuckerTransposeConv(in_channels=32, out_channels=16, kernel_size=(3, 3), stride=2, padding=1, output_padding=1, ranks=[15, 15])
+        # self.tucker_layer3 = TuckerTransposeConv(in_channels=16, out_channels=1, kernel_size=(3, 3), stride=2, padding=1, output_padding=1, ranks=[15, 15])
+        # print(type(self.tucker_layer))
         # self.tryout1 = ParafacConvolutionTranspose2D(nn.ConvTranspose2d(64, 32, 7), R=R)
         # self.tryout2 = ParafacConvolutionTranspose2D(nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1), R=R)
         # self.tryout3 = ParafacConvolutionTranspose2D(nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1), R=R)
 
-        # self.tryout1 = TuckerConvolutionTranspose2D(nn.ConvTranspose2d(64, 32, 7), rank_s=25, rank_t=25)
-        # self.tryout2 = TuckerConvolutionTranspose2D(nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1), rank_s=25, rank_t=25)
-        # self.tryout3 = TuckerConvolutionTranspose2D(nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1), rank_s=25, rank_t=25)
+        self.tryout1 = TuckerConvolutionTranspose2D(nn.ConvTranspose2d(64, 32, 7), rank_s=R, rank_t=R)
+        self.tryout2 = TuckerConvolutionTranspose2D(nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1), rank_s=R, rank_t=R)
+        self.tryout3 = TuckerConvolutionTranspose2D(nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1), rank_s=R, rank_t=R)
 
-
-
-        # self.decoder2 = nn.Sequential(
-        #     # *[Block(dim=64) for i in range(1)],
-        #     # LayerNorm(64, eps=1e-6, data_format="channels_first"),
-        #     ParafacConvolutionTranspose2D(nn.ConvTranspose2d(64, 32, 7), R=R),
-        #     nn.GELU(),
-        #     # *[Block(dim=32) for i in range(3)],
-        #     # LayerNorm(32, eps=1e-6, data_format="channels_first"), 
-        #     ParafacConvolutionTranspose2D(nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1), R=R),
-        #     nn.GELU(),
-        #     # *[Block(dim=16) for i in range(1)],
-        #     # LayerNorm(16, eps=1e-6, data_format="channels_first"),  
-        #     ParafacConvolutionTranspose2D(nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1), R=R),
-        #     nn.Sigmoid()
-        #     # LayerNorm(1, eps=1e-6, data_format="channels_first")
-        # )
         # self.fact_conv1 = tltorch.FactorizedConv.from_conv(self.conv1, rank=R, decompose_weights=True, factorization=factorization)
         # self.fact_conv2 = tltorch.FactorizedConv.from_conv(self.conv2, rank=R, decompose_weights=True, factorization=factorization)
         # self.fact_conv3 = tltorch.FactorizedConv.from_conv(self.conv3, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_convtrans1 = tltorch.FactorizedConv.from_conv(self.transconv1, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_convtrans2 = tltorch.FactorizedConv.from_conv(self.transconv2, rank=R, decompose_weights=True, factorization=factorization)
-        self.fact_convtrans3 = tltorch.FactorizedConv.from_conv(self.transconv3, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_convtrans1 = tltorch.FactorizedConv.from_conv(self.transconv1, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_convtrans2 = tltorch.FactorizedConv.from_conv(self.transconv2, rank=R, decompose_weights=True, factorization=factorization)
+        # self.fact_convtrans3 = tltorch.FactorizedConv.from_conv(self.transconv3, rank=R, decompose_weights=True, factorization=factorization)
         # print(self.fact_convtrans.weight.shape)
 
         # self.up1 = nn.Upsample(size=(7, 7), mode='bilinear', align_corners=False)
         # self.up2 = nn.Upsample(size=(28, 28), mode='bilinear', align_corners=False)
 
         self.gelu = nn.GELU() 
-        self.sigmoid = nn.Sigmoid()
+        # self.sigmoid = nn.Sigmoid()
 
         # self.fact_conv1 = ParafacConvolution2D(self.conv1, R=R)
         # self.fact_conv2 = ParafacConvolution2D(self.conv2, R=R)
         # self.fact_conv3 = ParafacConvolution2D(self.conv3, R=R)
 
-        # self.decoder = nn.Sequential(
-        #     # nn.ConvTranspose2d(64, 32, 7),
-        #     ParafacConvolutionTranspose2D(nn.ConvTranspose2d(64, 32, 7), R=R),
-        #     nn.GELU(),
-        #     # nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
-        #     ParafacConvolutionTranspose2D(nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1), R=R),
-        #     nn.GELU(),
-        #     # nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1),
-        #     ParafacConvolutionTranspose2D(nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1), R=R), 
-        #     nn.Sigmoid()
-        # )
+
         # self.decoder = nn.Sequential(
         #     nn.ConvTranspose2d(64, 32, 7),
         #     nn.GELU(),
         #     nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
         #     nn.GELU(),
         #     nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1),
-        #     nn.Sigmoid()
+        #     nn.GELU()
         # )
 
-    # def forward(self, x):
-    #     # print(x.shape)
-    #     x = self.up1(x)
-    #     # print(x.shape)
-    #     x = self.fact_conv1(x)
-    #     # print(x.shape)
-    #     x = self.fact_conv2(x)
-    #     # print(x.shape)
-    #     x = self.up2(x)
-    #     # print(x.shape)
-    #     x = self.fact_conv3(x)
-    #     # print(x.shape)
-    #     return x
     def forward(self, x):
-        x = self.fact_convtrans1(x)
-        # x = self.fact_conv1(x)
+
+        x = self.tryout1(x)
         x = self.gelu(x)
-        # x = self.fact_conv2(x)
-        x = self.fact_convtrans2(x)
+        x = self.tryout2(x)
         x = self.gelu(x)
-        # x = self.fact_conv3(x)
-        x = self.fact_convtrans3(x)
-        x = self.sigmoid(x)
+        x = self.tryout3(x)
+        x = self.gelu(x)
         # x = self.decoder(x)
-        # x = self.decoder2(x)
-
-        # print(f'start forward pass')
-        # print(f' before tryout1: {x.shape}')
-        # x = self.tryout1(x)
-        # x = self.gelu(x)
-        # print(f' before tryout2: {x.shape}')
-        # x = self.tryout2(x)
-        # x = self.gelu(x)
-        # print(f' before tryout3: {x.shape}')
-        # x = self.tryout3(x)
-        # print(x.shape)
-        # print(f'after tryout3: {x.shape}')
-
-        # x = self.sigmoid(x)
         return x
 
 
@@ -403,4 +345,4 @@ class LayerNorm(nn.Module):
             s = (x - u).pow(2).mean(1, keepdim=True)
             x = (x - u) / torch.sqrt(s + self.eps)
             x = self.weight[:, None, None] * x + self.bias[:, None, None]
-            return x
+            # return x

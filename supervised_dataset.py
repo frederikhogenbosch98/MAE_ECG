@@ -55,22 +55,31 @@ if __name__ == "__main__":
     SAVE = True
     save_path = 'data/datasets/supervised_dataset_22k.pt'
 
-    unsupervised_dataset = torch.load('data/datasets/subsets/dataset_20k_224_1000.pt')
+    unsupervised_dataset = torch.load('data/datasets/unsupervised_dataset_22k_224.pt')
+    unsupervised_dataset_last_bit = torch.load('data/datasets/subsets/dataset_20k_224_b22000.pt')
 
     st = time.time()
     labels = create_label_tensor()
     end = time.time()
     print(f'total tensor creation time: {end-st}s')
+    print(len(labels))
     
-    supervised_dataset = unsupervised_dataset[0].unsqueeze(0)
+    # supervised_dataset = unsupervised_dataset[0].unsqueeze(0)
     labels_corr = []
-    labels_corr.append(0)
+    # labels_corr.append(0)
     # for i in range(1,len(labels)):
-    for i in range(1,1000):
-        if not labels[i] or len(labels[i]) > 1:
-            continue
+    # for i in range(len(labels)):
+    #     if not labels[i] or len(labels[i]) > 1:
+    #         continue
+    #     labels_corr.append(labels[i])
+    #     supervised_dataset = torch.cat([supervised_dataset, unsupervised_dataset[i].unsqueeze(0)], dim=0)
+
+    valid_indices = [i for i in range(len(labels)-1) if labels[i] and len(labels[i]) == 1]
+    supervised_dataset = torch.empty((len(valid_indices),) + unsupervised_dataset[0].shape)
+    print(len(unsupervised_dataset))
+    for idx, i in enumerate(valid_indices):
+        supervised_dataset[idx] = unsupervised_dataset[i]
         labels_corr.append(labels[i])
-        supervised_dataset = torch.cat([supervised_dataset, unsupervised_dataset[i].unsqueeze(0)], dim=0)
         
     # print(len(labels_corr))
     # print(supervised_dataset.shape)

@@ -40,7 +40,7 @@ class Block(nn.Module):
         return x
 
 
-        
+
 
 class AutoEncoder28(nn.Module):
     def __init__(self, in_channels=1):
@@ -98,7 +98,7 @@ class AutoEncoder28(nn.Module):
             nn.GELU(),
             nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1),
             # nn.BatchNorm2d(1),
-            nn.Sigmoid()
+            nn.GELU()
         )
         # self.decoder = nn.Sequential(
         #     nn.Conv2d(64, 56)
