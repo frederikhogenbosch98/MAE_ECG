@@ -163,25 +163,17 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-            scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
-            # scheduler =     CosineAnnealingwithWarmUp(optimizer, 
-            #                                         n_warmup_epochs=n_warmup_epochs,
-            #                                         warmup_lr=5e-4,
-            #                                         start_lr=5e-4,
-            #                                         lower_lr=8e-6,
-            #                                         alpha=0.5,
-            #                                         epoch_int=20,
-            #                                         num_epochs=num_epochs)
+            # scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
+            scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                                n_warmup_epochs=n_warmup_epochs,
+                                                warmup_lr=5e-4,
+                                                start_lr=5e-4,
+                                                lower_lr=8e-6,
+                                                alpha=0.5,
+                                                epoch_int=20,
+                                                num_epochs=num_epochs)
             # scheduler.print_seq()
-            # scheduler = ChainedScheduler(
-            # optimizer,
-            #     T_0 = 20,
-            #     T_mul = 1,
-            #     eta_min = 0.0,
-            #     gamma = 0.1,
-            #     max_lr = 0.01,
-            #     warmup_steps= 5,
-            #     )
+
             early_stopper = EarlyStopper(patience=10)
 
         outputs = []
@@ -195,16 +187,10 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             model.train()
             for i, data in enumerate(train_loader):
                 img = data.to(device)
-
-                # plot_single_img(img.cpu(), 10)
-                # print(img.shape)
-                # print(img[0,0,:,:])
                 unmasked_img = img
+
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
-                    # print('masking!!!')
-                # plot_single_img(img, 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                # plot_single_img(img, 10)
                 img = img.to(device)
                 recon = model(img)
                 optimizer.zero_grad()
@@ -214,8 +200,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                 running_loss += loss.item()
                 # scheduler.step(epoch + i / num_iters)
             scheduler.step()
-            #     break
-            # break
+
             if valset:
                 model.eval()
                 validation_loss = 0.0
@@ -235,20 +220,20 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                     break
             else:
                 validation_loss = 0
+
             epoch_loss = running_loss / len(train_loader)
             t_epoch_end = time.time()
-            # for  param_group in optimizer.param_groups:
-            #     lr = param_group['lr']
+
             print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
             losses.append(epoch_loss)
-            # if len(losses) > 5 and early_stopper(losses):
-            #     break
+
            
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_ecg/250_epoch_01_05_6pm.pth'
+            # save_folder = 'data/models_ecg/250_epoch_01_05_10pm.pth'
+            save_folder = 'trained_models/250_epoch_01_05_10pm.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -358,7 +343,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
         # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
 
-        lambda_lr = lambda epoch: 0.95 ** (epoch / 1000)
+        lambda_lr = lambda epoch: 0.95 ** (epoch / 10)
 
         # Create the scheduler
         scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
@@ -418,7 +403,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             t_epoch_end = time.time()
             # print('epoch {}: loss: {:.4f} duration: {:.2f}s'.format(epoch+1, float(loss), float(t_epoch_end-t_epoch_start)))
             epoch_loss = running_loss / len(train_loader)
-            print('epoch {}: average loss: {:.4f}, val loss: {:.4f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.5f}'.format(epoch+1, epoch_loss, validation_loss, accuracy, (t_epoch_end - t_epoch_start), optimizer.param_groups[0]['lr']))
+            print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, accuracy, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
             losses.append(epoch_loss)
             # scheduler.step()
         t_end = time.time()
@@ -503,7 +488,7 @@ class UnsupervisedDataset(torch.utils.data.Dataset):
 
 
 class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path_un, data_path_sup, resize_shape=(128,128)):
+    def __init__(self, data_path_un, data_path_sup, resize_shape=(56,56)):
         self.data = torch.load(data_path_un)
         label_data = torch.load(data_path_sup)
         self.data = self.data[:,0,:,:].unsqueeze(1)
@@ -550,8 +535,8 @@ if __name__ == "__main__":
 
     dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
     # print(len(dataset_un))
-    trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [18000, 3799])
-    trainset_un, valset_un = torch.utils.data.random_split(trainset_un, [15000, 3000]) 
+    trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [17000, 4799])
+    testset_un, valset_un = torch.utils.data.random_split(testset_un, [3000, 1799]) 
 
     ### ECG SUPERVISED
     dataset_sup = SupervisedDataset(data_path_un='data/datasets/unsupervised_dataset_22k_224.pt', data_path_sup='data/datasets/supervised_dataset_22k.pt')
@@ -560,43 +545,43 @@ if __name__ == "__main__":
     trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
 
     MASK_RATIO = 0
-    R = 20
+    R = 25
     print(f'R: {R}')
     factorization='tucker'
     # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
     # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
     # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-    # mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
-    mae = AutoEncoder56().to(device)
+    mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
+    # mae = AutoEncoder56().to(device)
 
-    # num_warmup_epochs_mae = 3
-    # num_epochs_mae = 250 + num_warmup_epochs_mae
-    # mae = train_mae(mae, trainset_un,
-    #                 valset=valset_un,
-    #                 MASK_RATIO=MASK_RATIO,
-    #                 num_epochs=num_epochs_mae,
-    #                 n_warmup_epochs=num_warmup_epochs_mae,
-    #                 TRAIN_MAE=True,
-    #                 SAVE_MODEL_MAE=True)
+    num_warmup_epochs_mae = 3
+    num_epochs_mae = 250 + num_warmup_epochs_mae
+    mae = train_mae(mae, trainset_un,
+                    valset=valset_un,
+                    MASK_RATIO=MASK_RATIO,
+                    num_epochs=num_epochs_mae,
+                    n_warmup_epochs=num_warmup_epochs_mae,
+                    TRAIN_MAE=True,
+                    SAVE_MODEL_MAE=True)
 
-    # current_pams = count_parameters(mae)
-    # print(f'num params: {current_pams}')
+    current_pams = count_parameters(mae)
+    print(f'num params: {current_pams}')
    
-    # eval_mae(mae, testset_un)
-    num_classes = 5
+    eval_mae(mae, testset_un)
+    # num_classes = 5
     # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    num_warmup_epochs_classifier = 0
-    num_epochs_classifier = 40 + num_warmup_epochs_classifier
-    classifier = train_classifier(classifier, 
-                                trainset=trainset_sup, 
-                                valset=valset_sup, 
-                                num_epochs=num_epochs_classifier, 
-                                n_warmup_epochs=num_warmup_epochs_classifier, 
-                                learning_rate=1e-3,
-                                batch_size=128, 
-                                TRAIN_CLASSIFIER=True, 
-                                SAVE_MODEL_CLASSIFIER=True)
+    # # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    # num_warmup_epochs_classifier = 0
+    # num_epochs_classifier = 40 + num_warmup_epochs_classifier
+    # classifier = train_classifier(classifier, 
+    #                             trainset=trainset_sup, 
+    #                             valset=valset_sup, 
+    #                             num_epochs=num_epochs_classifier, 
+    #                             n_warmup_epochs=num_warmup_epochs_classifier, 
+    #                             learning_rate=1e-3,
+    #                             batch_size=128, 
+    #                             TRAIN_CLASSIFIER=True, 
+    #                             SAVE_MODEL_CLASSIFIER=False)
 
-    eval_classifier(classifier, testset_sup)
+    # eval_classifier(classifier, testset_sup)
 
