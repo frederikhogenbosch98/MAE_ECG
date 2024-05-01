@@ -164,17 +164,20 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                         shuffle=False)#, num_workers=2)
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
             # scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
-            scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                                n_warmup_epochs=n_warmup_epochs,
-                                                warmup_lr=5e-4,
-                                                start_lr=5e-4,
-                                                lower_lr=8e-6,
-                                                alpha=0.5,
-                                                epoch_int=20,
-                                                num_epochs=num_epochs)
+            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+            #                                     n_warmup_epochs=n_warmup_epochs,
+            #                                     warmup_lr=5e-4,
+            #                                     start_lr=5e-4,
+            #                                     lower_lr=8e-6,
+            #                                     alpha=0.5,
+            #                                     epoch_int=20,
+            #                                     num_epochs=num_epochs)
             # scheduler.print_seq()
+            lambda_lr = lambda epoch: 0.95 ** (epoch / 10)
 
-            early_stopper = EarlyStopper(patience=5)
+            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
+
+            early_stopper = EarlyStopper(patience=6)
 
         outputs = []
         losses = []
@@ -244,7 +247,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth'))
+        # model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth'))
+        model.load_state_dict(torch.load('trained_models/250_epoch_01_05_10pm.pth', map_location=torch.device('cpu')))
 
 
     return model
@@ -465,7 +469,7 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, resize_shape=(56,56)):
+    def __init__(self, data_path, resize_shape=(112,112)):
         loaded_data = torch.load(data_path)
         # print(type(loaded_data))
         self.data = loaded_data
@@ -488,7 +492,7 @@ class UnsupervisedDataset(torch.utils.data.Dataset):
 
 
 class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path_un, data_path_sup, resize_shape=(56,56)):
+    def __init__(self, data_path_un, data_path_sup, resize_shape=(112,112)):
         self.data = torch.load(data_path_un)
         label_data = torch.load(data_path_sup)
         self.data = self.data[:,0,:,:].unsqueeze(1)
@@ -555,7 +559,7 @@ if __name__ == "__main__":
     # mae = AutoEncoder56().to(device)
 
     num_warmup_epochs_mae = 3
-    num_epochs_mae = 70 + num_warmup_epochs_mae
+    num_epochs_mae = 250 + num_warmup_epochs_mae
     mae = train_mae(mae, trainset_un,
                     valset=valset_un,
                     MASK_RATIO=MASK_RATIO,
