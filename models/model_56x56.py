@@ -61,7 +61,7 @@ import torch.nn.functional as F
 
 
 class AutoEncoder56(nn.Module):
-    def __init__(self, R, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1
@@ -138,20 +138,65 @@ class AutoEncoder56(nn.Module):
 class Classifier56(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier56, self).__init__()
-        self.encoder = autoencoder.encoder
+        # self.encoder = autoencoder.encoder
 
-        self.norm = nn.LayerNorm(in_features, eps=1e-6) 
+        self.encoder = nn.Sequential(
+                # Layer 1: Convolutional
+                nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, stride=1, padding=1),
+                nn.ELU(),
+                nn.BatchNorm2d(num_features=64),
+
+                # Layer 2: Convolutional
+                nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1),
+                nn.ELU(),
+                nn.BatchNorm2d(num_features=64),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+
+                # Layer 3: Convolutional
+                nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
+                nn.ELU(),
+                nn.BatchNorm2d(num_features=128),
+
+                # Layer 4: Convolutional
+                nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1, padding=1),
+                nn.ELU(),
+                nn.BatchNorm2d(num_features=128),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+
+                # Layer 5: Convolutional
+                nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1, padding=1),
+                nn.ELU(),
+                nn.BatchNorm2d(num_features=256),
+
+                # Layer 6: Convolutional
+                nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1),
+                nn.ELU(),
+                nn.BatchNorm2d(num_features=256),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
+        self.img_size = (56, 56)
+        # self.classifier = nn.Sequential(
+        #     nn.Flatten(),
+        #     nn.Linear(in_features, in_features),
+        #     nn.GELU(),
+        #     nn.BatchNorm2d(),
+        #     nn.Dropout(0.5),
+        #     nn.Linear(in_features, out_features)
+        # )
         self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(in_features, in_features),
-            nn.GELU(),
-            nn.BatchNorm2d(),
-            nn.Dropout(0.5),
-            nn.Linear(in_features, out_features)
+                nn.Flatten(),
+                nn.Linear(65536, 2048),
+                nn.ELU(),
+                nn.BatchNorm1d(num_features=2048),
+                nn.Dropout(0.5),
+                nn.Linear(2048, out_features)
         )
 
     def forward(self, x):
         x = self.encoder(x)
+        # print(x.shape)
         # x = self.norm(x.mean([-2,-1]))
         x = self.classifier(x)
         return x

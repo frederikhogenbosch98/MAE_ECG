@@ -145,7 +145,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=1e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -313,12 +313,12 @@ def eval_mae(model, testset, batch_size=128):
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
 
 
-def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=4e-3, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        for param in classifier.encoder.parameters():
-            param.requires_grad = False
+        # for param in classifier.encoder.parameters():
+        #     param.requires_grad = False
         
 
         train_loader = torch.utils.data.DataLoader(trainset, 
@@ -335,7 +335,15 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
 
 
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-            scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+            # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+            # scheduler =     CosineAnnealingwithWarmUp(optimizer, 
+            #                             n_warmup_epochs=n_warmup_epochs,
+            #                             warmup_lr=5e-4,
+            #                             start_lr=5e-4,
+            #                             lower_lr=8e-6,
+            #                             alpha=0.5,
+            #                             epoch_int=20,
+            #                             num_epochs=num_epochs)
             # scheduler = CosineAnnealingwithWarmUp(optimizer, 
             #                                       n_warmup_epochs=n_warmup_epochs, 
                                                 #   warmup_lr=5e-4, 
@@ -349,9 +357,14 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
 
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
         # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+
+        lambda_lr = lambda epoch: 0.95 ** (epoch / 1000)
+
+        # Create the scheduler
+        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
         loss_function =  nn.CrossEntropyLoss().to(device)
 
-        early_stopper = EarlyStopper(patience=7, min_delta=0.001)
+        early_stopper = EarlyStopper(patience=10, min_delta=0.0001)
 
         losses = []
         print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")        
@@ -412,7 +425,8 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
 
         if SAVE_MODEL_CLASSIFIER:
-            save_folder = 'data/models_imagenette/CLASSIFIER_MR_0.pth'
+            # save_folder = 'data/models_imagenette/CLASSIFIER_MR_0.pth'
+            save_folder = 'trained_models/fullpapermodel_run1.pth'
             torch.save(classifier.state_dict(), save_folder)
             print(f'classifier model saved to {save_folder}')
 
@@ -450,16 +464,16 @@ def eval_classifier(model, testset, batch_size=128):
     accuracy = 100 * correct / total
     print(f'Accuracy: {np.round(accuracy,3)}%')
 
-    ## MNIST
-    for idx, (images, labels) in enumerate(test_loader):
-        images, labels = images.to(device), labels.to(device)
-        x = model(images)
-        _, predicted = torch.max(x.data, 1)
-        images = images.cpu()
-        plot_single_img(images, 0)
-        print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
-        if idx == 10:
-            break
+    # ## MNIST
+    # for idx, (images, labels) in enumerate(test_loader):
+    #     images, labels = images.to(device), labels.to(device)
+    #     x = model(images)
+    #     _, predicted = torch.max(x.data, 1)
+    #     images = images.cpu()
+    #     plot_single_img(images, 0)
+    #     print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
+    #     if idx == 10:
+    #         break
 
     return np.mean(test_accuracy)
 
@@ -489,7 +503,7 @@ class UnsupervisedDataset(torch.utils.data.Dataset):
 
 
 class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path_un, data_path_sup, resize_shape=(56,56)):
+    def __init__(self, data_path_un, data_path_sup, resize_shape=(128,128)):
         self.data = torch.load(data_path_un)
         label_data = torch.load(data_path_sup)
         self.data = self.data[:,0,:,:].unsqueeze(1)
@@ -555,34 +569,34 @@ if __name__ == "__main__":
     # mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
     mae = AutoEncoder56().to(device)
 
-    num_warmup_epochs_mae = 3
-    num_epochs_mae = 250 + num_warmup_epochs_mae
-    mae = train_mae(mae, trainset_un,
-                    valset=valset_un,
-                    MASK_RATIO=MASK_RATIO,
-                    num_epochs=num_epochs_mae,
-                    n_warmup_epochs=num_warmup_epochs_mae,
-                    TRAIN_MAE=True,
-                    SAVE_MODEL_MAE=True)
+    # num_warmup_epochs_mae = 3
+    # num_epochs_mae = 250 + num_warmup_epochs_mae
+    # mae = train_mae(mae, trainset_un,
+    #                 valset=valset_un,
+    #                 MASK_RATIO=MASK_RATIO,
+    #                 num_epochs=num_epochs_mae,
+    #                 n_warmup_epochs=num_warmup_epochs_mae,
+    #                 TRAIN_MAE=True,
+    #                 SAVE_MODEL_MAE=True)
 
-    current_pams = count_parameters(mae)
-    print(f'num params: {current_pams}')
+    # current_pams = count_parameters(mae)
+    # print(f'num params: {current_pams}')
    
-    eval_mae(mae, testset_un)
+    # eval_mae(mae, testset_un)
+    num_classes = 5
+    # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    num_warmup_epochs_classifier = 0
+    num_epochs_classifier = 40 + num_warmup_epochs_classifier
+    classifier = train_classifier(classifier, 
+                                trainset=trainset_sup, 
+                                valset=valset_sup, 
+                                num_epochs=num_epochs_classifier, 
+                                n_warmup_epochs=num_warmup_epochs_classifier, 
+                                learning_rate=1e-3,
+                                batch_size=128, 
+                                TRAIN_CLASSIFIER=True, 
+                                SAVE_MODEL_CLASSIFIER=True)
 
-    # num_classes = 5
-    # classifier = Classifier56_CPD(autoencoder=mae, in_features=3136, out_features=num_classes).to(device)
-    # num_warmup_epochs_classifier = 0
-    # num_epochs_classifier = 40 + num_warmup_epochs_classifier
-    # classifier = train_classifier(classifier, 
-    #                             trainset=trainset_sup, 
-    #                             valset=valset_sup, 
-    #                             num_epochs=num_epochs_classifier, 
-    #                             n_warmup_epochs=num_warmup_epochs_classifier, 
-    #                             learning_rate=1e-3,
-    #                             batch_size=128, 
-    #                             TRAIN_CLASSIFIER=True, 
-    #                             SAVE_MODEL_CLASSIFIER=False)
-
-    # eval_classifier(classifier, testset_sup)
+    eval_classifier(classifier, testset_sup)
 
