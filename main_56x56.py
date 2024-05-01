@@ -248,7 +248,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_ecg/250_epoch_01_05_11am.pth'
+            save_folder = 'data/models_ecg/250_epoch_01_05_6pm.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -363,8 +363,8 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             for i, (inputs, labels) in enumerate(train_loader):
                 inputs, labels = inputs.to(device), labels.squeeze().to(device)
                 # print(labels[0:64])
-                plot_single_img(inputs.cpu(), 10)
-                print(labels[10])
+                # plot_single_img(inputs.cpu(), 10)
+                # print(labels[10])
                 outputs = classifier(inputs)
                 # print(F.softmax(outputs, dim=1))
                 loss = loss_function(outputs, labels)
@@ -489,14 +489,20 @@ class UnsupervisedDataset(torch.utils.data.Dataset):
 
 
 class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, resize_shape=(56,56)):
-        loaded_data = torch.load(data_path)
-        self.data = loaded_data['data']
+    def __init__(self, data_path_un, data_path_sup, resize_shape=(56,56)):
+        self.data = torch.load(data_path_un)
+        label_data = torch.load(data_path_sup)
         self.data = self.data[:,0,:,:].unsqueeze(1)
-        self.labels = loaded_data['labels']
+        self.labels = label_data['labels']
         self.labels = self.labels.long() 
+        self.valid_idx = label_data['valid_idx']
 
-        assert len(self.data) == len(self.labels), "Data and labels must have the same length"
+        self.shortened_data = torch.empty((len(self.valid_idx),) + self.data[0].shape)
+
+        for idx, i in enumerate(self.valid_idx):
+            self.shortened_data[idx] = self.data[i]
+
+        assert len(self.shortened_data) == len(self.labels), f'data ({len(self.shortened_data)}) and labels ({len(self.labels)}) must have the same length'
 
         self.transform = transforms.Compose([
             transforms.ToPILImage(),  
@@ -506,10 +512,10 @@ class SupervisedDataset(torch.utils.data.Dataset):
         
 
     def __len__(self):
-        return len(self.data)
+        return len(self.shortened_data)
 
     def __getitem__(self, index):
-        data_item = self.transform(self.data[index])
+        data_item = self.transform(self.shortened_data[index])
         label_item = self.labels[index]
         return data_item, label_item
 
@@ -530,17 +536,17 @@ if __name__ == "__main__":
 
     dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
     # print(len(dataset_un))
-    trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [18000, 3798])
+    trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [18000, 3799])
     trainset_un, valset_un = torch.utils.data.random_split(trainset_un, [15000, 3000]) 
 
     ### ECG SUPERVISED
-    dataset_sup = SupervisedDataset('data/datasets/supervised_dataset_22k.pt')
+    dataset_sup = SupervisedDataset(data_path_un='data/datasets/unsupervised_dataset_22k_224.pt', data_path_sup='data/datasets/supervised_dataset_22k.pt')
     # print(len(dataset_sup))
-    trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4243])
+    trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4244])    
     trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
 
     MASK_RATIO = 0
-    R = 20
+    R = 25
     print(f'R: {R}')
     factorization='tucker'
     # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
@@ -556,27 +562,27 @@ if __name__ == "__main__":
                     MASK_RATIO=MASK_RATIO,
                     num_epochs=num_epochs_mae,
                     n_warmup_epochs=num_warmup_epochs_mae,
-                    TRAIN_MAE=False,
+                    TRAIN_MAE=True,
                     SAVE_MODEL_MAE=True)
 
     current_pams = count_parameters(mae)
     print(f'num params: {current_pams}')
    
-    # eval_mae(mae, testset_un)
+    eval_mae(mae, testset_un)
 
-    num_classes = 5
-    classifier = Classifier56_CPD(autoencoder=mae, in_features=3136, out_features=num_classes).to(device)
-    num_warmup_epochs_classifier = 0
-    num_epochs_classifier = 20 + num_warmup_epochs_classifier
-    classifier = train_classifier(classifier, 
-                                trainset=trainset_sup, 
-                                valset=valset_sup, 
-                                num_epochs=num_epochs_classifier, 
-                                n_warmup_epochs=num_warmup_epochs_classifier, 
-                                learning_rate=1e-4,
-                                batch_size=128, 
-                                TRAIN_CLASSIFIER=True, 
-                                SAVE_MODEL_CLASSIFIER=False)
+    # num_classes = 5
+    # classifier = Classifier56_CPD(autoencoder=mae, in_features=3136, out_features=num_classes).to(device)
+    # num_warmup_epochs_classifier = 0
+    # num_epochs_classifier = 40 + num_warmup_epochs_classifier
+    # classifier = train_classifier(classifier, 
+    #                             trainset=trainset_sup, 
+    #                             valset=valset_sup, 
+    #                             num_epochs=num_epochs_classifier, 
+    #                             n_warmup_epochs=num_warmup_epochs_classifier, 
+    #                             learning_rate=1e-3,
+    #                             batch_size=128, 
+    #                             TRAIN_CLASSIFIER=True, 
+    #                             SAVE_MODEL_CLASSIFIER=False)
 
-    eval_classifier(classifier, testset_sup)
+    # eval_classifier(classifier, testset_sup)
 
