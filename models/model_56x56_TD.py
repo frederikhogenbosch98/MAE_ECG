@@ -243,7 +243,7 @@ class AutoEncoder56_CPD(nn.Module):
             nn.BatchNorm2d(channels[3]),
             # Corresponds to LAYER 6 in Encoder
             nn.Upsample(scale_factor=2, mode='nearest'),
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
             # Corresponds to LAYER 5 in Encoder
