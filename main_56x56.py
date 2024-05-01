@@ -145,7 +145,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=2e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
