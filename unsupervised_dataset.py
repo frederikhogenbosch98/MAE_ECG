@@ -76,9 +76,10 @@ def create_input_tensor(folder):
     directory_path = Path(f'{physio_root}')
     num_folders = len(next(os.walk(f'{physio_root}'))[1])
     mat_files = [file for file in directory_path.rglob('*.dat')]
-
+    mat_files = sorted(mat_files)
     mat_files_without_extension = [str(file)[:-4] for file in mat_files]
-    mat_files_without_extension = mat_files_without_extension[1:]
+
+    
     t_start = time.time()
 
     for idx, file in enumerate(mat_files_without_extension):

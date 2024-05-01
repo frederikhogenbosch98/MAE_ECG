@@ -45,7 +45,7 @@ class CosineAnnealingwithWarmUp():
         self._optimizer.zero_grad()
 
     def print_seq(self):
-        plt.plot(np.concat(self.warmup, self.get_cosine_epoch()))
+        plt.plot(np.concatenate((self.warmup, self.get_cosine_epoch())))
         plt.title('Learning Rate Custom Scheduler')
         plt.xlabel('epochs')
         plt.ylabel('learning rate')
@@ -56,7 +56,7 @@ class CosineAnnealingwithWarmUp():
         for i in range(self.num_epochs // self.epoch_int):
             full_ls[i*self.epoch_int:(i+1)*self.epoch_int] = self.start_lr * self.alpha[i] * np.cos(np.linspace(0, np.pi/2, self.epoch_int))
 
-        return self.normalize(full_ls)
+        return np.array(self.normalize(full_ls))
     
     def _update_learning_rate(self):
 
@@ -164,7 +164,14 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                         shuffle=False)#, num_workers=2)
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
             # scheduler  = StepLR(optimizer, step_size=20, gamma=0.25) 
-            scheduler = CosineAnnealingwithWarmUp(optimizer, n_warmup_epochs=n_warmup_epochs, warmup_lr=1e-5, start_lr=5e-4, lower_lr=1e-5, alpha=0.75, epoch_int=20, num_epochs=num_epochs)
+            scheduler =     CosineAnnealingwithWarmUp(optimizer, 
+                                                    n_warmup_epochs=n_warmup_epochs,
+                                                    warmup_lr=1e-5,
+                                                    start_lr=5e-4,
+                                                    lower_lr=1e-5,
+                                                    alpha=0.5,
+                                                    epoch_int=20,
+                                                    num_epochs=num_epochs)
             scheduler.print_seq()
             # scheduler = ChainedScheduler(
             # optimizer,
@@ -252,7 +259,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_ecg/testrun_01_05.pth'))
+        model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth'))
 
 
     return model
@@ -328,9 +335,16 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
 
 
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-            # scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
-            scheduler = CosineAnnealingwithWarmUp(optimizer, n_warmup_epochs=n_warmup_epochs, warmup_lr=5e-4, start_lr=5e-4, alpha=0.6, epoch_int=30, num_epochs=num_epochs)
-            scheduler.print_seq()
+            scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+            #                                       n_warmup_epochs=n_warmup_epochs, 
+            #                                       warmup_lr=5e-4, 
+            #                                       start_lr=5e-4, 
+            #                                       alpha=0.6, 
+            #                                       epoch_int=30, 
+            #                                       num_epochs=num_epochs)
+
+            # scheduler.print_seq()
 
 
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
@@ -340,7 +354,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         early_stopper = EarlyStopper(patience=7, min_delta=0.001)
 
         losses = []
-        print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} epochs")        
+        print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")        
         t_start = time.time()
         for epoch in range(num_epochs):
             running_loss = 0.0
@@ -349,11 +363,10 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             for i, (inputs, labels) in enumerate(train_loader):
                 inputs, labels = inputs.to(device), labels.squeeze().to(device)
                 # print(labels[0:64])
-                # plot_single_img(inputs.cpu(), 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                # print(labels[10])
+                plot_single_img(inputs.cpu(), 10)
+                print(labels[10])
                 outputs = classifier(inputs)
                 # print(F.softmax(outputs, dim=1))
-                # plot_single_img(outputs.cpu(), 10, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                 loss = loss_function(outputs, labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -538,17 +551,32 @@ if __name__ == "__main__":
 
     num_warmup_epochs_mae = 5
     num_epochs_mae = 250 + num_warmup_epochs_mae
-    mae = train_mae(mae, trainset_un, valset=valset_un, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, n_warmup_epochs=num_warmup_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
+    mae = train_mae(mae, trainset_un,
+                    valset=valset_un,
+                    MASK_RATIO=MASK_RATIO,
+                    num_epochs=num_epochs_mae,
+                    n_warmup_epochs=num_warmup_epochs_mae,
+                    TRAIN_MAE=False,
+                    SAVE_MODEL_MAE=True)
 
     current_pams = count_parameters(mae)
     print(f'num params: {current_pams}')
    
-    eval_mae(mae, testset_un)
+    # eval_mae(mae, testset_un)
 
-    # num_classes = 5
-    # classifier = Classifier56_CPD(autoencoder=mae, in_features=3136, out_features=num_classes).to(device)
-    # num_warmup_epochs_classifier = 5
-    # num_epochs_classifier = 100 + num_warmup_epochs_classifier
-    # classifier = train_classifier(classifier, trainset=trainset_sup, valset=valset_sup, num_epochs=num_epochs_classifier, n_warmup_epochs=num_warmup_epochs_classifier, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
-    # eval_classifier(classifier, testset_sup)
+    num_classes = 5
+    classifier = Classifier56_CPD(autoencoder=mae, in_features=3136, out_features=num_classes).to(device)
+    num_warmup_epochs_classifier = 0
+    num_epochs_classifier = 20 + num_warmup_epochs_classifier
+    classifier = train_classifier(classifier, 
+                                trainset=trainset_sup, 
+                                valset=valset_sup, 
+                                num_epochs=num_epochs_classifier, 
+                                n_warmup_epochs=num_warmup_epochs_classifier, 
+                                learning_rate=1e-4,
+                                batch_size=128, 
+                                TRAIN_CLASSIFIER=True, 
+                                SAVE_MODEL_CLASSIFIER=False)
+
+    eval_classifier(classifier, testset_sup)
 

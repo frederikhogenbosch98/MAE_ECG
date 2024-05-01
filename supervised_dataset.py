@@ -56,7 +56,7 @@ if __name__ == "__main__":
     save_path = 'data/datasets/supervised_dataset_22k.pt'
 
     unsupervised_dataset = torch.load('data/datasets/unsupervised_dataset_22k_224.pt')
-    unsupervised_dataset_last_bit = torch.load('data/datasets/subsets/dataset_20k_224_b22000.pt')
+    # unsupervised_dataset_last_bit = torch.load('data/datasets/subsets/dataset_20k_224_b22000.pt')
 
     st = time.time()
     labels = create_label_tensor()
@@ -74,11 +74,11 @@ if __name__ == "__main__":
     #         continue
     #     labels_corr.append(labels[i])
     #     supervised_dataset = torch.cat([supervised_dataset, unsupervised_dataset[i].unsqueeze(0)], dim=0)
-    valid_indices = [i for i in range(len(labels)-1) if len(labels[i]) == 1]
-    supervised_dataset = torch.empty((len(valid_indices),) + unsupervised_dataset[0].shape)
+    valid_indices = [i for i in range(len(labels)) if len(labels[i]) == 1]
+    # supervised_dataset = torch.empty((len(valid_indices),) + unsupervised_dataset[0].shape)
     labels_corr = torch.empty(len(valid_indices))
     for idx, i in enumerate(valid_indices):
-        supervised_dataset[idx] = unsupervised_dataset[i]
+        # supervised_dataset[idx] = unsupervised_dataset[i]
         labels_corr[idx] = labels[i][0]
         # print(idx, i+1, labels[i][0])
         # if idx == 50:
@@ -93,5 +93,8 @@ if __name__ == "__main__":
     # print(labels_corr[0:50])
     
     if SAVE:
-        torch.save({'data': supervised_dataset, 'labels': labels_corr}, save_path)
+        torch.save({'labels': labels_corr, 'valid_idx': valid_indices}, save_path)
         print(f'Supervised dataset saved to {save_path}')
+    # if SAVE:
+    #     torch.save({'data': supervised_dataset, 'labels': labels_corr}, save_path)
+    #     print(f'Supervised dataset saved to {save_path}')
