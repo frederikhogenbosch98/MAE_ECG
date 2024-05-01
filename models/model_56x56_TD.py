@@ -115,9 +115,8 @@ import tltorch
 #         # print(x.shape)
 #         x = self.decoder(x)
 #         return x
-
 class AutoEncoder56_CPD(nn.Module):
-    def __init__(self, R, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1, 1]):
+    def __init__(self, R, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
         super(AutoEncoder56_CPD, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1
@@ -149,59 +148,112 @@ class AutoEncoder56_CPD(nn.Module):
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
             # LAYER 6
-            nn.MaxPool2d(2, stride=2),
-            # LAYER 7
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # LAYER 8
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # LAYER 9
             nn.MaxPool2d(2, stride=2)
         )
         self.decoder = nn.Sequential(
-            # Corresponds to LAYER 8 in Encoder
-            nn.Upsample(scale_factor=2, mode='nearest'),
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[3]),
-            # Corresponds to LAYER 7 in Encoder
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[3]),
-            nn.Upsample(scale_factor=2, mode='nearest'),
-            # Corresponds to LAYER 6 in Encoder
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # Corresponds to LAYER 5 in Encoder
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=2, mode='nearest'),
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[1]),
-            # Corresponds to LAYER 5 in Encoder
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[1]),
-            # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=2, mode='nearest'),
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[0]),
-            # Corresponds to LAYER 2 in Encoder
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[0]),
-            # Corresponds to LAYER 1 in Encoder
-            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
-            nn.GELU()
-        )
+                # Decoding layer corresponding to the last max pooling in encoder
+                nn.ConvTranspose2d(channels[2], channels[2], kernel_size=3, stride=2, padding=1, output_padding=1),
+                nn.GELU(),
+                nn.BatchNorm2d(channels[2]),
+                # Further decoding layers
+                # tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+                nn.GELU(),
+                nn.BatchNorm2d(channels[2]),
+                # Decoding layer for second pooling in encoder
+                nn.ConvTranspose2d(channels[2], channels[1], kernel_size=3, stride=2, padding=1, output_padding=1),
+                nn.GELU(),
+                nn.BatchNorm2d(channels[1]),
+                # Further decoding layers
+                # tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+                nn.GELU(),
+                nn.BatchNorm2d(channels[1]),
+                # Decoding layer for first pooling in encoder
+                nn.ConvTranspose2d(channels[1], channels[0], kernel_size=3, stride=2, padding=1, output_padding=1),
+                nn.GELU(),
+                # nn.BatchNorm2d(channels[0]),
+                # Final decoding layers to produce output matching the input size
+                # tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+                # nn.GELU(),
+                nn.BatchNorm2d(channels[0]),
+                tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+                nn.GELU(),
+            )
+
+
+    def forward(self, x):
+        x = self.encoder(x)
+        # print(x.shape)
+        x = self.decoder(x)
+        return x
+
+
+# class AutoEncoder56_CPD(nn.Module):
+#     def __init__(self, R, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
+#         super(AutoEncoder56_CPD, self).__init__()
+#         self.encoder = nn.Sequential(
+#             # LAYER 1
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[0]),
+#             # LAYER 2
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[0]),
+#             # LAYER 3
+#             nn.MaxPool2d(2, stride=2),
+#             # LAYER 4
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[1]),
+#             # LAYER 5
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[1]),
+#             # LAYER 6
+#             nn.MaxPool2d(2, stride=2),
+#             # LAYER 4
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[2]),
+#             # LAYER 5
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[2]),
+#             # LAYER 6
+#             nn.MaxPool2d(2, stride=2)
+#         )
+#         self.decoder = nn.Sequential(
+#             # Corresponds to LAYER 6 in Encoder
+#             nn.Upsample(scale_factor=2, mode='nearest'),
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[2]),
+#             # Corresponds to LAYER 5 in Encoder
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[2]),
+#             # Corresponds to LAYER 4 in Encoder
+#             nn.Upsample(scale_factor=2, mode='nearest'),
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[1]),
+#             # Corresponds to LAYER 5 in Encoder
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[1]),
+#             # Corresponds to LAYER 4 in Encoder
+#             nn.Upsample(scale_factor=2, mode='nearest'),
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[0]),
+#             # Corresponds to LAYER 2 in Encoder
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#             nn.BatchNorm2d(channels[0]),
+#             # Corresponds to LAYER 1 in Encoder
+#             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
+#             nn.GELU(),
+#         )
 
 
     def forward(self, x):

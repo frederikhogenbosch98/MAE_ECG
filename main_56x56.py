@@ -163,16 +163,16 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-            # scheduler  = StepLR(optimizer, step_size=20, gamma=0.25) 
-            scheduler =     CosineAnnealingwithWarmUp(optimizer, 
-                                                    n_warmup_epochs=n_warmup_epochs,
-                                                    warmup_lr=1e-5,
-                                                    start_lr=5e-4,
-                                                    lower_lr=1e-5,
-                                                    alpha=0.5,
-                                                    epoch_int=20,
-                                                    num_epochs=num_epochs)
-            scheduler.print_seq()
+            scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
+            # scheduler =     CosineAnnealingwithWarmUp(optimizer, 
+            #                                         n_warmup_epochs=n_warmup_epochs,
+            #                                         warmup_lr=5e-4,
+            #                                         start_lr=5e-4,
+            #                                         lower_lr=8e-6,
+            #                                         alpha=0.5,
+            #                                         epoch_int=20,
+            #                                         num_epochs=num_epochs)
+            # scheduler.print_seq()
             # scheduler = ChainedScheduler(
             # optimizer,
             #     T_0 = 20,
@@ -239,7 +239,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             t_epoch_end = time.time()
             # for  param_group in optimizer.param_groups:
             #     lr = param_group['lr']
-            print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:5f}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
+            print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
             losses.append(epoch_loss)
             # if len(losses) > 5 and early_stopper(losses):
             #     break
@@ -338,7 +338,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
             # scheduler = CosineAnnealingwithWarmUp(optimizer, 
             #                                       n_warmup_epochs=n_warmup_epochs, 
-            #                                       warmup_lr=5e-4, 
+                                                #   warmup_lr=5e-4, 
             #                                       start_lr=5e-4, 
             #                                       alpha=0.6, 
             #                                       epoch_int=30, 
@@ -546,16 +546,16 @@ if __name__ == "__main__":
     trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
 
     MASK_RATIO = 0
-    R = 25
+    R = 20
     print(f'R: {R}')
     factorization='tucker'
     # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
     # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
     # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-    mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
-    # mae = AutoEncoder56().to(device)
+    # mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
+    mae = AutoEncoder56().to(device)
 
-    num_warmup_epochs_mae = 5
+    num_warmup_epochs_mae = 3
     num_epochs_mae = 250 + num_warmup_epochs_mae
     mae = train_mae(mae, trainset_un,
                     valset=valset_un,
