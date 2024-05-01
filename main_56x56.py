@@ -11,12 +11,69 @@ import numpy as np
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
-from linear_warmup_cosine_annealing_warm_restarts_weight_decay import ChainedScheduler
+import math
 
+
+class CosineAnnealingwithWarmUp():
+
+    def __init__(self, optimizer, n_warmup_epochs, warmup_lr, start_lr, lower_lr, alpha, epoch_int, num_epochs):
+        self._optimizer = optimizer
+        self.n_steps = 0
+        self.n_warmup_steps = n_warmup_epochs
+        self.warmup_lr = warmup_lr
+        self.start_lr = start_lr
+        self.epoch_int = epoch_int
+        self.num_epochs = num_epochs - n_warmup_epochs
+        self.current_epoch = 0
+        self.lower_lr = lower_lr
+
+        self.warmup = np.linspace(self.warmup_lr, self.start_lr, self.n_warmup_steps)
+        assert epoch_int % num_epochs  != 0, "num_epochs should be a multiple of epoch interval"
+
+        self.alpha = np.power(alpha, np.arange(num_epochs // epoch_int))
+        self.lrs = self.get_cosine_epoch()
+        
+
+    def step(self):
+        self._update_learning_rate()
+        self._optimizer.step()
+
+    def normalize(self,array):
+        return np.interp(array, (array.min(), array.max()), (self.lower_lr, self.start_lr))
+
+    def zero_grad(self):
+        self._optimizer.zero_grad()
+
+    def print_seq(self):
+        plt.plot(np.concat(self.warmup, self.get_cosine_epoch()))
+        plt.title('Learning Rate Custom Scheduler')
+        plt.xlabel('epochs')
+        plt.ylabel('learning rate')
+        plt.show()
+
+    def get_cosine_epoch(self):
+        full_ls = np.zeros(self.num_epochs)
+        for i in range(self.num_epochs // self.epoch_int):
+            full_ls[i*self.epoch_int:(i+1)*self.epoch_int] = self.start_lr * self.alpha[i] * np.cos(np.linspace(0, np.pi/2, self.epoch_int))
+
+        return self.normalize(full_ls)
+    
+    def _update_learning_rate(self):
+
+        if self.n_steps < self.n_warmup_steps:
+            lr = self.warmup[self.n_steps]
+            self.current_epoch = 0
+        else:
+            lr = self.lrs[self.n_steps-self.n_warmup_steps]
+            
+        self.n_steps += 1
+
+        for param_group in self._optimizer.param_groups:
+            param_group['lr'] = lr
 
 
 class EarlyStopper:
-    def __init__(self, patience=5, min_delta=0.0001):
+    def __init__(self, patience=5, min_delta=0.00005):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
@@ -88,7 +145,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_size=128, learning_rate=1e-3, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=1e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -105,7 +162,10 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             val_loader = torch.utils.data.DataLoader(valset, 
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+            # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+            # scheduler  = StepLR(optimizer, step_size=20, gamma=0.25) 
+            scheduler = CosineAnnealingwithWarmUp(optimizer, n_warmup_epochs=n_warmup_epochs, warmup_lr=1e-5, start_lr=5e-4, lower_lr=1e-5, alpha=0.75, epoch_int=20, num_epochs=num_epochs)
+            scheduler.print_seq()
             # scheduler = ChainedScheduler(
             # optimizer,
             #     T_0 = 20,
@@ -115,12 +175,12 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
             #     max_lr = 0.01,
             #     warmup_steps= 5,
             #     )
-            early_stopper = EarlyStopper(patience=3)
+            early_stopper = EarlyStopper(patience=10)
 
         outputs = []
         losses = []
 
-        print(f"Start MAE training for {num_epochs} epochs")
+        print(f"Start MAE training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")
         t_start = time.time()
         for epoch in range(num_epochs):
             running_loss = 0.0
@@ -145,8 +205,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-                scheduler.step(epoch + i / num_iters)
-                # scheduler.step()
+                # scheduler.step(epoch + i / num_iters)
+            scheduler.step()
             #     break
             # break
             if valset:
@@ -181,18 +241,18 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=5, batch_
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = 'data/models_ecg/3393_R20_old_model_overnight_30_4.pth'
+            save_folder = 'data/models_ecg/250_epoch_01_05_11am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
 
-        # plot_losses(epoch+1, losses)        
+        plot_losses(epoch+1, losses)        
         print("\n")
         print("\n")
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_ecg/3393_R20.pth'))
+        model.load_state_dict(torch.load('data/models_ecg/testrun_01_05.pth'))
 
 
     return model
@@ -246,7 +306,7 @@ def eval_mae(model, testset, batch_size=128):
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
 
 
-def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_rate=1e-3, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=4e-3, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
@@ -267,7 +327,10 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
                                 shuffle=False, num_workers=2)    
 
 
-            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+            # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+            # scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+            scheduler = CosineAnnealingwithWarmUp(optimizer, n_warmup_epochs=n_warmup_epochs, warmup_lr=5e-4, start_lr=5e-4, alpha=0.6, epoch_int=30, num_epochs=num_epochs)
+            scheduler.print_seq()
 
 
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
@@ -277,7 +340,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
         early_stopper = EarlyStopper(patience=7, min_delta=0.001)
 
         losses = []
-        print(f"Start CLASSIFIER training for {num_epochs} epochs")
+        print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} epochs")        
         t_start = time.time()
         for epoch in range(num_epochs):
             running_loss = 0.0
@@ -296,7 +359,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, learning_
                 loss.backward()
                 optimizer.step()
                 running_loss += loss.item()
-                scheduler.step(epoch + i / num_iters)
+            scheduler.step()
 
 
             if valset:
@@ -466,14 +529,16 @@ if __name__ == "__main__":
     MASK_RATIO = 0
     R = 20
     print(f'R: {R}')
-    factorization='cp'
+    factorization='tucker'
     # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
     # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
     # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-    mae = AutoEncoder56().to(device)
+    mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
+    # mae = AutoEncoder56().to(device)
 
-    num_epochs_mae = 250
-    mae = train_mae(mae, trainset_un, valset=valset_un, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
+    num_warmup_epochs_mae = 5
+    num_epochs_mae = 250 + num_warmup_epochs_mae
+    mae = train_mae(mae, trainset_un, valset=valset_un, MASK_RATIO=MASK_RATIO, num_epochs=num_epochs_mae, n_warmup_epochs=num_warmup_epochs_mae, TRAIN_MAE=True, SAVE_MODEL_MAE=True)
 
     current_pams = count_parameters(mae)
     print(f'num params: {current_pams}')
@@ -481,8 +546,9 @@ if __name__ == "__main__":
     eval_mae(mae, testset_un)
 
     # num_classes = 5
-    # classifier = Classifier56_CPD(autoencoder=mae, in_features=128, out_features=num_classes).to(device)
-    # num_epochs_classifier = 100
-    # classifier = train_classifier(classifier, trainset=trainset_sup, valset=valset_sup, num_epochs=num_epochs_classifier, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
+    # classifier = Classifier56_CPD(autoencoder=mae, in_features=3136, out_features=num_classes).to(device)
+    # num_warmup_epochs_classifier = 5
+    # num_epochs_classifier = 100 + num_warmup_epochs_classifier
+    # classifier = train_classifier(classifier, trainset=trainset_sup, valset=valset_sup, num_epochs=num_epochs_classifier, n_warmup_epochs=num_warmup_epochs_classifier, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=False)
     # eval_classifier(classifier, testset_sup)
 
