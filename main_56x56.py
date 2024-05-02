@@ -235,7 +235,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            save_folder = f'trained_models/RUN_{fact}_R{R}.pth.pth'
+            save_folder = f'trained_models/MAE_RUN_{fact}_R{R}.pth.pth'
             # save_folder = 'trained_models/tranpose_02_05_10am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
@@ -422,7 +422,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
 
         if SAVE_MODEL_CLASSIFIER:
             # save_folder = f'/models_nightrun/RUN_{fact}_R{R}.pth'
-            save_folder = f'trained_models/RUN_{fact}_R{R}.pth.pth'
+            save_folder = f'trained_models/CLASSIFIER_RUN_{fact}_R{R}.pth.pth'
             torch.save(classifier.state_dict(), save_folder)
             print(f'classifier model saved to {save_folder}')
 
@@ -606,7 +606,7 @@ if __name__ == "__main__":
         
             mses.append(eval_mae(mae, testset_un))
             
-            num_classes = 7
+            num_classes = 8
             classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 1
