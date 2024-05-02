@@ -241,7 +241,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth.pth'))
+        model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth'))
         # model.load_state_dict(torch.load('trained_models/cosinetest_02_05_9am.pth', map_location=torch.device('cpu')))
 
 
@@ -327,13 +327,13 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             #                             alpha=0.5,
             #                             epoch_int=20,
             #                             num_epochs=num_epochs)
-            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
-            #                                       n_warmup_epochs=n_warmup_epochs, 
-                                                #   warmup_lr=5e-4, 
-            #                                       start_lr=5e-4, 
-            #                                       alpha=0.6, 
-            #                                       epoch_int=30, 
-            #                                       num_epochs=num_epochs)
+            scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                                  n_warmup_epochs=n_warmup_epochs, 
+                                                  warmup_lr=5e-4, 
+                                                  start_lr=5e-4, 
+                                                  alpha=0.6, 
+                                                  epoch_int=30, 
+                                                  num_epochs=num_epochs)
 
             # scheduler.print_seq()
 
@@ -341,10 +341,10 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         # optimizer = torch.optim.Adam(classifier.parameters(), lr=2e-3, weight_decay=0.05)
         # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
 
-        lambda_lr = lambda epoch: 0.95 ** (epoch / 10)
+        # lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
 
         # Create the scheduler
-        scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
+        # scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
         loss_function =  nn.CrossEntropyLoss().to(device)
 
         early_stopper = EarlyStopper(patience=10, min_delta=0.0001)
@@ -577,7 +577,7 @@ if __name__ == "__main__":
     #                             num_epochs=num_epochs_classifier, 
     #                             n_warmup_epochs=num_warmup_epochs_classifier, 
     #                             learning_rate=1e-3,
-    #                             batch_size=128, 
+    #                             batch_size=256, 
     #                             TRAIN_CLASSIFIER=True, 
     #                             SAVE_MODEL_CLASSIFIER=False)
 
