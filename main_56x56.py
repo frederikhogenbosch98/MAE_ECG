@@ -144,8 +144,12 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
     if TRAIN_MAE:
 
         criterion = nn.MSELoss() # mean square error loss
-        optimizer = torch.optim.Adam(model.parameters(),
-                                    lr=learning_rate, 
+        # optimizer = torch.optim.Adam(model.parameters(),
+        #                             lr=learning_rate, 
+        #                             weight_decay=1e-4)
+
+        optimizer = torch.optim.SGD(model.parameters(),
+                                    lr=learning_rate,
                                     weight_decay=1e-4)
 
         train_loader = torch.utils.data.DataLoader(trainset, 
