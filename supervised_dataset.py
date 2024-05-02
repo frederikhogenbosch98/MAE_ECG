@@ -28,7 +28,7 @@ def create_label_tensor():
     Y['diagnostic_superclass'] = Y.scp_codes.apply(aggregate_supclass_diagnostic)
     Y['diagnostic_superclass_len'] = Y['diagnostic_superclass'].apply(len)
     # print(Y.loc[Y.diagnostic_superclass_len > 1, 'diagnostic_superclass'])
-    print(Y[0:50])
+    print(Y[0:100])
 
 
     labels = []
@@ -64,6 +64,7 @@ if __name__ == "__main__":
     print(f'total tensor creation time: {end-st}s')
     print(len(labels))
     print(len(unsupervised_dataset))
+    # print(labels[0:100])
     
     # supervised_dataset = unsupervised_dataset[0].unsqueeze(0)
     labels_corr = []
@@ -80,10 +81,10 @@ if __name__ == "__main__":
     for idx, i in enumerate(valid_indices):
         # supervised_dataset[idx] = unsupervised_dataset[i]
         labels_corr[idx] = labels[i][0]
-        # print(idx, i+1, labels[i][0])
+        print(idx, i+1, labels[i][0])
         # if idx == 50:
         #     break
-        
+    print(labels_corr[0:100])
 
     # for i in range(25):
     #     print(i)

@@ -7,8 +7,10 @@ import wfdb
 from scipy.signal import butter, lfilter
 import numpy as np
 from scipy.signal import resample, find_peaks
+import torchvision
 
 def plot_single_img(img, i):
+    # print(img[i,0,:,:])
     plt.imshow(img[i, :, :, :].permute(1,2,0).detach().numpy(),cmap="gray")
     plt.title(f'index: {i}')
     plt.show()
@@ -61,7 +63,7 @@ def averaging(segments):
     return averaged_signal
 
 class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path_un, data_path_sup, resize_shape=(56,56)):
+    def __init__(self, data_path_un, data_path_sup, resize_shape=(224,224)):
         loaded_data = torch.load(data_path_un)
         label_data = torch.load(data_path_sup)
         self.data = loaded_data
@@ -70,25 +72,30 @@ class SupervisedDataset(torch.utils.data.Dataset):
         self.labels = self.labels.long() 
         self.valid_idx = label_data['valid_idx']
 
+        print(len(self.data))
         self.shortened_data = torch.empty((len(self.valid_idx),) + self.data[0].shape)
 
         for idx, i in enumerate(self.valid_idx):
             self.shortened_data[idx] = self.data[i]
 
-        assert len(self.shortened_data) == len(self.labels), f'data ({len(self.shortened_data)}) and labels ({len(self.labels)}) must have the same length'
 
+        assert len(self.shortened_data) == len(self.labels), f'data ({len(self.shortened_data)}) and labels ({len(self.labels)}) must have the same length'
+        print(self.shortened_data[0,0,:,:])
         self.transform = transforms.Compose([
-            transforms.ToPILImage(),  
+            # transforms.ToPILImage(),  
             transforms.Resize(resize_shape),
             transforms.ToTensor()  
         ])
-        
+        self.resize_shape = resize_shape
+
 
     def __len__(self):
         return len(self.shortened_data)
 
     def __getitem__(self, index):
-        data_item = self.transform(self.shortened_data[index])
+        # data_item = self.transform(self.shortened_data[index])
+        data_item = self.shortened_data[index].float() / 255.0  # Normalize if still in 0-255 range
+        data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
         label_item = self.labels[index]
         return data_item, label_item
     
@@ -96,14 +103,14 @@ def plot_ecg(i):
     record = wfdb.rdrecord(f'{physio_root}/{i:05}_hr') 
     sample_values, sample_field = wfdb.rdsamp(f'{physio_root}/{i:05}_hr')
     sample_values = np.array(sample_values)
-    # first_lead_record = wfdb.Record(
-    # p_signal=record.p_signal[:, 0].reshape(-1, 1),  # Reshape for single column matrix
-    # fs=record.fs,
-    # sig_name=[record.sig_name[0]],
-    # n_sig=1,
-    # units=[record.units[0]],
-    # comments=record.comments
-    # )
+    first_lead_record = wfdb.Record(
+    p_signal=record.p_signal[:, 0].reshape(-1, 1),  # Reshape for single column matrix
+    fs=record.fs,
+    sig_name=[record.sig_name[0]],
+    n_sig=1,
+    units=[record.units[0]],
+    comments=record.comments
+    )
     # sig = np.array(record)
     # print(sig)
     low_cut = 0.1
@@ -125,7 +132,7 @@ def plot_ecg(i):
     plt.plot(signal)
     plt.show()
     # return filtered_data
-    # wfdb.plot_wfdb(record=first_lead_record, title=f'{i-1}', ecg_grids=[0])
+    wfdb.plot_wfdb(record=record, title=f'{i-1}', ecg_grids=[0])
 
 
 if __name__ == "__main__":
@@ -147,8 +154,8 @@ if __name__ == "__main__":
                                     shuffle=False, num_workers=2)
 
     for idx, (image, label) in enumerate(train_loader):
-        for i in range(200,256):
+        for i in range(0,256):
             print(f'idx: {i}, label: {label[i]}')
             plot_single_img(image, i)
-            # plot_ecg(i+1)
+            plot_ecg(i+1)
             

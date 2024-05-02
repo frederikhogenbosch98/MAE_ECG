@@ -83,6 +83,7 @@ def create_input_tensor(folder):
     t_start = time.time()
 
     for idx, file in enumerate(mat_files_without_extension):
+        print(file)
         if idx < lower_limit:
             continue
         elif idx >= upper_limit:
@@ -116,7 +117,6 @@ def create_input_tensor(folder):
                 del segs[0], segs[-1]
                 output_data[:,l] = normalize(np.mean(np.array(segs), axis=0))
 
-
             buf = create_img(output_data[:,l], 224, 224)
             buf.seek(0)
             image = Image.open(buf).convert('L')
@@ -128,6 +128,12 @@ def create_input_tensor(folder):
                 temp_img_tensor = torch.tensor(image_array[0:224, 0:224]) 
                 temp_img_tensor = temp_img_tensor[None, :, :]
                 img_tensor = torch.cat([img_tensor, temp_img_tensor], dim=0)
+
+
+        if idx == 21:
+            for l in range(11):
+                plt.plot(output_data[:,l])
+                plt.show()
 
         if idx % 100 == 0 and idx != 0:
             print(idx)
@@ -194,7 +200,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-f', '--folder')
     args = parser.parse_args()
-    SAVE = True
+    SAVE = False
 
     st = time.time()
     input_tensor = create_input_tensor(int(args.folder))

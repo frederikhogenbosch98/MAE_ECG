@@ -1,5 +1,5 @@
 from torchvision import datasets, transforms
-import torch
+import torch, torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.datasets import ImageFolder 
@@ -185,7 +185,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             for i, data in enumerate(train_loader):
                 img = data.to(device)
                 unmasked_img = img
-
+                plot_single_img(img.cpu(), 7)
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
                 img = img.to(device)
@@ -296,12 +296,12 @@ def eval_mae(model, testset, batch_size=128):
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
 
 
-def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=512, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        # for param in classifier.encoder.parameters():
-        #     param.requires_grad = False
+        for param in classifier.encoder.parameters():
+            param.requires_grad = False
         
 
         train_loader = torch.utils.data.DataLoader(trainset, 
@@ -310,7 +310,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         
         num_iters = len(train_loader)
 
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()), lr=learning_rate, weight_decay=1e-4)
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()), lr=learning_rate, weight_decay=1e-5)
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
@@ -329,10 +329,11 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             #                             num_epochs=num_epochs)
             scheduler = CosineAnnealingwithWarmUp(optimizer, 
                                                   n_warmup_epochs=n_warmup_epochs, 
-                                                  warmup_lr=5e-4, 
+                                                  warmup_lr=1e-4, 
                                                   start_lr=5e-4, 
-                                                  alpha=0.6, 
-                                                  epoch_int=30, 
+                                                  lower_lr=1e-6,
+                                                  alpha=0.5, 
+                                                  epoch_int=20, 
                                                   num_epochs=num_epochs)
 
             # scheduler.print_seq()
@@ -463,7 +464,7 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, resize_shape=(56,56)):
+    def __init__(self, data_path, resize_shape=(224,224)):
         loaded_data = torch.load(data_path)
         # print(type(loaded_data))
         self.data = loaded_data
@@ -475,18 +476,21 @@ class UnsupervisedDataset(torch.utils.data.Dataset):
             transforms.Resize(resize_shape),
             transforms.ToTensor()  
         ])
+
+        self.resize_shape = resize_shape
         
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
-        data_item = self.transform(self.data[index])
+        data_item = self.data[index].float() / 255.0  # Normalize if still in 0-255 range
+        data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
         return data_item
 
 
 class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path_un, data_path_sup, resize_shape=(56,56)):
+    def __init__(self, data_path_un, data_path_sup, resize_shape=(224,224)):
         self.data = torch.load(data_path_un)
         label_data = torch.load(data_path_sup)
         self.data = self.data[:,0,:,:].unsqueeze(1)
@@ -507,12 +511,13 @@ class SupervisedDataset(torch.utils.data.Dataset):
             transforms.ToTensor()  
         ])
         
-
+        self.resize_shape = resize_shape
     def __len__(self):
         return len(self.shortened_data)
 
     def __getitem__(self, index):
-        data_item = self.transform(self.shortened_data[index])
+        data_item = self.shortened_data[index].float() / 255.0  # Normalize if still in 0-255 range
+        data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
         label_item = self.labels[index]
         return data_item, label_item
 
@@ -565,21 +570,21 @@ if __name__ == "__main__":
     current_pams = count_parameters(mae)
     print(f'num params: {current_pams}')
    
-    eval_mae(mae, testset_un)
-    # num_classes = 5
-    # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    # # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    # num_warmup_epochs_classifier = 0
-    # num_epochs_classifier = 40 + num_warmup_epochs_classifier
-    # classifier = train_classifier(classifier, 
-    #                             trainset=trainset_sup, 
-    #                             valset=valset_sup, 
-    #                             num_epochs=num_epochs_classifier, 
-    #                             n_warmup_epochs=num_warmup_epochs_classifier, 
-    #                             learning_rate=1e-3,
-    #                             batch_size=256, 
-    #                             TRAIN_CLASSIFIER=True, 
-    #                             SAVE_MODEL_CLASSIFIER=False)
+    # eval_mae(mae, testset_un)
+    num_classes = 5
+    classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    num_warmup_epochs_classifier = 10
+    num_epochs_classifier = 40 + num_warmup_epochs_classifier
+    classifier = train_classifier(classifier, 
+                                trainset=trainset_sup, 
+                                valset=valset_sup, 
+                                num_epochs=num_epochs_classifier, 
+                                n_warmup_epochs=num_warmup_epochs_classifier, 
+                                learning_rate=1e-3,
+                                batch_size=256, 
+                                TRAIN_CLASSIFIER=True, 
+                                SAVE_MODEL_CLASSIFIER=False)
 
-    # eval_classifier(classifier, testset_sup)
+    eval_classifier(classifier, testset_sup)
 
