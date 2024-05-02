@@ -82,7 +82,7 @@ if __name__ == "__main__":
                         
     ### RESNET TRAINING
 
-    num_classes = 10
+    num_classes = 5
     num_epochs = 20
     batch_size = 16
     learning_rate = 0.01
@@ -95,12 +95,13 @@ if __name__ == "__main__":
 
     # Train the model
     total_step = len(train_loader)
-
+    print(f"Start MAE training for {num_epochs} training epochs")
     for epoch in range(num_epochs):
         for i, (images, labels) in enumerate(train_loader):  
             # Move tensors to the configured device
             images = images.to(device)
             labels = labels.to(device)
+            # plot_single_img(images.cpu(), 7)
             
             # Forward pass
             outputs = model(images)
