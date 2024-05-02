@@ -28,7 +28,7 @@ class ResidualBlock(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, layers, num_classes = 5):
+    def __init__(self, layers, num_classes = 10):
         super(ResNet, self).__init__()
         self.inplanes = 64
         self.conv1 = nn.Sequential(

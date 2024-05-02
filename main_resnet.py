@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     num_classes = 10
     num_epochs = 20
-    batch_size = 16
+    batch_size = 128
     learning_rate = 0.01
 
     model = ResNet([3, 4, 6, 3]).to(device)
