@@ -12,6 +12,7 @@ from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
 import math
+from models.resnet50 import ResNet
 
 
 class CosineAnnealingwithWarmUp():
@@ -591,4 +592,6 @@ if __name__ == "__main__":
                                 SAVE_MODEL_CLASSIFIER=False)
 
     eval_classifier(classifier, testset_sup)
+
+
 
