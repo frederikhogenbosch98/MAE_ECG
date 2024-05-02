@@ -328,7 +328,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
 
 
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-            # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+            scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
             # scheduler =     CosineAnnealingwithWarmUp(optimizer, 
             #                             n_warmup_epochs=n_warmup_epochs,
             #                             warmup_lr=5e-4,
@@ -337,14 +337,14 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             #                             alpha=0.5,
             #                             epoch_int=20,
             #                             num_epochs=num_epochs)
-            scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                                  n_warmup_epochs=n_warmup_epochs, 
-                                                  warmup_lr=1e-4, 
-                                                  start_lr=5e-4, 
-                                                  lower_lr=1e-6,
-                                                  alpha=0.5, 
-                                                  epoch_int=20, 
-                                                  num_epochs=num_epochs)
+            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+            #                                       n_warmup_epochs=n_warmup_epochs, 
+            #                                       warmup_lr=1e-4, 
+            #                                       start_lr=5e-4, 
+            #                                       lower_lr=1e-6,
+            #                                       alpha=0.5, 
+            #                                       epoch_int=20, 
+            #                                       num_epochs=num_epochs)
 
             # scheduler.print_seq()
 
