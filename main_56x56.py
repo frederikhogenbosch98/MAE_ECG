@@ -140,7 +140,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=512, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=512, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -235,8 +235,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
-            # save_folder = 'data/models_ecg/250_epoch_01_05_10pm.pth'
-            save_folder = 'trained_models/tranpose_02_05_10am.pth'
+            save_folder = f'trained_models/RUN_{fact}_R{R}.pth.pth'
+            # save_folder = 'trained_models/tranpose_02_05_10am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -248,7 +248,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth'))
-        # model.load_state_dict(torch.load('trained_models/cosinetest_02_05_9am.pth', map_location=torch.device('cpu')))
+        # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
 
 
     return model
@@ -268,7 +268,7 @@ def eval_mae(model, testset, batch_size=128):
     count = 0
 
     with torch.no_grad():  
-        for inputs in test_loader:
+        for inputs, _ in test_loader:
             inputs = inputs.to(device)  
             reconstructed = model(inputs)  
             loss = mse_loss(reconstructed, inputs)  
@@ -279,10 +279,10 @@ def eval_mae(model, testset, batch_size=128):
 
     print(f'Average MSE Loss on Test Set: {average_loss}')
 
-    data_list = []
-    target_list = []
+    # data_list = []
+    # target_list = []
 
-    # for data in testset:
+    # for data, _ in testset:
     #     data_list.append(data.unsqueeze(0))
 
     # test_data_tensor = torch.cat(data_list, dim=0)
@@ -303,7 +303,7 @@ def eval_mae(model, testset, batch_size=128):
 
     return average_loss
 
-def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=256, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
@@ -317,7 +317,10 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         
         num_iters = len(train_loader)
 
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()), lr=learning_rate, weight_decay=1e-5)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()), lr=learning_rate, weight_decay=1e-5)
+        optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, classifier.parameters()),
+                            lr=learning_rate,
+                            weight_decay=1e-4)
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
@@ -365,12 +368,14 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             classifier.train()
             t_epoch_start = time.time()
             for i, (inputs, labels) in enumerate(train_loader):
-                inputs, labels = inputs.to(device), labels.squeeze().to(device)
+                inputs, labels = inputs.to(device), labels.to(device)
                 # print(labels[0:64])
                 # plot_single_img(inputs.cpu(), 10)
                 # print(labels[10])
                 outputs = classifier(inputs)
                 # print(F.softmax(outputs, dim=1))
+                # print(outputs.shape)
+                # print(labels.shape)
                 loss = loss_function(outputs, labels)
                 optimizer.zero_grad()
                 loss.backward()
@@ -386,7 +391,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
                 total = 0
                 with torch.no_grad():  
                     for data, target in val_loader:
-                        data, target = data.to(device), target.squeeze().to(device)
+                        data, target = data.to(device), target.to(device)
                         output = classifier(data)
                         loss = loss_function(output, target)
                         validation_loss += loss.item() * data.size(0)
@@ -416,8 +421,8 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
 
         if SAVE_MODEL_CLASSIFIER:
-            # save_folder = 'data/models_imagenette/CLASSIFIER_MR_0.pth'
-            save_folder = 'trained_models/fullpapermodel_run1.pth'
+            # save_folder = f'/models_nightrun/RUN_{fact}_R{R}.pth'
+            save_folder = f'trained_models/RUN_{fact}_R{R}.pth.pth'
             torch.save(classifier.state_dict(), save_folder)
             print(f'classifier model saved to {save_folder}')
 
@@ -442,7 +447,7 @@ def eval_classifier(model, testset, batch_size=128):
     test_accuracy = []
     with torch.no_grad():
         for images, labels in test_loader:
-            images, labels = images.to(device), labels.squeeze().to(device)
+            images, labels = images.to(device), labels.to(device)
             outputs = model(images)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(outputs.data, 1)
@@ -543,9 +548,9 @@ if __name__ == "__main__":
 
     # ### ECG UNSUPERVISED
 
-    # dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
+    dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
     # # print(len(dataset_un))
-    # trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [17000, 4799])
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset_un, [15000, 3799, 3000])
     # testset_un, valset_un = torch.utils.data.random_split(testset_un, [3000, 1799]) 
 
     # ### ECG SUPERVISED
@@ -555,63 +560,74 @@ if __name__ == "__main__":
     # trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112, 112)), 
+        transforms.Resize((112,112)), 
         transforms.ToTensor(),         
         ])
     data_dir = 'data/physionet/mitbih/'
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-    print(len(dataset))
+    # print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [100000, 50000, 28140, 570000])
+    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    # trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [100000, 50000, 28140, 570000])
 
 
     MASK_RATIO = 0
-    R = 20
-    R_LIST = [15, 20, 25, 30]
+    fact_list = ['cp', 'tucker']
+    R_LIST = [8, 12, 15, 20, 25]
     mses = []
-    for R in R_LIST:
+    accuracies = []
 
-        print(f'R: {R}')
-        factorization='cp'
-        # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
-        # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
-        # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-        mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
-        # mae = AutoEncoder56().to(device)
+    for fact in fact_list:
+        for R in R_LIST:
+            print(f'fact: {fact}, R: {R}')
+            factorization=fact
+            # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
+            # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
+            # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
+            mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
+            # mae = AutoEncoder56().to(device)
 
-        current_pams = count_parameters(mae)
-        print(f'num params: {current_pams}')
+            current_pams = count_parameters(mae)
+            print(f'num params: {current_pams}')
 
 
-        num_warmup_epochs_mae = 0
-        num_epochs_mae = 50 + num_warmup_epochs_mae
-        mae = train_mae(mae, trainset_un,
-                        valset=valset_un,
-                        MASK_RATIO=MASK_RATIO,
-                        num_epochs=num_epochs_mae,
-                        n_warmup_epochs=num_warmup_epochs_mae,
-                        TRAIN_MAE=True,
-                        SAVE_MODEL_MAE=True)
+            num_warmup_epochs_mae = 0
+            num_epochs_mae = 1 + num_warmup_epochs_mae
+            mae = train_mae(mae, trainset_un,
+                            valset=valset_un,
+                            MASK_RATIO=MASK_RATIO,
+                            num_epochs=num_epochs_mae,
+                            n_warmup_epochs=num_warmup_epochs_mae,
+                            TRAIN_MAE=False,
+                            SAVE_MODEL_MAE=True,
+                            R=R,
+                            fact=fact)
 
-    
-        mses.append(eval_mae(mae, testset_un))
+        
+            mses.append(eval_mae(mae, testset_un))
+            
+            num_classes = 7
+            classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            num_warmup_epochs_classifier = 1
+            num_epochs_classifier = 1 + num_warmup_epochs_classifier
+            classifier = train_classifier(classifier, 
+                                        trainset=trainset_sup, 
+                                        valset=valset_sup, 
+                                        num_epochs=num_epochs_classifier, 
+                                        n_warmup_epochs=num_warmup_epochs_classifier, 
+                                        learning_rate=1e-3,
+                                        batch_size=256, 
+                                        TRAIN_CLASSIFIER=True, 
+                                        SAVE_MODEL_CLASSIFIER=False,
+                                        R=R,
+                                        fact=fact)
+
+            accuracies.append(eval_classifier(classifier, testset_sup))
+
     print(mses)
-    # num_classes = 5
-    # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    # # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    # num_warmup_epochs_classifier = 10
-    # num_epochs_classifier = 40 + num_warmup_epochs_classifier
-    # classifier = train_classifier(classifier, 
-    #                             trainset=trainset_sup, 
-    #                             valset=valset_sup, 
-    #                             num_epochs=num_epochs_classifier, 
-    #                             n_warmup_epochs=num_warmup_epochs_classifier, 
-    #                             learning_rate=1e-3,
-    #                             batch_size=256, 
-    #                             TRAIN_CLASSIFIER=True, 
-    #                             SAVE_MODEL_CLASSIFIER=False)
-
-    # eval_classifier(classifier, testset_sup)
+    print()
+            
 
 
 
