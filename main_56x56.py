@@ -236,7 +236,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
         if SAVE_MODEL_MAE:
             # save_folder = 'data/models_ecg/250_epoch_01_05_10pm.pth'
-            save_folder = 'trained_models/250_epoch_01_05_10pm.pth'
+            save_folder = 'trained_models/cosinetest_02_05_9am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -565,7 +565,7 @@ if __name__ == "__main__":
                     MASK_RATIO=MASK_RATIO,
                     num_epochs=num_epochs_mae,
                     n_warmup_epochs=num_warmup_epochs_mae,
-                    TRAIN_MAE=False,
+                    TRAIN_MAE=True,
                     SAVE_MODEL_MAE=True)
 
     current_pams = count_parameters(mae)
