@@ -140,7 +140,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=256, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=4096, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -562,7 +562,7 @@ if __name__ == "__main__":
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [600000, 100000, 48140])
+    trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [200000, 100000, 48140, 400000])
 
 
     MASK_RATIO = 0
