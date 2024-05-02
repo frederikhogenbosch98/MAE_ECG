@@ -188,9 +188,10 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             t_epoch_start = time.time()
             model.train()
             for i, data in enumerate(train_loader):
-                img = data.to(device)
+                img, _ = data
+                img = img.to(device)
                 unmasked_img = img
-                plot_single_img(img.cpu(), 7)
+                # plot_single_img(img.cpu(), 7)
                 if MASK_RATIO != 0:
                     img = mask(img, MASK_RATIO, p)
                 img = img.to(device)
@@ -208,7 +209,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                 validation_loss = 0.0
 
                 with torch.no_grad():
-                    for data in val_loader:
+                    for data, _ in val_loader:
                         imgs  = data
                         imgs = imgs.to(device)
                         outputs = model(imgs)
@@ -281,25 +282,26 @@ def eval_mae(model, testset, batch_size=128):
     data_list = []
     target_list = []
 
-    for data in testset:
-        data_list.append(data.unsqueeze(0))
+    # for data in testset:
+    #     data_list.append(data.unsqueeze(0))
 
-    test_data_tensor = torch.cat(data_list, dim=0)
+    # test_data_tensor = torch.cat(data_list, dim=0)
 
-    test_data_tensor = test_data_tensor.to(device)
+    # test_data_tensor = test_data_tensor.to(device)
 
 
-    x = model(test_data_tensor[0:64,:,:,:])
-    embedding = model.encoder(x)
-    e1 = embedding
-    recon = model.decoder(e1)
-    # print(recon.shape)
-    # print(recon)
-    for i in range(10):
-        recon_cpu = recon[i,:,:,:]#.detach().numpy()
-        recon_cpu = recon_cpu.cpu()
-        plotimg(test_data_tensor[i,:,:,:], recon_cpu)
+    # x = model(test_data_tensor[0:64,:,:,:])
+    # embedding = model.encoder(x)
+    # e1 = embedding
+    # recon = model.decoder(e1)
+    # # print(recon.shape)
+    # # print(recon)
+    # for i in range(10):
+    #     recon_cpu = recon[i,:,:,:]#.detach().numpy()
+    #     recon_cpu = recon_cpu.cpu()
+    #     plotimg(test_data_tensor[i,:,:,:], recon_cpu)
 
+    return average_loss
 
 def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=512, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
@@ -541,57 +543,73 @@ if __name__ == "__main__":
 
     # ### ECG UNSUPERVISED
 
-    dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
-    # print(len(dataset_un))
-    trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [17000, 4799])
-    testset_un, valset_un = torch.utils.data.random_split(testset_un, [3000, 1799]) 
+    # dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
+    # # print(len(dataset_un))
+    # trainset_un, testset_un = torch.utils.data.random_split(dataset_un, [17000, 4799])
+    # testset_un, valset_un = torch.utils.data.random_split(testset_un, [3000, 1799]) 
 
-    ### ECG SUPERVISED
-    dataset_sup = SupervisedDataset(data_path_un='data/datasets/unsupervised_dataset_22k_224.pt', data_path_sup='data/datasets/supervised_dataset_22k.pt')
-    # print(len(dataset_sup))
-    trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4244])    
-    trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
+    # ### ECG SUPERVISED
+    # dataset_sup = SupervisedDataset(data_path_un='data/datasets/unsupervised_dataset_22k_224.pt', data_path_sup='data/datasets/supervised_dataset_22k.pt')
+    # # print(len(dataset_sup))
+    # trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4244])    
+    # trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
+    transform = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1),
+        transforms.Resize((112, 112)), 
+        transforms.ToTensor(),         
+        ])
+    data_dir = 'data/physionet/mitbih/'
+    dataset = datasets.ImageFolder(root=data_dir, transform=transform)
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
+
 
     MASK_RATIO = 0
     R = 20
-    print(f'R: {R}')
-    factorization='tucker'
-    # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
-    # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
-    # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-    mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
-    # mae = AutoEncoder56().to(device)
+    R_LIST = [15, 20, 25, 30]
+    mses = []
+    for R in R_LIST:
 
-    num_warmup_epochs_mae = 0
-    num_epochs_mae = 250 + num_warmup_epochs_mae
-    mae = train_mae(mae, trainset_un,
-                    valset=valset_un,
-                    MASK_RATIO=MASK_RATIO,
-                    num_epochs=num_epochs_mae,
-                    n_warmup_epochs=num_warmup_epochs_mae,
-                    TRAIN_MAE=True,
-                    SAVE_MODEL_MAE=True)
+        print(f'R: {R}')
+        factorization='cp'
+        # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
+        # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
+        # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
+        mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
+        # mae = AutoEncoder56().to(device)
 
-    current_pams = count_parameters(mae)
-    print(f'num params: {current_pams}')
-   
-    # eval_mae(mae, testset_un)
-    num_classes = 5
-    classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-    num_warmup_epochs_classifier = 10
-    num_epochs_classifier = 40 + num_warmup_epochs_classifier
-    classifier = train_classifier(classifier, 
-                                trainset=trainset_sup, 
-                                valset=valset_sup, 
-                                num_epochs=num_epochs_classifier, 
-                                n_warmup_epochs=num_warmup_epochs_classifier, 
-                                learning_rate=1e-3,
-                                batch_size=256, 
-                                TRAIN_CLASSIFIER=True, 
-                                SAVE_MODEL_CLASSIFIER=False)
+        current_pams = count_parameters(mae)
+        print(f'num params: {current_pams}')
 
-    eval_classifier(classifier, testset_sup)
+
+        num_warmup_epochs_mae = 0
+        num_epochs_mae = 50 + num_warmup_epochs_mae
+        mae = train_mae(mae, trainset_un,
+                        valset=valset_un,
+                        MASK_RATIO=MASK_RATIO,
+                        num_epochs=num_epochs_mae,
+                        n_warmup_epochs=num_warmup_epochs_mae,
+                        TRAIN_MAE=True,
+                        SAVE_MODEL_MAE=True)
+
+    
+        mses.append(eval_mae(mae, testset_un))
+    print(mses)
+    # num_classes = 5
+    # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    # # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+    # num_warmup_epochs_classifier = 10
+    # num_epochs_classifier = 40 + num_warmup_epochs_classifier
+    # classifier = train_classifier(classifier, 
+    #                             trainset=trainset_sup, 
+    #                             valset=valset_sup, 
+    #                             num_epochs=num_epochs_classifier, 
+    #                             n_warmup_epochs=num_warmup_epochs_classifier, 
+    #                             learning_rate=1e-3,
+    #                             batch_size=256, 
+    #                             TRAIN_CLASSIFIER=True, 
+    #                             SAVE_MODEL_CLASSIFIER=False)
+
+    # eval_classifier(classifier, testset_sup)
 
 
 
