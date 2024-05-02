@@ -328,7 +328,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
 
 
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
-            scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
+            # scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
             # scheduler =     CosineAnnealingwithWarmUp(optimizer, 
             #                             n_warmup_epochs=n_warmup_epochs,
             #                             warmup_lr=5e-4,
@@ -337,14 +337,14 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             #                             alpha=0.5,
             #                             epoch_int=20,
             #                             num_epochs=num_epochs)
-            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
-            #                                       n_warmup_epochs=n_warmup_epochs, 
-            #                                       warmup_lr=1e-4, 
-            #                                       start_lr=5e-4, 
-            #                                       lower_lr=1e-6,
-            #                                       alpha=0.5, 
-            #                                       epoch_int=20, 
-            #                                       num_epochs=num_epochs)
+            scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                                  n_warmup_epochs=n_warmup_epochs, 
+                                                  warmup_lr=1e-4, 
+                                                  start_lr=5e-4, 
+                                                  lower_lr=1e-6,
+                                                  alpha=0.5, 
+                                                  epoch_int=20, 
+                                                  num_epochs=num_epochs)
 
             # scheduler.print_seq()
 
@@ -573,7 +573,7 @@ if __name__ == "__main__":
 
     MASK_RATIO = 0
     fact_list = ['cp', 'tucker']
-    R_LIST = [8, 12, 15, 20, 25]
+    R_LIST = [5, 10, 15, 20, 25]
     mses = []
     accuracies = []
 
@@ -592,7 +592,7 @@ if __name__ == "__main__":
 
 
             num_warmup_epochs_mae = 0
-            num_epochs_mae = 1 + num_warmup_epochs_mae
+            num_epochs_mae = 100 + num_warmup_epochs_mae
             mae = train_mae(mae, trainset_un,
                             valset=valset_un,
                             MASK_RATIO=MASK_RATIO,
@@ -609,8 +609,8 @@ if __name__ == "__main__":
             num_classes = 8
             classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            num_warmup_epochs_classifier = 1
-            num_epochs_classifier = 1 + num_warmup_epochs_classifier
+            num_warmup_epochs_classifier = 5
+            num_epochs_classifier = 20 + num_warmup_epochs_classifier
             classifier = train_classifier(classifier, 
                                         trainset=trainset_sup, 
                                         valset=valset_sup, 

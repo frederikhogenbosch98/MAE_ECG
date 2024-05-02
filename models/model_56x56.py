@@ -138,42 +138,8 @@ class AutoEncoder56(nn.Module):
 class Classifier56(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier56, self).__init__()
-        # self.encoder = autoencoder.encoder
+        self.encoder = autoencoder.encoder
 
-        self.encoder = nn.Sequential(
-                # Layer 1: Convolutional
-                nn.Conv2d(in_channels=1, out_channels=64, kernel_size=3, stride=1, padding=1),
-                nn.ELU(),
-                nn.BatchNorm2d(num_features=64),
-
-                # Layer 2: Convolutional
-                nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1),
-                nn.ELU(),
-                nn.BatchNorm2d(num_features=64),
-                nn.MaxPool2d(kernel_size=2, stride=2),
-
-                # Layer 3: Convolutional
-                nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1),
-                nn.ELU(),
-                nn.BatchNorm2d(num_features=128),
-
-                # Layer 4: Convolutional
-                nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1, padding=1),
-                nn.ELU(),
-                nn.BatchNorm2d(num_features=128),
-                nn.MaxPool2d(kernel_size=2, stride=2),
-
-                # Layer 5: Convolutional
-                nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, stride=1, padding=1),
-                nn.ELU(),
-                nn.BatchNorm2d(num_features=256),
-
-                # Layer 6: Convolutional
-                nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, stride=1, padding=1),
-                nn.ELU(),
-                nn.BatchNorm2d(num_features=256),
-                nn.MaxPool2d(kernel_size=2, stride=2),
-        )
 
         # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
         self.img_size = (56, 56)
