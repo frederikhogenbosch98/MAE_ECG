@@ -71,8 +71,8 @@ if __name__ == "__main__":
     batch_size = 128
     learning_rate = 0.01
 
-    model = ResNet([3, 4, 6, 3]).to(device)
-    model = ResNet_TD(layers=[3, 4, 6, 3], R=15, factorization='tucker').to(device)
+    # model = ResNet([3, 4, 6, 3]).to(device)
+    model = ResNet_TD(layers=[3, 4, 6, 3], R=5, factorization='tucker').to(device)
 
     # test_tensor = torch.rand(16, 3, 128, 128)
     # output = model(test_tensor)
@@ -80,13 +80,14 @@ if __name__ == "__main__":
 
     # Define image transformations
     transform = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1),
         transforms.Resize((128, 128)), 
         transforms.ToTensor(),         
         ])
 
-    data_dir = 'data/physionet/mitbih/imgs_sorted_test'
+    data_dir = 'data/physionet/mitbih/'
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-    trainset, testset, valset = torch.utils.data.random_split(dataset, [15000, 4000, 2003])
+    trainset, testset, valset = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=2)
     test_loader = torch.utils.data.DataLoader(testset, batch_size=128, shuffle=True, num_workers=2)
     val_loader = torch.utils.data.DataLoader(valset, batch_size=128, shuffle=False, num_workers=2)
