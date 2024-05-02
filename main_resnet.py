@@ -71,8 +71,9 @@ if __name__ == "__main__":
     batch_size = 128
     learning_rate = 0.01
 
-    # model = ResNet([3, 4, 6, 3]).to(device)
-    model = ResNet_TD(layers=[3, 4, 6, 3], R=5, factorization='tucker').to(device)
+    # model = ResNet([2, 2, 2, 2]).to(device)
+    model = ResNet_TD(layers=[2, 2, 2, 2], R=5, factorization='cp').to(device)
+    print(f'number of parameters: {count_parameters(model)}')
 
     # test_tensor = torch.rand(16, 3, 128, 128)
     # output = model(test_tensor)
