@@ -568,7 +568,7 @@ if __name__ == "__main__":
     # print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [20000, 10000, 5000, 713140])
+    trainset_sup, testset_sup, valset_sup, _ = torch.utils.data.random_split(dataset, [20000, 10000, 5000, 713140])
 
 
     MASK_RATIO = 0
