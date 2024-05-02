@@ -303,7 +303,7 @@ def eval_mae(model, testset, batch_size=128):
 
     return average_loss
 
-def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=512, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
+def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=256, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True):
 
     classifier.to(device)
     if TRAIN_CLASSIFIER:
@@ -562,7 +562,7 @@ if __name__ == "__main__":
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [200000, 100000, 48140, 400000])
+    trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [100000, 50000, 38140, 560000])
 
 
     MASK_RATIO = 0
