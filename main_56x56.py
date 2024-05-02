@@ -561,7 +561,8 @@ if __name__ == "__main__":
     data_dir = 'data/physionet/mitbih/'
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     print(len(dataset))
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
+    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [600000, 100000, 48140])
 
 
     MASK_RATIO = 0
