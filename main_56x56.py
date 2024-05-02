@@ -90,12 +90,6 @@ class EarlyStopper:
         return False
 
 
-def early_stopper(loss):
-    if np.mean([np.abs(loss[-1] - loss[-2]), np.abs(loss[-2] - loss[-3])]) < 0.0002:
-        return True
-    else:
-        return False
-
 def apply_mask(x, ratio, p):
     x = x.permute(0,5,1,2,3,4)
     rand_mask = torch.rand(x.shape[0], x.shape[1], x.shape[2], x.shape[3]) < ratio
@@ -177,7 +171,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
             scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
 
-            early_stopper = EarlyStopper(patience=6)
+            # early_stopper = EarlyStopper(patience=6)
 
         outputs = []
         losses = []
@@ -218,9 +212,9 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
                 validation_loss /= len(val_loader.dataset)
                 
-                if early_stopper.early_stop(validation_loss):             
-                    print(f"EARLY STOPPING AT EPOCH: {epoch}")
-                    break
+                # if early_stopper.early_stop(validation_loss):             
+                #     print(f"EARLY STOPPING AT EPOCH: {epoch}")
+                #     break
             else:
                 validation_loss = 0
 
@@ -236,7 +230,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
         if SAVE_MODEL_MAE:
             # save_folder = 'data/models_ecg/250_epoch_01_05_10pm.pth'
-            save_folder = 'trained_models/cosinetest_02_05_9am.pth'
+            save_folder = 'trained_models/tranpose_02_05_10am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
@@ -247,8 +241,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        # model.load_state_dict(torch.load('data/models_ecg/cosinetest_02_05_9am.pth'))
-        model.load_state_dict(torch.load('trained_models/cosinetest_02_05_9am.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth.pth'))
+        # model.load_state_dict(torch.load('trained_models/cosinetest_02_05_9am.pth', map_location=torch.device('cpu')))
 
 
     return model
@@ -558,8 +552,8 @@ if __name__ == "__main__":
     mae = AutoEncoder56_CPD(R, in_channels=1).to(device)
     # mae = AutoEncoder56().to(device)
 
-    num_warmup_epochs_mae = 3
-    num_epochs_mae = 100 + num_warmup_epochs_mae
+    num_warmup_epochs_mae = 0
+    num_epochs_mae = 250 + num_warmup_epochs_mae
     mae = train_mae(mae, trainset_un,
                     valset=valset_un,
                     MASK_RATIO=MASK_RATIO,
