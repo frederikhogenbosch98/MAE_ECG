@@ -1,16 +1,17 @@
 import torch, torchvision
 import torch.nn as nn
+import tltorch
 
 
-class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, stride = 1, downsample = None):
-        super(ResidualBlock, self).__init__()
+class ResidualBlock_TD(nn.Module):
+    def __init__(self, in_channels, out_channels, R, factorization='cp', stride = 1, downsample = None):
+        super(ResidualBlock_TD, self).__init__()
         self.conv1 = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1),
+                        tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1), rank=R, decompose_weights=True, factorization=factorization),
                         nn.BatchNorm2d(out_channels),
                         nn.ReLU())
         self.conv2 = nn.Sequential(
-                        nn.Conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1),
+                        tltorch.FactorizedConv.from_conv(nn.Conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1), rank=R, decompose_weights=True, factorization=factorization),
                         nn.BatchNorm2d(out_channels))
         self.downsample = downsample
         self.relu = nn.ReLU()
@@ -27,19 +28,21 @@ class ResidualBlock(nn.Module):
         return out
 
 
-class ResNet(nn.Module):
-    def __init__(self, layers, num_classes = 7):
-        super(ResNet, self).__init__()
+class ResNet_TD(nn.Module):
+    def __init__(self, layers, R, factorization='cp', num_classes = 7):
+        super(ResNet_TD, self).__init__()
+        self.R = R
+        self.factorization = factorization
         self.inplanes = 64
         self.conv1 = nn.Sequential(
-                        nn.Conv2d(1, 64, kernel_size = 7, stride = 2, padding = 3),
+                        tltorch.FactorizedConv.from_conv(nn.Conv2d(1, 64, kernel_size = 7, stride = 2, padding = 3), rank=R, decompose_weights=True, factorization=factorization),
                         nn.BatchNorm2d(64),
                         nn.ReLU())
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1)
-        self.layer0 = self._make_layer(ResidualBlock, 64, layers[0], stride = 1)
-        self.layer1 = self._make_layer(ResidualBlock, 128, layers[1], stride = 2)
-        self.layer2 = self._make_layer(ResidualBlock, 256, layers[2], stride = 2)
-        self.layer3 = self._make_layer(ResidualBlock, 512, layers[3], stride = 2)
+        self.layer0 = self._make_layer(ResidualBlock_TD, 64, layers[0], stride = 1)
+        self.layer1 = self._make_layer(ResidualBlock_TD, 128, layers[1], stride = 2)
+        self.layer2 = self._make_layer(ResidualBlock_TD, 256, layers[2], stride = 2)
+        self.layer3 = self._make_layer(ResidualBlock_TD, 512, layers[3], stride = 2)
         self.avgpool = nn.AvgPool2d(4, stride=1)
         self.fc = nn.Linear(512, num_classes)
         
@@ -52,10 +55,10 @@ class ResNet(nn.Module):
                 nn.BatchNorm2d(planes),
             )
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers.append(block(in_channels = self.inplanes, out_channels=planes, R=self.R, factorization=self.factorization, stride=stride, downsample=downsample))
         self.inplanes = planes
         for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
+            layers.append(block(in_channels=self.inplanes, out_channels=planes, R=self.R, factorization=self.factorization))
 
         return nn.Sequential(*layers)
     
