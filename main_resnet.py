@@ -153,7 +153,7 @@ if __name__ == "__main__":
                             
     ### RESNET TRAINING
 
-    num_classes = 5
+    num_classes = 10
     num_epochs = 20
     batch_size = 16
     learning_rate = 0.01
