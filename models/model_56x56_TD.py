@@ -155,7 +155,7 @@ import tltorch
 #         )
 #         self.decoder = nn.Sequential(
 #             # Corresponds to LAYER 6 in Encoder
-#             nn.ConvTranspose2d(channels[2], channels[2], ) 
+#             nn.ConvTranspose2d(channels[2], channels[2], kernel_size=2, stride=2), 
 #             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
 #             nn.GELU(),
 #             nn.BatchNorm2d(channels[2]),
@@ -164,7 +164,7 @@ import tltorch
 #             nn.GELU(),
 #             nn.BatchNorm2d(channels[2]),
 #             # Corresponds to LAYER 4 in Encoder
-#             nn.Upsample(scale_factor=2, mode='nearest'),
+#             nn.ConvTranspose2d(channels[2], channels[2], kernel_size=2, stride=2), 
 #             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
 #             nn.GELU(),
 #             nn.BatchNorm2d(channels[1]),
@@ -173,7 +173,7 @@ import tltorch
 #             nn.GELU(),
 #             nn.BatchNorm2d(channels[1]),
 #             # Corresponds to LAYER 4 in Encoder
-#             nn.Upsample(scale_factor=2, mode='nearest'),
+#             nn.ConvTranspose2d(channels[1], channels[1], kernel_size=2, stride=2), 
 #             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
 #             nn.GELU(),
 #             nn.BatchNorm2d(channels[0]),
@@ -326,7 +326,7 @@ class LayerNorm(nn.Module):
             return x
 
 class AutoEncoder56_CPD(nn.Module):
-    def __init__(self, R, in_channels=1, channels=[32, 64, 128], depths=[1, 1, 1]):
+    def __init__(self, R, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
         super(AutoEncoder56_CPD, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1

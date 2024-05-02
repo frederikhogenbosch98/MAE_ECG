@@ -145,7 +145,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=2e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=256, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -164,18 +164,18 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                         shuffle=False)#, num_workers=2)
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
             # scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
-            scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                                n_warmup_epochs=n_warmup_epochs,
-                                                warmup_lr=1e-5,
-                                                start_lr=5e-4,
-                                                lower_lr=7e-6,
-                                                alpha=0.5,
-                                                epoch_int=20,
-                                                num_epochs=num_epochs)
+            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+            #                                     n_warmup_epochs=n_warmup_epochs,
+            #                                     warmup_lr=1e-5,
+            #                                     start_lr=5e-4,
+            #                                     lower_lr=7e-6,
+            #                                     alpha=0.5,
+            #                                     epoch_int=20,
+            #                                     num_epochs=num_epochs)
             # scheduler.print_seq()
-            # lambda_lr = lambda epoch: 0.95 ** (epoch / 10)
+            lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
 
-            # scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
+            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
 
             early_stopper = EarlyStopper(patience=6)
 
@@ -241,7 +241,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             torch.save(model.state_dict(), save_folder)
             print(f'mae model saved to {save_folder}')
 
-        plot_losses(epoch+1, losses)        
+        # plot_losses(epoch+1, losses)        
         print("\n")
         print("\n")
 
