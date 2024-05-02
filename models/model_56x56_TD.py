@@ -357,6 +357,7 @@ class AutoEncoder56_CPD(nn.Module):
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True),
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
+            nn.Dropout(0.5),
             # LAYER 6
             nn.MaxPool2d(2, stride=2)
             
