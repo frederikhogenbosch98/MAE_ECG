@@ -326,7 +326,7 @@ class LayerNorm(nn.Module):
             return x
 
 # class AutoEncoder56_CPD(nn.Module):
-#     def __init__(self, R, in_channels=1, channels=[32, 64, 128], depths=[1, 1, 1]):
+#     def __init__(self, R, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
 #         super(AutoEncoder56_CPD, self).__init__()
 #         self.encoder = nn.Sequential(
 #             # LAYER 1
