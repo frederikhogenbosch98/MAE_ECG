@@ -140,7 +140,7 @@ def mask(batch, ratio, p):
 
 
 
-def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=512, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, p=4):
+def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, p=4):
     # torch.manual_seed(42)
     if TRAIN_MAE:
 
@@ -188,7 +188,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             t_epoch_start = time.time()
             model.train()
             for i, data in enumerate(train_loader):
-                img, _ = data
+                img = data
                 img = img.to(device)
                 unmasked_img = img
                 # plot_single_img(img.cpu(), 7)
@@ -209,7 +209,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                 validation_loss = 0.0
 
                 with torch.no_grad():
-                    for data, _ in val_loader:
+                    for data in val_loader:
                         imgs  = data
                         imgs = imgs.to(device)
                         outputs = model(imgs)
@@ -268,7 +268,7 @@ def eval_mae(model, testset, batch_size=128):
     count = 0
 
     with torch.no_grad():  
-        for inputs, _ in test_loader:
+        for inputs in test_loader:
             inputs = inputs.to(device)  
             reconstructed = model(inputs)  
             loss = mse_loss(reconstructed, inputs)  
@@ -567,8 +567,8 @@ if __name__ == "__main__":
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     # print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    # trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [100000, 50000, 28140, 570000])
+    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(dataset, [20000, 10000, 5000, 713140])
 
 
     MASK_RATIO = 0
@@ -598,7 +598,7 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=False,
+                            TRAIN_MAE=True,
                             SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
@@ -619,7 +619,7 @@ if __name__ == "__main__":
                                         learning_rate=1e-3,
                                         batch_size=256, 
                                         TRAIN_CLASSIFIER=True, 
-                                        SAVE_MODEL_CLASSIFIER=False,
+                                        SAVE_MODEL_CLASSIFIER=True,
                                         R=R,
                                         fact=fact)
 
