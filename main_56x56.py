@@ -171,7 +171,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                                 alpha=0.5,
                                                 epoch_int=20,
                                                 num_epochs=num_epochs)
-            scheduler.print_seq()
+            # scheduler.print_seq()
             # lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
 
             # scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
@@ -565,7 +565,7 @@ if __name__ == "__main__":
         ])
     data_dir = 'data/physionet/mitbih/'
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-    # print(len(dataset))
+    print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
     # trainset_sup, testset_sup, valset_sup, _ = torch.utils.data.random_split(dataset, [20000, 10000, 5000, 713140])
@@ -598,8 +598,8 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=False,
-                            SAVE_MODEL_MAE=True,
+                            TRAIN_MAE=True,
+                            SAVE_MODEL_MAE=False,
                             R=R,
                             fact=fact)
 
@@ -626,7 +626,7 @@ if __name__ == "__main__":
             accuracies.append(eval_classifier(classifier, testset_sup))
 
     print(mses)
-    print()
+    print(accuracies)
             
 
 
