@@ -40,10 +40,9 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
             if ann.symbol[i] not in lboriginal_labels:
                 continue
             label = lboriginal_labels[ann.symbol[i]]
-            if file in train:
-                dir = '{}train/{}'.format(_dataset_dir, label)
-            else:
-                dir = '{}validation/{}'.format(_dataset_dir, label)
+
+            dir = '{}/{}'.format(_dataset_dir, label)
+
             if not os.path.exists(dir):
                 os.makedirs(dir)
 
