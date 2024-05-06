@@ -576,7 +576,7 @@ if __name__ == "__main__":
 
     MASK_RATIO = 0
     fact_list = ['cp', 'tucker']#, 'tucker']
-    R_LIST = [20]
+    R_LIST = [0]
     mses = []
     accuracies = []
 
@@ -587,8 +587,8 @@ if __name__ == "__main__":
             # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
             # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
             # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-            mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
-            # mae = AutoEncoder56().to(device)
+            # mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
+            mae = AutoEncoder56().to(device)
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
