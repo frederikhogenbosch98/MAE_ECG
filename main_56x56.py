@@ -476,7 +476,7 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, resize_shape=(224,224)):
+    def __init__(self, data_path, resize_shape=(112,112)):
         loaded_data = torch.load(data_path)
         # print(type(loaded_data))
         self.data = loaded_data
