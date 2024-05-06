@@ -64,7 +64,6 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
 
             ''' Convert in gray scale and resize img '''
             if file in train:
-                print(label)
                 filename = '{}train/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
             else:
                 filename = '{}validation/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
