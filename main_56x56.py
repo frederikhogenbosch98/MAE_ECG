@@ -13,6 +13,7 @@ from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
 import math
 from models.resnet50 import ResNet
+from datetime import datetime
 
 
 class CosineAnnealingwithWarmUp():
@@ -234,8 +235,9 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
+        now = datetime.now()
         if SAVE_MODEL_MAE:
-            save_folder = f'trained_models/MAE_RUN_{fact}_R{R}.pth.pth'
+            save_folder = f'trained_models/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
             # save_folder = 'trained_models/tranpose_02_05_10am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
@@ -419,10 +421,10 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             # scheduler.step()
         t_end = time.time()
         print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
-
+        now = datetime.now()
         if SAVE_MODEL_CLASSIFIER:
             # save_folder = f'/models_nightrun/RUN_{fact}_R{R}.pth'
-            save_folder = f'trained_models/CLASSIFIER_RUN_{fact}_R{R}.pth.pth'
+            save_folder = f'trained_models/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
             torch.save(classifier.state_dict(), save_folder)
             print(f'classifier model saved to {save_folder}')
 
@@ -476,7 +478,7 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, resize_shape=(56,56)):
+    def __init__(self, data_path, resize_shape=(112,112)):
         loaded_data = torch.load(data_path)
         # print(type(loaded_data))
         self.data = loaded_data
@@ -573,7 +575,7 @@ if __name__ == "__main__":
 
 
     MASK_RATIO = 0
-    fact_list = ['cp']#, 'tucker']
+    fact_list = ['cp', 'tucker']#, 'tucker']
     R_LIST = [20]
     mses = []
     accuracies = []
@@ -600,7 +602,7 @@ if __name__ == "__main__":
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
                             TRAIN_MAE=True,
-                            SAVE_MODEL_MAE=False,
+                            SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
 
