@@ -39,11 +39,8 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
         for i in tqdm.tqdm(range(1, len(ann.sample) - 1)):
             if ann.symbol[i] is not 'N':
                 print(ann.symbol[i])
-            print(lboriginal_labels)
             if ann.symbol[i] not in lboriginal_labels:
-                print('erro')
                 continue
-            label = lboriginal_labels[ann.symbol[i]]
             if file in train:
                 dir = '{}train/{}'.format(_dataset_dir, label)
             else:
