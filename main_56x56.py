@@ -496,8 +496,9 @@ class UnsupervisedDataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        data_item = self.data[index].float() / 255.0  # Normalize if still in 0-255 range
-        data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
+        # data_item = self.data[index].float() / 255.0  # Normalize if still in 0-255 range
+        # data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
+        data_item = self.transform(self.data[index])
         return data_item
 
 
