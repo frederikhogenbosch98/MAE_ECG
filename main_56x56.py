@@ -167,7 +167,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                                 n_warmup_epochs=n_warmup_epochs,
                                                 warmup_lr=1e-5,
                                                 start_lr=5e-4,
-                                                lower_lr=7e-6,
+                                                lower_lr=1e-5,
                                                 alpha=0.5,
                                                 epoch_int=20,
                                                 num_epochs=num_epochs)
@@ -591,7 +591,7 @@ if __name__ == "__main__":
             print(f'num params: {current_pams}')
 
 
-            num_warmup_epochs_mae = 0
+            num_warmup_epochs_mae = 10
             num_epochs_mae = 100 + num_warmup_epochs_mae
             mae = train_mae(mae, trainset_un,
                             valset=valset_un,
