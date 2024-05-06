@@ -41,6 +41,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
                 print(ann.symbol[i])
             if ann.symbol[i] not in lboriginal_labels:
                 continue
+            label = lboriginal_labels[ann.symbol[i]]
             if file in train:
                 dir = '{}train/{}'.format(_dataset_dir, label)
             else:
