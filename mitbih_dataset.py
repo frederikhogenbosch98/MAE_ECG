@@ -11,7 +11,7 @@ import numpy as np
 
 _range_to_ignore = 20
 _directory = '../extra_reps/data/mitbih/'
-_dataset_dir = 'data/physionet/mitbih'
+_dataset_dir = 'data/physionet/mitbih/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .70
 _split_validation_percentage = 0.70
@@ -63,10 +63,8 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
                 spine.set_visible(False)
 
             ''' Convert in gray scale and resize img '''
-            if file in train:
-                filename = '{}train/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
-            else:
-                filename = '{}validation/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+
+            filename = '{}/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
             fig.savefig(filename)
             im_gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
             im_gray = cv2.resize(im_gray, size, interpolation=cv2.INTER_LANCZOS4)
