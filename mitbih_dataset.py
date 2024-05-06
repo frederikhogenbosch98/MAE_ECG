@@ -10,9 +10,9 @@ import wfdb
 import numpy as np
 
 _range_to_ignore = 20
-_directory = '../data/mitbih/'
-_dataset_dir = '../data/dataset_filtered/'
-_dataset_ann_dir = '../data/dataset_ann/'
+_directory = '../../data/mitbih/'
+_dataset_dir = '../../data/dataset_filtered/'
+_dataset_ann_dir = '../../data/dataset_ann/'
 _split_percentage = .70
 _split_validation_percentage = 0.70
 _split_test_percentage = 0.50
