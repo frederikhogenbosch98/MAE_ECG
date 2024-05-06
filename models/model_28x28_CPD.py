@@ -5,7 +5,7 @@ import tltorch
 import tensorly as tl
 from tensorly.decomposition import parafac, tucker, parafac2, partial_tucker
 import numpy as np
-from ConvTranpose_CP import FactorizedConvTranspose
+from old_files.ConvTranpose_CP import FactorizedConvTranspose
 
 tl.set_backend('pytorch')
 
@@ -71,13 +71,9 @@ class ParafacConvolution2D(nn.Module):
     
     def forward(self, x):
         x = self.s_to_r(x)
-        # print(x.shape)
         x = self.depth_vert(x)
-        # print(x.shape)
         x = self.depth_hor(x)
-        # print(x.shape)
         x = self.r_to_t(x)
-        # print(x.shape)
         return x
 
 

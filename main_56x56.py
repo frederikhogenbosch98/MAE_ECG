@@ -163,18 +163,18 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                         shuffle=False)#, num_workers=2)
             # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
             # scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
-            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
-            #                                     n_warmup_epochs=n_warmup_epochs,
-            #                                     warmup_lr=1e-5,
-            #                                     start_lr=5e-4,
-            #                                     lower_lr=7e-6,
-            #                                     alpha=0.5,
-            #                                     epoch_int=20,
-            #                                     num_epochs=num_epochs)
-            # scheduler.print_seq()
-            lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
+            scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                                n_warmup_epochs=n_warmup_epochs,
+                                                warmup_lr=1e-5,
+                                                start_lr=5e-4,
+                                                lower_lr=7e-6,
+                                                alpha=0.5,
+                                                epoch_int=20,
+                                                num_epochs=num_epochs)
+            scheduler.print_seq()
+            # lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
 
-            scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
+            # scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
 
             # early_stopper = EarlyStopper(patience=6)
 
@@ -268,7 +268,7 @@ def eval_mae(model, testset, batch_size=128):
     count = 0
 
     with torch.no_grad():  
-        for inputs in test_loader:
+        for inputs, _ in test_loader:
             inputs = inputs.to(device)  
             reconstructed = model(inputs)  
             loss = mse_loss(reconstructed, inputs)  
@@ -279,27 +279,27 @@ def eval_mae(model, testset, batch_size=128):
 
     print(f'Average MSE Loss on Test Set: {average_loss}')
 
-    # data_list = []
-    # target_list = []
+    data_list = []
+    target_list = []
 
-    # for data, _ in testset:
-    #     data_list.append(data.unsqueeze(0))
+    for data, _ in testset:
+        data_list.append(data.unsqueeze(0))
 
-    # test_data_tensor = torch.cat(data_list, dim=0)
+    test_data_tensor = torch.cat(data_list, dim=0)
 
-    # test_data_tensor = test_data_tensor.to(device)
+    test_data_tensor = test_data_tensor.to(device)
 
 
-    # x = model(test_data_tensor[0:64,:,:,:])
-    # embedding = model.encoder(x)
-    # e1 = embedding
-    # recon = model.decoder(e1)
-    # # print(recon.shape)
-    # # print(recon)
-    # for i in range(10):
-    #     recon_cpu = recon[i,:,:,:]#.detach().numpy()
-    #     recon_cpu = recon_cpu.cpu()
-    #     plotimg(test_data_tensor[i,:,:,:], recon_cpu)
+    x = model(test_data_tensor[0:64,:,:,:])
+    embedding = model.encoder(x)
+    e1 = embedding
+    recon = model.decoder(e1)
+    # print(recon.shape)
+    # print(recon)
+    for i in range(10):
+        recon_cpu = recon[i,:,:,:]#.detach().numpy()
+        recon_cpu = recon_cpu.cpu()
+        plotimg(test_data_tensor[i,:,:,:], recon_cpu)
 
     return average_loss
 
@@ -567,13 +567,13 @@ if __name__ == "__main__":
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     # print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    trainset_sup, testset_sup, valset_sup, _ = torch.utils.data.random_split(dataset, [20000, 10000, 5000, 713140])
+    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    # trainset_sup, testset_sup, valset_sup, _ = torch.utils.data.random_split(dataset, [20000, 10000, 5000, 713140])
 
 
     MASK_RATIO = 0
-    fact_list = ['cp', 'tucker']
-    R_LIST = [5, 10, 15, 20, 25]
+    fact_list = ['cp']#, 'tucker']
+    R_LIST = [20]
     mses = []
     accuracies = []
 
@@ -598,13 +598,13 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=True,
+                            TRAIN_MAE=False,
                             SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
 
         
-            mses.append(eval_mae(mae, testset_un))
+            mses.append(eval_mae(mae, testset_sup))
             
             num_classes = 8
             classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)

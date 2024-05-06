@@ -3,65 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# class AutoEncoder56(nn.Module):
-#     def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]):
-#         super(AutoEncoder56, self).__init__()
-#         self.encoder = nn.Sequential(
-#             # DOWNSAMPLE 1
-#             *[Block(dim=in_channels) for i in range(depths[0])],
-#             nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=7),
-#             LayerNorm(channels[0], eps=1e-6, data_format="channels_first"),
-#             # BLOCK 1
-#             *[Block(dim=channels[0]) for i in range(depths[0])],
-#             # DOWNSAMPLE 2
-#             LayerNorm(channels[0], eps=1e-6, data_format="channels_first"),
-#             nn.Conv2d(channels[0], channels[1], kernel_size=2, stride=2),
-#             # BLOCK 2
-#             *[Block(dim=channels[1]) for i in range(depths[1])], 
-#             # DOWNSAMPLE 3
-#             LayerNorm(channels[1], eps=1e-6, data_format="channels_first"),
-#             nn.Conv2d(channels[1], channels[2], kernel_size=2, stride=2),
-#             # BLOCK 3
-#             *[Block(dim=channels[2]) for i in range(depths[2])], 
-#             # DOWNSAMPLE 4
-#             LayerNorm(channels[2], eps=1e-6, data_format="channels_first"),
-#             nn.Conv2d(channels[2], channels[3], kernel_size=2, stride=1),
-#             # BLOCK 4
-#             *[Block(dim=channels[3]) for i in range(depths[3])] 
-#         )
-#         self.decoder = nn.Sequential(
-#             # BLOCK 4
-#             *[Block(dim=channels[3]) for i in range(depths[3])], 
-#             # UPSAMPLE 4
-#             LayerNorm(channels[3], eps=1e-6, data_format="channels_first"),
-#             nn.ConvTranspose2d(channels[3], channels[2], kernel_size=2, stride=1),
-#             # BLOCK 3
-#             *[Block(dim=channels[2]) for i in range(depths[2])], 
-#             # UPSAMPLE 3
-#             LayerNorm(channels[2], eps=1e-6, data_format="channels_first"),
-#             nn.ConvTranspose2d(channels[2], channels[1], kernel_size=2, stride=2),
-#             # BLOCK 2
-#             *[Block(dim=channels[1]) for i in range(depths[1])], 
-#             # UPSAMPLE 2
-#             LayerNorm(channels[1], eps=1e-6, data_format="channels_first"),
-#             nn.ConvTranspose2d(channels[1], channels[0], kernel_size=2, stride=2),
-#             # BLOCK 1
-#             *[Block(dim=channels[0]) for i in range(depths[0])],
-#             # UPSAMPLE 1
-#             LayerNorm(in_channels, eps=1e-6, data_format="channels_first"),
-#             nn.ConvTranspose2d(channels[0],in_channels, kernel_size=7, stride=7, padding=0, output_padding=0),
-#         )
-
-
-#     def forward(self, x):
-#         x = self.encoder(x)
-#         # print(x.shape)
-#         x = self.decoder(x)
-#         return x
-
-
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1
@@ -97,7 +40,7 @@ class AutoEncoder56(nn.Module):
         )
         self.decoder = nn.Sequential(
             # Corresponds to LAYER 6 in Encoder
-            nn.Upsample(scale_factor=2, mode='nearest'),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
@@ -106,7 +49,7 @@ class AutoEncoder56(nn.Module):
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
             # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=2, mode='nearest'),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[1]),
@@ -115,7 +58,7 @@ class AutoEncoder56(nn.Module):
             nn.GELU(),
             nn.BatchNorm2d(channels[1]),
             # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=2, mode='nearest'),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[0]),
@@ -140,21 +83,17 @@ class Classifier56(nn.Module):
         super(Classifier56, self).__init__()
         self.encoder = autoencoder.encoder
 
-
-        # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
-        self.img_size = (56, 56)
+        self.norm = nn.LayerNorm(in_features, eps=1e-6) 
         # self.classifier = nn.Sequential(
         #     nn.Flatten(),
         #     nn.Linear(in_features, in_features),
         #     nn.GELU(),
-        #     nn.BatchNorm2d(),
-        #     nn.Dropout(0.5),
         #     nn.Linear(in_features, out_features)
         # )
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(65536, 2048),
-                nn.ELU(),
+                nn.Linear(12544, 2048),
+                nn.GELU(),
                 nn.BatchNorm1d(num_features=2048),
                 nn.Dropout(0.5),
                 nn.Linear(2048, out_features)
