@@ -11,7 +11,7 @@ import numpy as np
 
 _range_to_ignore = 20
 _directory = '../extra_reps/data/mitbih/'
-_dataset_dir = '../extra_reps/data/dataset_filtered/'
+_dataset_dir = 'data/physionet/mitbih'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .70
 _split_validation_percentage = 0.70
