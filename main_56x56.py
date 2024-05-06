@@ -161,16 +161,16 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             val_loader = torch.utils.data.DataLoader(valset, 
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
-            # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2, eta_min=0.0001)
             # scheduler  = StepLR(optimizer, step_size=10, gamma=0.95) 
-            scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                                n_warmup_epochs=n_warmup_epochs,
-                                                warmup_lr=1e-5,
-                                                start_lr=5e-4,
-                                                lower_lr=1e-5,
-                                                alpha=0.5,
-                                                epoch_int=20,
-                                                num_epochs=num_epochs)
+            # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+            #                                     n_warmup_epochs=n_warmup_epochs,
+            #                                     warmup_lr=1e-5,
+            #                                     start_lr=5e-4,
+            #                                     lower_lr=1e-5,
+            #                                     alpha=0.75,
+            #                                     epoch_int=20,
+            #                                     num_epochs=num_epochs)
             # scheduler.print_seq()
             # lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
 
@@ -342,7 +342,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
                                                   warmup_lr=1e-4, 
                                                   start_lr=5e-4, 
                                                   lower_lr=1e-6,
-                                                  alpha=0.5, 
+                                                  alpha=0.75, 
                                                   epoch_int=20, 
                                                   num_epochs=num_epochs)
 
