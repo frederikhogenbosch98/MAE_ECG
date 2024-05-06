@@ -568,7 +568,7 @@ if __name__ == "__main__":
         ])
     data_dir = 'data/physionet/mitbih/'
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-    # print(len(dataset))
+    print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
     trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [50000, 18000, 6705])
@@ -609,7 +609,7 @@ if __name__ == "__main__":
         
             mses.append(eval_mae(mae, testset_sup))
             
-            num_classes = 8
+            num_classes = 5
             classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 5

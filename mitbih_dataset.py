@@ -1,3 +1,10 @@
+'''
+Original file from ECGNeuralNetwork repository by lorenzobrusco.
+Modifications were made.
+Original repository: https://github.com/lorenzobrusco/ECGNeuralNetwork
+'''
+
+
 import json
 import matplotlib.pyplot as plt
 import tqdm
