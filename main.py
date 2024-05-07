@@ -386,8 +386,8 @@ if __name__ == "__main__":
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
     print(len(ptbxl_dataset))
 
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
-    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
+    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
 
     # mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
     # mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
@@ -413,12 +413,12 @@ if __name__ == "__main__":
     accuracies = []
 
     # MAE
-    num_warmup_epochs_mae = 0
-    num_epochs_mae = 1 + num_warmup_epochs_mae
+    num_warmup_epochs_mae = 5
+    num_epochs_mae = 100 + num_warmup_epochs_mae
 
     # CLASSIFIER
     num_warmup_epochs_classifier = 0
-    num_epochs_classifier = 1 + num_warmup_epochs_classifier
+    num_epochs_classifier = 0 + num_warmup_epochs_classifier
 
     mae_losses_run = np.zeros((len(R_LIST), num_epochs_mae))
     class_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
@@ -443,45 +443,45 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=False,
+                            TRAIN_MAE=True,
                             SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
 
             mses.append(eval_mae(mae, testset_un))
             
-            num_classes = 5
-            # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            # num_classes = 5
+            # # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
 
-            classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
-                                        trainset=trainset_sup, 
-                                        valset=valset_sup, 
-                                        num_epochs=num_epochs_classifier, 
-                                        n_warmup_epochs=num_warmup_epochs_classifier, 
-                                        learning_rate=1e-3,
-                                        batch_size=256, 
-                                        TRAIN_CLASSIFIER=True, 
-                                        SAVE_MODEL_CLASSIFIER=True,
-                                        R=R,
-                                        fact=fact)
+            # classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+            #                             trainset=trainset_sup, 
+            #                             valset=valset_sup, 
+            #                             num_epochs=num_epochs_classifier, 
+            #                             n_warmup_epochs=num_warmup_epochs_classifier, 
+            #                             learning_rate=1e-3,
+            #                             batch_size=256, 
+            #                             TRAIN_CLASSIFIER=True, 
+            #                             SAVE_MODEL_CLASSIFIER=True,
+            #                             R=R,
+            #                             fact=fact)
 
-            print(count_parameters(classifier))
-            accuracies.append(eval_classifier(classifier, testset_sup))
+            # print(count_parameters(classifier))
+            # accuracies.append(eval_classifier(classifier, testset_sup))
 
-            mae_losses_run[i,:] = mae_losses
-            class_losses_run[i,:] = class_losses
-
-
-    now = datetime.now()
-    mae_save_folder = f'trained_models/numpy_arrays/MAE_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
-    class_save_folder = f'trained_models/numpy_arrays/CLASS_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
-    np.save(mae_save_folder, mae_losses_run)
-    np.save(class_save_folder, class_losses_run)
+            # mae_losses_run[i,:] = mae_losses
+            # class_losses_run[i,:] = class_losses
 
 
-    print(mses)
-    print(accuracies)
+    # now = datetime.now()
+    # mae_save_folder = f'trained_models/numpy_arrays/MAE_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
+    # class_save_folder = f'trained_models/numpy_arrays/CLASS_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
+    # np.save(mae_save_folder, mae_losses_run)
+    # np.save(class_save_folder, class_losses_run)
+
+
+    # print(mses)
+    # print(accuracies)
 
 
             
