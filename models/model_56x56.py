@@ -15,14 +15,12 @@ class ResEncoderBlock(nn.Module):
 
 
     def forward(self, x):
-        input = x
         x = self.conv1(x)
-        x = self.act(x)
         x = self.norm1(x)
-        x = input + x
-        x = self.conv2(x)
         x = self.act(x)
+        x = self.conv2(x)
         x = self.norm2(x)
+        x = self.act(x)
         return x
 
 
@@ -38,13 +36,11 @@ class ResDecoderBlock(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.act(x)
         x = self.norm(x)
-        input = x
+        x = self.act(x)
         x = self.conv2(x)
-        x = self.act(x)
         x = self.norm(x)
-        x = input + x
+        x = self.act(x)
         return x
 
 
@@ -67,8 +63,8 @@ class AutoEncoder56(nn.Module):
             # ResBlock(dim=channels[3]),
             nn.MaxPool2d(2, stride=2),
             nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
+            nn.BatchNorm2d(channels[3]),
             nn.GELU(),
-            nn.BatchNorm2d(channels[3])
         )
         self.decoder = nn.Sequential(
             nn.Upsample(scale_factor=14, mode='bilinear'),
@@ -79,8 +75,8 @@ class AutoEncoder56(nn.Module):
             *[ResDecoderBlock(in_channels=channels[1], out_channels=channels[0]) for i in range(depths[1])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
             nn.GELU()
             )
