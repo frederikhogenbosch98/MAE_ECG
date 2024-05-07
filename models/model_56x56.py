@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class DownsampleBlock(nn.Module):
+class ResEncoderBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
@@ -15,16 +15,18 @@ class DownsampleBlock(nn.Module):
 
 
     def forward(self, x):
+        input = x
         x = self.conv1(x)
         x = self.act(x)
         x = self.norm1(x)
         x = self.conv2(x)
         x = self.act(x)
         x = self.norm2(x)
+        x = input + x
         return x
 
 
-class UpsampleBlock(nn.Module):
+class ResDecoderBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
@@ -35,31 +37,33 @@ class UpsampleBlock(nn.Module):
 
 
     def forward(self, x):
+        input = x
         x = self.conv1(x)
         x = self.act(x)
         x = self.norm(x)
         x = self.conv2(x)
         x = self.act(x)
         x = self.norm(x)
+        x = input + x
         return x
 
 
 
 class AutoEncoder56(nn.Module):
     # def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
-    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
-            DownsampleBlock(in_channels=in_channels, out_channels=channels[0]),
+            *[ResEncoderBlock(in_channels, channels[0]) for i in range(depths[0])],
             # ResBlock(dim=channels[0]),
             nn.MaxPool2d(2, stride=2), 
-            DownsampleBlock(in_channels=channels[0], out_channels=channels[1]),
+            *[ResEncoderBlock(channels[0], channels[1]) for i in range(depths[1])],
             # ResBlock(dim=channels[1]),
             nn.MaxPool2d(2, stride=2),  
-            DownsampleBlock(in_channels=channels[1], out_channels=channels[2]),
+            *[ResEncoderBlock(channels[1], channels[2]) for i in range(depths[2])],
             # ResBlock(dim=channels[2]),
             nn.MaxPool2d(2, stride=2),
-            DownsampleBlock(in_channels=channels[2], out_channels=channels[3]),
+            *[ResEncoderBlock(channels[2], channels[3]) for i in range(depths[3])],
             # ResBlock(dim=channels[3]),
             nn.MaxPool2d(2, stride=2),
             nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
@@ -68,18 +72,17 @@ class AutoEncoder56(nn.Module):
         )
         self.decoder = nn.Sequential(
             nn.Upsample(scale_factor=14, mode='bilinear'),
-            UpsampleBlock(in_channels=channels[3], out_channels=channels[2]),
+            *[ResDecoderBlock(in_channels=channels[3], out_channels=channels[2]) for i in range(depths[3])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            UpsampleBlock(in_channels=channels[2], out_channels=channels[1]),
+            *[ResDecoderBlock(in_channels=channels[2], out_channels=channels[1]) for i in range(depths[2])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            UpsampleBlock(in_channels=channels[1], out_channels=channels[0]),
+            *[ResDecoderBlock(in_channels=channels[1], out_channels=channels[0]) for i in range(depths[1])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[0]),
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
             nn.GELU()
-
             )
 
 
