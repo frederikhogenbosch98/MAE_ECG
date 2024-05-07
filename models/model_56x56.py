@@ -111,11 +111,11 @@ class Classifier56(nn.Module):
         # )
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(128, 128),
+                nn.Linear(256, 256),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=128),
+                nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
-                nn.Linear(128, out_features)
+                nn.Linear(256, out_features)
         )
 
     def forward(self, x):
