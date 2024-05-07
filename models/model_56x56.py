@@ -15,14 +15,14 @@ class ResEncoderBlock(nn.Module):
 
 
     def forward(self, x):
+        input = x
         x = self.conv1(x)
         x = self.act(x)
         x = self.norm1(x)
-        input = x
+        x = input + x
         x = self.conv2(x)
         x = self.act(x)
         x = self.norm2(x)
-        x = input + x
         return x
 
 
