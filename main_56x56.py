@@ -171,7 +171,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                                 start_lr=5e-4,
                                                 lower_lr=1e-5,
                                                 alpha=0.75,
-                                                epoch_int=1,
+                                                epoch_int=20,
                                                 num_epochs=num_epochs)
             # scheduler.print_seq()
             # lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
@@ -600,7 +600,7 @@ if __name__ == "__main__":
             print(f'num params: {current_pams}')
 
 
-            num_warmup_epochs_mae = 0
+            num_warmup_epochs_mae = 5
             num_epochs_mae = 20 + num_warmup_epochs_mae
             mae = train_mae(model=mae, 
                             trainset=trainset_un,
