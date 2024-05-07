@@ -625,8 +625,8 @@ if __name__ == "__main__":
             # mses.append(eval_mae(mae, testset_sup))
             
             num_classes = 5
-            # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             print(count_parameters(mae.encoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 5
