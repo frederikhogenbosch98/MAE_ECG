@@ -25,8 +25,8 @@ class ResBlock(nn.Module):
 
 
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1, 1]):
-    # def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 3, 1]):
+    # def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 3, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
             nn.Conv2d(in_channels, channels[0], 3, stride=1, padding=1),
