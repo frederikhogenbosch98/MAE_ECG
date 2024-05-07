@@ -9,136 +9,13 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
+from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
 import math
 from models.resnet50 import ResNet
 from datetime import datetime
 import platform
-
-
-class CosineAnnealingwithWarmUp():
-
-    def __init__(self, optimizer, n_warmup_epochs, warmup_lr, start_lr, lower_lr, alpha, epoch_int, num_epochs):
-        self._optimizer = optimizer
-        self.n_steps = 0
-        self.n_warmup_steps = n_warmup_epochs
-        self.warmup_lr = warmup_lr
-        self.start_lr = start_lr
-        self.epoch_int = epoch_int
-        self.num_epochs = num_epochs - n_warmup_epochs
-        self.current_epoch = 0
-        self.lower_lr = lower_lr
-
-        self.warmup = np.linspace(self.warmup_lr, self.start_lr, self.n_warmup_steps)
-        # assert epoch_int % num_epochs  != 0, "num_epochs should be a multiple of epoch interval"
-
-        self.alpha = np.power(alpha, np.arange(num_epochs // epoch_int))
-        self.lrs = self.get_cosine_epoch()
-        
-
-    def step(self):
-        self._update_learning_rate()
-        self._optimizer.step()
-
-    def normalize(self,array):
-        return np.interp(array, (array.min(), array.max()), (self.lower_lr, self.start_lr))
-
-    def zero_grad(self):
-        self._optimizer.zero_grad()
-
-    def print_seq(self):
-        plt.plot(np.concatenate((self.warmup, self.get_cosine_epoch())))
-        plt.title('Learning Rate Custom Scheduler')
-        plt.xlabel('epochs')
-        plt.ylabel('learning rate')
-        plt.show()
-
-    def get_cosine_epoch(self):
-        full_ls = np.zeros(self.num_epochs)
-        for i in range(self.num_epochs // self.epoch_int):
-            full_ls[i*self.epoch_int:(i+1)*self.epoch_int] = self.start_lr * self.alpha[i] * np.cos(np.linspace(0, np.pi/2, self.epoch_int))
-
-        return np.array(self.normalize(full_ls))
-    
-    def _update_learning_rate(self):
-
-        if self.n_steps < self.n_warmup_steps:
-            lr = self.warmup[self.n_steps]
-            self.current_epoch = 0
-        else:
-            lr = self.lrs[self.n_steps-self.n_warmup_steps]
-            
-        self.n_steps += 1
-
-        for param_group in self._optimizer.param_groups:
-            param_group['lr'] = lr
-
-
-class EarlyStopper:
-    def __init__(self, patience=5, min_delta=0.001):
-        self.patience = patience
-        self.min_delta = min_delta
-        self.counter = 0
-        self.min_validation_loss = float('inf')
-
-    def early_stop(self, validation_loss):
-        if validation_loss < self.min_validation_loss:
-            self.min_validation_loss = validation_loss
-            self.counter = 0
-        elif validation_loss > (self.min_validation_loss + self.min_delta):
-            self.counter += 1
-            if self.counter >= self.patience:
-                return True
-        return False
-
-
-def apply_mask(x, ratio, p):
-    x = x.permute(0,5,1,2,3,4)
-    rand_mask = torch.rand(x.shape[0], x.shape[1], x.shape[2], x.shape[3]) < ratio
-    rand_mask = rand_mask.unsqueeze(-1).unsqueeze(-1).repeat(1, 1, 1, 1, p, p)
-    x = torch.where(rand_mask, torch.zeros_like(x), x) 
-    return x
- 
-
-def patchify(imgs, ratio, p=4):
-    """
-    imgs: (N, 3, H, W)
-    x: (N, L, patch_size**2 *3)
-    """
-    assert imgs.shape[2] == imgs.shape[3] and imgs.shape[2] % p == 0
-
-    h = w = imgs.shape[2] // p
-    x = imgs.reshape(shape=(imgs.shape[0], 1, h, p, w, p))
-    x = torch.einsum('nchpwq->nhwpqc', x)
-    x = apply_mask(x, ratio, p)
-    x = x.reshape(shape=(imgs.shape[0], h * w, p**2 * 1))
-    return x
-
-
-def unpatchify(x, p=4):
-    """
-    x: (N, L, patch_size**2 *3)
-    imgs: (N, 3, H, W)
-    """
-    h = w = int(x.shape[1]**.5)
-    assert h * w == x.shape[1]
-    
-    x = x.reshape(shape=(x.shape[0], h, w, p, p, 1))
-    x = torch.einsum('nhwpqc->nchpwq', x)
-    imgs = x.reshape(shape=(x.shape[0], 1, h * p, h * p))
-    return imgs
-
-
-def mask(batch, ratio, p):
-    x = patchify(batch.cpu(), ratio, p)
-    imgs = unpatchify(x, p)
-    return imgs
-    # plt.subplot(2,1,1)
-    # plt.imshow(batch[8,0,:,:].cpu().detach().numpy(), cmap="gray")
-    # plt.subplot(2,1,2)
-    # plt.imshow(imgs[8,0,:,:].cpu().detach().numpy(), cmap="gray")
-    # plt.show()
 
 
 
@@ -182,6 +59,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
         outputs = []
         losses = []
+        val_losses = []
 
         print(f"Start MAE training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")
         t_start = time.time()
@@ -194,8 +72,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                 img = img.to(device)
                 unmasked_img = img
                 # plot_single_img(img.cpu(), 7)
-                if MASK_RATIO != 0:
-                    img = mask(img, MASK_RATIO, p)
+                # if MASK_RATIO != 0:
+                #     img = mask(img, MASK_RATIO, p)
                 img = img.to(device)
                 recon = model(img)
                 optimizer.zero_grad()
@@ -227,6 +105,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                 validation_loss = 0
 
             epoch_loss = running_loss / len(train_loader)
+            losses.append(epoch_loss)
+            val_losses.append(validation_loss)
             t_epoch_end = time.time()
 
             print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
@@ -254,7 +134,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
 
 
-    return model
+    return model, losses, val_losses
 
 
 
@@ -364,6 +244,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         early_stopper = EarlyStopper(patience=10, min_delta=0.0001)
 
         losses = []
+        val_losses = []
         print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")        
         t_start = time.time()
         for epoch in range(num_epochs):
@@ -419,6 +300,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
             epoch_loss = running_loss / len(train_loader)
             print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, accuracy, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
             losses.append(epoch_loss)
+            val_losses.append(validation_loss)
             # scheduler.step()
         t_end = time.time()
         print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
@@ -435,7 +317,7 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         # classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
         classifier.load_state_dict(torch.load('trained_models/CLASSIFIER_RUN_cp_R20_6_5_20_31.pth', map_location=torch.device('cpu')))
 
-    return classifier
+    return classifier, losses, val_losses
 
 
 def eval_classifier(model, testset, batch_size=128):
@@ -479,66 +361,6 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 
-class UnsupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path, resize_shape=(112,112)):
-        loaded_data = torch.load(data_path)
-        # print(type(loaded_data))
-        self.data = loaded_data
-        self.data = self.data[:,0,:,:].unsqueeze(1)
-
-
-        self.transform = transforms.Compose([
-            transforms.ToPILImage(),  
-            transforms.Resize(resize_shape),
-            transforms.ToTensor()  
-        ])
-
-        self.resize_shape = resize_shape
-        
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        # data_item = self.data[index].float() / 255.0  # Normalize if still in 0-255 range
-        # data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
-        data_item = self.transform(self.data[index])
-        return data_item
-
-
-class SupervisedDataset(torch.utils.data.Dataset):
-    def __init__(self, data_path_un, data_path_sup, resize_shape=(224,224)):
-        self.data = torch.load(data_path_un)
-        label_data = torch.load(data_path_sup)
-        self.data = self.data[:,0,:,:].unsqueeze(1)
-        self.labels = label_data['labels']
-        self.labels = self.labels.long() 
-        self.valid_idx = label_data['valid_idx']
-
-        self.shortened_data = torch.empty((len(self.valid_idx),) + self.data[0].shape)
-
-        for idx, i in enumerate(self.valid_idx):
-            self.shortened_data[idx] = self.data[i]
-
-        assert len(self.shortened_data) == len(self.labels), f'data ({len(self.shortened_data)}) and labels ({len(self.labels)}) must have the same length'
-
-        self.transform = transforms.Compose([
-            transforms.ToPILImage(),  
-            transforms.Resize(resize_shape),
-            transforms.ToTensor()  
-        ])
-        
-        self.resize_shape = resize_shape
-    def __len__(self):
-        return len(self.shortened_data)
-
-    def __getitem__(self, index):
-        data_item = self.shortened_data[index].float() / 255.0  # Normalize if still in 0-255 range
-        data_item = torchvision.transforms.functional.resize(data_item, self.resize_shape)
-        label_item = self.labels[index]
-        return data_item, label_item
-
-
 if __name__ == "__main__":
 
     dtype = torch.float32
@@ -551,28 +373,12 @@ if __name__ == "__main__":
 
     print(f'SELECTED DEVICE: {device}')
 
-    # ### ECG UNSUPERVISED
-
-    # dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
-    # # print(len(dataset_un))
-    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset_un, [15000, 3799, 3000])
-    # testset_un, valset_un = torch.utils.data.random_split(testset_un, [3000, 1799]) 
-
-    # ### ECG SUPERVISED
-    # dataset_sup = SupervisedDataset(data_path_un='data/datasets/unsupervised_dataset_22k_224.pt', data_path_sup='data/datasets/supervised_dataset_22k.pt')
-    # # print(len(dataset_sup))
-    # trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4244])    
-    # trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
-
-
-
 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((112,112)), 
         transforms.ToTensor(),         
         ])
-
 
     ptbxl_dir = 'data/physionet/ptbxl_full/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
@@ -583,10 +389,16 @@ if __name__ == "__main__":
     mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
     mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
     mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
-    print(len(mitbih_dataset_train))
+
+    incartdb = 'data/physionet/incartdb/render/imgs'
+    incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
+
+    # print(len(mitbih_dataset_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    trainset_sup, valset_sup = torch.utils.data.random_split(mitbih_dataset_train, [47343, 5000])
+    combined_dataset_train = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    print(len(combined_dataset_train))
+    trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [47343, 5000])
     testset_sup = mitbih_dataset_test
 
 
@@ -596,8 +408,19 @@ if __name__ == "__main__":
     mses = []
     accuracies = []
 
+    # MAE
+    num_warmup_epochs_mae = 0
+    num_epochs_mae = 1 + num_warmup_epochs_mae
+
+    # CLASSIFIER
+    num_warmup_epochs_classifier = 0
+    num_epochs_classifier = 1 + num_warmup_epochs_classifier
+
+    mae_losses_run = np.zeros(len(R_LIST), num_epochs_mae)
+    class_losses_run = np.zeros(len(R_LIST), num_epochs_classifier)
+
     for fact in fact_list:
-        for R in R_LIST:
+        for i, R in enumerate(R_LIST):
             print(f'fact: {fact}, R: {R}')
             factorization=fact
             # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
@@ -610,9 +433,7 @@ if __name__ == "__main__":
             print(f'num params: {current_pams}')
 
 
-            num_warmup_epochs_mae = 5
-            num_epochs_mae = 100 + num_warmup_epochs_mae
-            mae = train_mae(model=mae, 
+            mae, mae_losses, mae_val_losses = train_mae(model=mae, 
                             trainset=trainset_un,
                             valset=valset_un,
                             MASK_RATIO=MASK_RATIO,
@@ -629,13 +450,8 @@ if __name__ == "__main__":
             num_classes = 5
             # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            # print(count_parameters(mae))
-            # print(count_parameters(mae.encoder))
-            # print(count_parameters(mae.decoder))
-            # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            num_warmup_epochs_classifier = 0
-            num_epochs_classifier = 20 + num_warmup_epochs_classifier
-            classifier = train_classifier(classifier=classifier, 
+
+            classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
                                         valset=valset_sup, 
                                         num_epochs=num_epochs_classifier, 
@@ -650,8 +466,21 @@ if __name__ == "__main__":
             print(count_parameters(classifier))
             accuracies.append(eval_classifier(classifier, testset_sup))
 
+            mae_losses_run[i,:] = mae_losses
+            class_losses_run[i,:] = class_losses
+
+
+    now = datetime.now()
+    mae_save_folder = f'trained_models/numpy_arrays/MAE_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
+    class_save_folder = f'trained_models/numpy_arrays/CLASS_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
+    np.save(mae_save_folder, mae_losses_run)
+    np.save(class_save_folder, class_losses_run)
+
+
     print(mses)
     print(accuracies)
+
+
             
 
 
