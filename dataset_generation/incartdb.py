@@ -18,12 +18,11 @@ import numpy as np
 from scipy.signal import resample
 
 _range_to_ignore = 20
-_directory = '../../datasets/incartdb/'
-_dataset_dir = '../data/physionet/incartdb/'
-_dataset_ann_dir = '../extra_reps/data/dataset_ann/'
+_directory = 'data/physionet/incartdb/'
+_dataset_dir = 'data/physionet/incartdb/render/imgs'
 
 
-def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128, 128), augmentation=True):
+def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(112, 112), augmentation=True):
     """
        For each beat for each patient creates img apply some filters
        :param size: the img size
@@ -37,7 +36,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
 
     for file in files:
         sig, _ = wfdb.rdsamp(_directory + file)
-        sig = sig[0]
+        # sig = sig[:,0]
 
         ann = wfdb.rdann(_directory + file, extension='atr')
         for i in tqdm.tqdm(range(1, len(ann.sample) - 1)):
