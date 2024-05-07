@@ -249,7 +249,8 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R20_6_5_20_21.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth'))
+        # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R20_6_5_20_21.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
 
 
@@ -567,12 +568,24 @@ if __name__ == "__main__":
         transforms.Resize((112,112)), 
         transforms.ToTensor(),         
         ])
-    data_dir = 'data/physionet/mitbih/'
-    dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-    # print(len(dataset))
+    # data_dir = 'data/physionet/mitbih/'
+    # dataset = datasets.ImageFolder(root=data_dir, transform=transform)
+    # # print(len(dataset))
+    # # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
+    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    # # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [80000, 20000, 9446])
+
+
+
+    mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
+    mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
+    mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
+    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
+    print(len(mitbih_dataset_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [80000, 20000, 9446])
+    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    trainset_sup, valset_sup = torch.utils.data.random_split(mitbih_dataset_train, [47343, 5000])
+    testset_sup = mitbih_dataset_test
 
 
     MASK_RATIO = 0
@@ -588,8 +601,8 @@ if __name__ == "__main__":
             # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
             # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
             # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-            # mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
-            mae = AutoEncoder56().to(device)
+            mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
+            # mae = AutoEncoder56().to(device)
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
@@ -603,7 +616,7 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=True,
+                            TRAIN_MAE=False,
                             SAVE_MODEL_MAE=False,
                             R=R,
                             fact=fact)
@@ -616,8 +629,8 @@ if __name__ == "__main__":
             classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             print(count_parameters(mae.encoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            num_warmup_epochs_classifier = 0
-            num_epochs_classifier = 20 + num_warmup_epochs_classifier
+            num_warmup_epochs_classifier = 5
+            num_epochs_classifier = 40 + num_warmup_epochs_classifier
             classifier = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
                                         valset=valset_sup, 
