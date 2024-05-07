@@ -249,7 +249,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth'))
+        model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cuda')))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R20_6_5_20_21.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
 
