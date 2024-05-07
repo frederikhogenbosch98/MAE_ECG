@@ -4,8 +4,8 @@ import torch.nn.functional as F
 
 
 class AutoEncoder56(nn.Module):
-    # def __init__(self, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
-    def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
+    # def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1
@@ -28,18 +28,40 @@ class AutoEncoder56(nn.Module):
             nn.BatchNorm2d(channels[1]),
             # LAYER 6
             nn.MaxPool2d(2, stride=2),
-            # LAYER 4
+            # LAYER 6
             nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
-            # LAYER 5
+            # LAYER 7
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[2]),
-            # LAYER 6
-            nn.MaxPool2d(2, stride=2)
+            # LAYER 8
+            nn.MaxPool2d(2, stride=2),
+            #LAYER 9
+            nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
+            nn.GELU(),
+            nn.BatchNorm2d(channels[3]),
+            # LAYER 10
+            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
+            nn.GELU(),
+            nn.BatchNorm2d(channels[3]),
+            # LAYER 11
+            nn.MaxPool2d(2, stride=2),
+            nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
+            nn.GELU(),
+            nn.BatchNorm2d(channels[3]), 
         )
         self.decoder = nn.Sequential(
+            # Corresponds to LAYER 6 in Encoder
+            nn.Upsample(scale_factor=14, mode='bilinear'),
+            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
+            nn.GELU(),
+            nn.BatchNorm2d(channels[3]),
+            # Corresponds to LAYER 5 in Encoder
+            nn.Conv2d(channels[3], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.GELU(),
+            nn.BatchNorm2d(channels[2]),
             # Corresponds to LAYER 6 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
@@ -91,13 +113,21 @@ class Classifier56(nn.Module):
         #     nn.GELU(),
         #     nn.Linear(in_features, out_features)
         # )
+        # self.classifier = nn.Sequential(
+        #         nn.Flatten(),
+        #         nn.Linear(12544, 2048),
+        #         nn.GELU(),
+        #         nn.BatchNorm1d(num_features=2048),
+        #         nn.Dropout(0.5),
+        #         nn.Linear(2048, out_features)
+        # )
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(12544, 2048),
+                nn.Linear(128, 128),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=2048),
+                nn.BatchNorm1d(num_features=128),
                 nn.Dropout(0.5),
-                nn.Linear(2048, out_features)
+                nn.Linear(128, out_features)
         )
 
     def forward(self, x):

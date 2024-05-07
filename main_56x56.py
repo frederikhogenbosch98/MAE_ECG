@@ -588,8 +588,8 @@ if __name__ == "__main__":
             # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
             # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
             # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-            mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
-            # mae = AutoEncoder56().to(device)
+            # mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
+            mae = AutoEncoder56().to(device)
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
@@ -609,10 +609,11 @@ if __name__ == "__main__":
                             fact=fact)
 
         
-            mses.append(eval_mae(mae, testset_sup))
+            # mses.append(eval_mae(mae, testset_sup))
             
             num_classes = 5
-            classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             print(count_parameters(mae.encoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 0
