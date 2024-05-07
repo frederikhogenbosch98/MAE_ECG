@@ -170,7 +170,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                                 warmup_lr=1e-5,
                                                 start_lr=5e-4,
                                                 lower_lr=1e-5,
-                                                alpha=0.75,
+                                                alpha=0.5,
                                                 epoch_int=20,
                                                 num_epochs=num_epochs)
             # scheduler.print_seq()
@@ -553,9 +553,9 @@ if __name__ == "__main__":
 
     # ### ECG UNSUPERVISED
 
-    dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
+    # dataset_un = UnsupervisedDataset('data/datasets/unsupervised_dataset_22k_224.pt')
     # # print(len(dataset_un))
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset_un, [15000, 3799, 3000])
+    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset_un, [15000, 3799, 3000])
     # testset_un, valset_un = torch.utils.data.random_split(testset_un, [3000, 1799]) 
 
     # ### ECG SUPERVISED
@@ -563,11 +563,21 @@ if __name__ == "__main__":
     # # print(len(dataset_sup))
     # trainset_sup, testset_sup = torch.utils.data.random_split(dataset_sup, [12000, 4244])    
     # trainset_sup, valset_sup = torch.utils.data.random_split(trainset_sup, [10000, 2000]) 
+
+
+
+
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((112,112)), 
         transforms.ToTensor(),         
         ])
+
+
+    ptbxl_dir = 'data/physionet/ptbxl_full/'
+    ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
+    print(len(ptbxl_dataset))
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
 
     mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
     mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
