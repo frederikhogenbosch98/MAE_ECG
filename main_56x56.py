@@ -30,7 +30,7 @@ class CosineAnnealingwithWarmUp():
         self.lower_lr = lower_lr
 
         self.warmup = np.linspace(self.warmup_lr, self.start_lr, self.n_warmup_steps)
-        assert epoch_int % num_epochs  != 0, "num_epochs should be a multiple of epoch interval"
+        # assert epoch_int % num_epochs  != 0, "num_epochs should be a multiple of epoch interval"
 
         self.alpha = np.power(alpha, np.arange(num_epochs // epoch_int))
         self.lrs = self.get_cosine_epoch()
@@ -170,7 +170,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
                                                 start_lr=5e-4,
                                                 lower_lr=1e-5,
                                                 alpha=0.75,
-                                                epoch_int=20,
+                                                epoch_int=1,
                                                 num_epochs=num_epochs)
             # scheduler.print_seq()
             # lambda_lr = lambda epoch: 0.85 ** (epoch / 10)
@@ -249,7 +249,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('data/models_ecg/250_epoch_01_05_11am.pth'))
+        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R20_6_5_20_21.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
 
 
@@ -431,7 +431,8 @@ def train_classifier(classifier, trainset, valset=None, num_epochs=25, n_warmup_
         print("\n")
         # print("\n")
     else:
-        classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
+        # classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
+        classifier.load_state_dict(torch.load('trained_models/CLASSIFIER_RUN_cp_R20_6_5_20_31.pth', map_location=torch.device('cpu')))
 
     return classifier
 
@@ -570,13 +571,13 @@ if __name__ == "__main__":
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     # print(len(dataset))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [80000, 20000, 9446])
+    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [80000, 20000, 9446])
 
 
     MASK_RATIO = 0
-    fact_list = ['cp', 'tucker']#, 'tucker']
-    R_LIST = [0]
+    fact_list = ['cp']#, 'tucker']
+    R_LIST = [20]
     mses = []
     accuracies = []
 
@@ -587,22 +588,23 @@ if __name__ == "__main__":
             # encoder = Encoder56_CPD(R, factorization=factorization).to(device)
             # decoder = Decoder56_CPD(R, factorization=factorization).to(device)
             # mae = AutoEncoder56_CPD(R, in_channels=1, channels=[16, 32, 64, 128], depths=[3, 3, 9, 3]).to(device)
-            # mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
-            mae = AutoEncoder56().to(device)
+            mae = AutoEncoder56_CPD(R, factorization=fact, in_channels=1).to(device)
+            # mae = AutoEncoder56().to(device)
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
 
 
-            num_warmup_epochs_mae = 5
-            num_epochs_mae = 100 + num_warmup_epochs_mae
-            mae = train_mae(mae, trainset_un,
+            num_warmup_epochs_mae = 0
+            num_epochs_mae = 1 + num_warmup_epochs_mae
+            mae = train_mae(model=mae, 
+                            trainset=trainset_un,
                             valset=valset_un,
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
                             TRAIN_MAE=True,
-                            SAVE_MODEL_MAE=True,
+                            SAVE_MODEL_MAE=False,
                             R=R,
                             fact=fact)
 
@@ -611,10 +613,11 @@ if __name__ == "__main__":
             
             num_classes = 5
             classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            print(count_parameters(mae.encoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            num_warmup_epochs_classifier = 5
-            num_epochs_classifier = 20 + num_warmup_epochs_classifier
-            classifier = train_classifier(classifier, 
+            num_warmup_epochs_classifier = 0
+            num_epochs_classifier = 1 + num_warmup_epochs_classifier
+            classifier = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
                                         valset=valset_sup, 
                                         num_epochs=num_epochs_classifier, 
@@ -622,10 +625,11 @@ if __name__ == "__main__":
                                         learning_rate=1e-3,
                                         batch_size=256, 
                                         TRAIN_CLASSIFIER=True, 
-                                        SAVE_MODEL_CLASSIFIER=True,
+                                        SAVE_MODEL_CLASSIFIER=False,
                                         R=R,
                                         fact=fact)
 
+            print(count_parameters(classifier))
             accuracies.append(eval_classifier(classifier, testset_sup))
 
     print(mses)

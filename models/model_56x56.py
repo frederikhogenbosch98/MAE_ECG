@@ -4,7 +4,8 @@ import torch.nn.functional as F
 
 
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
+    # def __init__(self, in_channels=1, channels=[16, 32, 64], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1

@@ -20,7 +20,7 @@ _range_to_ignore = 20
 _directory = '../extra_reps/data/mitbih/'
 _dataset_dir = 'data/physionet/mitbih/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
-_split_percentage = .70
+_split_percentage = .50
 _split_validation_percentage = 0.70
 _split_test_percentage = 0.50
 
@@ -37,8 +37,8 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
     files = [f[:-4] for f in listdir(_directory) if isfile(join(_directory, f)) if (f.find('.dat') != -1)]
 
     random.shuffle(files)
-    train = files[: int(len(files) * _split_percentage)]
-    test = files[int(len(files) * _split_percentage):]
+    ds1 = files[: int(len(files) * _split_percentage)]
+    ds2 = files[int(len(files) * _split_percentage):]
 
     for file in files:
         sig, _ = wfdb.rdsamp(_directory + file)
@@ -48,7 +48,10 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
                 continue
             label = lboriginal_labels[ann.symbol[i]]
 
-            dir = '{}/{}'.format(_dataset_dir, label)
+            if file in ds1:
+                dir = '{}DS1/{}'.format(_dataset_dir, label)
+            else:
+                dir = '{}DS2/{}'.format(_dataset_dir, label)
 
             if not os.path.exists(dir):
                 os.makedirs(dir)
@@ -70,7 +73,10 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
 
             ''' Convert in gray scale and resize img '''
 
-            filename = '{}/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+            if file in ds1:
+                filename = '{}DS1/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+            else:
+                filename = '{}DS2/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
             fig.savefig(filename)
             im_gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
             im_gray = cv2.resize(im_gray, size, interpolation=cv2.INTER_LANCZOS4)
