@@ -582,7 +582,7 @@ if __name__ == "__main__":
 
     MASK_RATIO = 0
     fact_list = ['cp']#, 'tucker']
-    R_LIST = [20]
+    R_LIST = [0]
     mses = []
     accuracies = []
 
@@ -609,7 +609,7 @@ if __name__ == "__main__":
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
                             TRAIN_MAE=True,
-                            SAVE_MODEL_MAE=False,
+                            SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
 
@@ -633,7 +633,7 @@ if __name__ == "__main__":
                                         learning_rate=1e-3,
                                         batch_size=256, 
                                         TRAIN_CLASSIFIER=True, 
-                                        SAVE_MODEL_CLASSIFIER=False,
+                                        SAVE_MODEL_CLASSIFIER=True,
                                         R=R,
                                         fact=fact)
 
