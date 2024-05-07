@@ -576,7 +576,7 @@ if __name__ == "__main__":
     print(len(mitbih_dataset_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    trainset_sup, valset_sup = torch.utils.data.random_split(mitbih_dataset_train, [45000, 5000])
+    trainset_sup, valset_sup = torch.utils.data.random_split(mitbih_dataset_train, [47343, 5000])
     testset_sup = mitbih_dataset_test
 
 
@@ -619,7 +619,9 @@ if __name__ == "__main__":
             num_classes = 5
             # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            print(count_parameters(mae))
             print(count_parameters(mae.encoder))
+            print(count_parameters(mae.decoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 0
             num_epochs_classifier = 20 + num_warmup_epochs_classifier
