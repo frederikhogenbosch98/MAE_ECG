@@ -14,6 +14,7 @@ import time
 # from print_funs import plot_single_img
 import argparse
 import cv2
+import tqdm
 
 physio_root = 'data/physionet/ptbxl/records500'
 # _directory = '../../extra_reps/data/mitbih/'
@@ -85,15 +86,15 @@ def create_input_tensor():
     
     t_start = time.time()
 
-    for idx, file in enumerate(mat_files_without_extension):
+    for idx, file in enumerate(tqdm.tqdm(mat_files_without_extension)):
         # print(file)
         # if idx < lower_limit:
         #     continue
         # elif idx >= upper_limit:
         #     continue
 
-        if idx % 1000 == 0:
-            print(f'processing folder {(idx//1000)+1}/{num_folders}')
+        # if idx % 1000 == 0:
+        #     print(f'processing folder {(idx//1000)+1}/{num_folders}')
 
         ### signal data
         sample_values, sample_field = wfdb.rdsamp(f'{file}')
