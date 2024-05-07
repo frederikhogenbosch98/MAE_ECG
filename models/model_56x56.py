@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class ResEncoderBlock(nn.Module):
+class EncoderBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
@@ -24,7 +24,7 @@ class ResEncoderBlock(nn.Module):
         return x
 
 
-class ResDecoderBlock(nn.Module):
+class DecoderBlock(nn.Module):
 
     def __init__(self, in_channels, out_channels, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
@@ -50,16 +50,16 @@ class AutoEncoder56(nn.Module):
     def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
-            *[ResEncoderBlock(in_channels, channels[0]) for i in range(depths[0])],
+            *[EncoderBlock(in_channels, channels[0]) for i in range(depths[0])],
             # ResBlock(dim=channels[0]),
             nn.MaxPool2d(2, stride=2), 
-            *[ResEncoderBlock(channels[0], channels[1]) for i in range(depths[1])],
+            *[EncoderBlock(channels[0], channels[1]) for i in range(depths[1])],
             # ResBlock(dim=channels[1]),
             nn.MaxPool2d(2, stride=2),  
-            *[ResEncoderBlock(channels[1], channels[2]) for i in range(depths[2])],
+            *[EncoderBlock(channels[1], channels[2]) for i in range(depths[2])],
             # ResBlock(dim=channels[2]),
             nn.MaxPool2d(2, stride=2),
-            *[ResEncoderBlock(channels[2], channels[3]) for i in range(depths[3])],
+            *[EncoderBlock(channels[2], channels[3]) for i in range(depths[3])],
             # ResBlock(dim=channels[3]),
             nn.MaxPool2d(2, stride=2),
             nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
@@ -68,11 +68,11 @@ class AutoEncoder56(nn.Module):
         )
         self.decoder = nn.Sequential(
             nn.Upsample(scale_factor=14, mode='bilinear'),
-            *[ResDecoderBlock(in_channels=channels[3], out_channels=channels[2]) for i in range(depths[3])],
+            *[DecoderBlock(in_channels=channels[3], out_channels=channels[2]) for i in range(depths[3])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            *[ResDecoderBlock(in_channels=channels[2], out_channels=channels[1]) for i in range(depths[2])],
+            *[DecoderBlock(in_channels=channels[2], out_channels=channels[1]) for i in range(depths[2])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            *[ResDecoderBlock(in_channels=channels[1], out_channels=channels[0]) for i in range(depths[1])],
+            *[DecoderBlock(in_channels=channels[1], out_channels=channels[0]) for i in range(depths[1])],
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
