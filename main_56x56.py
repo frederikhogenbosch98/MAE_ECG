@@ -596,7 +596,7 @@ if __name__ == "__main__":
 
 
             num_warmup_epochs_mae = 0
-            num_epochs_mae = 1 + num_warmup_epochs_mae
+            num_epochs_mae = 20 + num_warmup_epochs_mae
             mae = train_mae(model=mae, 
                             trainset=trainset_un,
                             valset=valset_un,
@@ -617,7 +617,7 @@ if __name__ == "__main__":
             print(count_parameters(mae.encoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 0
-            num_epochs_classifier = 1 + num_warmup_epochs_classifier
+            num_epochs_classifier = 20 + num_warmup_epochs_classifier
             classifier = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
                                         valset=valset_sup, 
