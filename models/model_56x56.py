@@ -7,10 +7,10 @@ class ResBlock(nn.Module):
 
     def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
-        self.conv1 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(dim, dim, kernel_size=7, stride=1, padding=3)
+        # self.conv2 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
         self.norm1 = nn.BatchNorm2d(dim)
-        self.norm2 = nn.BatchNorm2d(dim)
+        # self.norm2 = nn.BatchNorm2d(dim)
         self.act = nn.GELU()
 
 
@@ -19,9 +19,9 @@ class ResBlock(nn.Module):
         x = self.conv1(x)
         x = self.norm1(x)
         x = self.act(x)
-        x = self.conv2(x)
-        x = self.norm2(x)
-        x = self.act(x)
+        # x = self.conv2(x)
+        # x = self.norm2(x)
+        # x = self.act(x)
         x = input + x
         return x
 
