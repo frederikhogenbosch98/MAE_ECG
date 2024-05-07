@@ -212,7 +212,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
                 with torch.no_grad():
                     for data in val_loader:
-                        imgs  = data
+                        imgs, _  = data
                         imgs = imgs.to(device)
                         outputs = model(imgs)
                         loss = criterion(outputs, imgs)
