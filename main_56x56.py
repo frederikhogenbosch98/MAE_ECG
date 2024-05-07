@@ -190,7 +190,7 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
             t_epoch_start = time.time()
             model.train()
             for i, data in enumerate(train_loader):
-                img = data
+                img, _ = data
                 img = img.to(device)
                 unmasked_img = img
                 # plot_single_img(img.cpu(), 7)
