@@ -137,6 +137,9 @@ def create_input_tensor():
             plt.clf()
             plt.close('all')
 
+        if idx == 10000:
+            break
+
 
 
 
