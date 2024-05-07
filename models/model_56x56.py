@@ -45,13 +45,13 @@ class AutoEncoder56(nn.Module):
             *[ResBlock(channels[3]) for i in range(depths[3])],
             # ResBlock(dim=channels[3]),
             nn.MaxPool2d(2, stride=2),
-            nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
-            nn.BatchNorm2d(channels[3]),
-            nn.GELU(),
+            # nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
+            # nn.BatchNorm2d(channels[3]),
+            # nn.GELU(),
         )
 
         self.decoder = nn.Sequential(
-            nn.Upsample(scale_factor=14, mode='bilinear'),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[3], channels[2], 3, stride=1, padding=1),
             *[ResBlock(channels[2]) for i in range(depths[3])],
             nn.Upsample(scale_factor=2, mode='bilinear'),

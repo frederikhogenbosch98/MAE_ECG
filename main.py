@@ -128,13 +128,15 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
         print("\n")
         print("\n")
 
+        return model, losses, val_losses 
+
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R20_6_5_20_21.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_7_5_21_41.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
 
 
-    return model, losses, val_losses
+        return model
 
 
 
@@ -383,23 +385,25 @@ if __name__ == "__main__":
     ptbxl_dir = 'data/physionet/ptbxl_full/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
     print(len(ptbxl_dataset))
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
 
-    mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
-    mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
-    mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
-    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
+    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
 
-    incartdb = 'data/physionet/incartdb/render/imgs'
-    incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
+    # mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
+    # mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
+    # mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
+    # mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
 
-    # print(len(mitbih_dataset_train))
-    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    combined_dataset_train = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
-    print(len(combined_dataset_train))
-    trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [47343, 5000])
-    testset_sup = mitbih_dataset_test
+    # incartdb = 'data/physionet/incartdb/render/imgs'
+    # incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
+
+    # # print(len(mitbih_dataset_train))
+    # # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
+    # # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    # combined_dataset_train = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    # print(len(combined_dataset_train))
+    # trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [47343, 5000])
+    # testset_sup = mitbih_dataset_test
 
 
     MASK_RATIO = 0
@@ -416,8 +420,8 @@ if __name__ == "__main__":
     num_warmup_epochs_classifier = 0
     num_epochs_classifier = 1 + num_warmup_epochs_classifier
 
-    mae_losses_run = np.zeros(len(R_LIST), num_epochs_mae)
-    class_losses_run = np.zeros(len(R_LIST), num_epochs_classifier)
+    mae_losses_run = np.zeros((len(R_LIST), num_epochs_mae))
+    class_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
 
     for fact in fact_list:
         for i, R in enumerate(R_LIST):
@@ -433,19 +437,18 @@ if __name__ == "__main__":
             print(f'num params: {current_pams}')
 
 
-            mae, mae_losses, mae_val_losses = train_mae(model=mae, 
+            mae = train_mae(model=mae, 
                             trainset=trainset_un,
                             valset=valset_un,
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=True,
+                            TRAIN_MAE=False,
                             SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
 
-        
-            # mses.append(eval_mae(mae, testset_sup))
+            mses.append(eval_mae(mae, testset_un))
             
             num_classes = 5
             # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
