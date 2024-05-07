@@ -21,8 +21,7 @@ _range_to_ignore = 20
 _directory = '../../datasets/incartdb/'
 _dataset_dir = '../data/physionet/incartdb/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
-fs_orig = 257;
-fs = 360;
+
 
 def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128, 128), augmentation=True):
     """
@@ -38,7 +37,6 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
 
     for file in files:
         sig, _ = wfdb.rdsamp(_directory + file)
-        sig = resample(np.array(sig), num=(len(sig)/fs_orig)*fs)
         ann = wfdb.rdann(_directory + file, extension='atr')
         for i in tqdm.tqdm(range(1, len(ann.sample) - 1)):
             if ann.symbol[i] not in lboriginal_labels:

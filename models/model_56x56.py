@@ -3,95 +3,83 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+class DownsampleBlock(nn.Module):
+
+    def __init__(self, in_channels, out_channels, drop_path=0., layer_scale_init_value=1e-6):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
+        self.norm1 = nn.BatchNorm2d(in_channels)
+        self.norm2 = nn.BatchNorm2d(out_channels)
+        self.act = nn.GELU()
+
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.act(x)
+        x = self.norm1(x)
+        x = self.conv2(x)
+        x = self.act(x)
+        x = self.norm2(x)
+        return x
+
+
+class UpsampleBlock(nn.Module):
+
+    def __init__(self, in_channels, out_channels, drop_path=0., layer_scale_init_value=1e-6):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
+        self.norm = nn.BatchNorm2d(out_channels)
+        self.act = nn.GELU()
+
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.act(x)
+        x = self.norm(x)
+        x = self.conv2(x)
+        x = self.act(x)
+        x = self.norm(x)
+        return x
+
+
+
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
-    # def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
+    # def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
-            # LAYER 1
-            nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[0]),
-            # LAYER 2
-            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[0]),
-            # LAYER 3
+            DownsampleBlock(in_channels=in_channels, out_channels=channels[0]),
+            # ResBlock(dim=channels[0]),
+            nn.MaxPool2d(2, stride=2), 
+            DownsampleBlock(in_channels=channels[0], out_channels=channels[1]),
+            # ResBlock(dim=channels[1]),
+            nn.MaxPool2d(2, stride=2),  
+            DownsampleBlock(in_channels=channels[1], out_channels=channels[2]),
+            # ResBlock(dim=channels[2]),
             nn.MaxPool2d(2, stride=2),
-            # LAYER 4
-            nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[1]),
-            # LAYER 5
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[1]),
-            # LAYER 6
-            nn.MaxPool2d(2, stride=2),
-            # LAYER 6
-            nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # LAYER 7
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # LAYER 8
-            nn.MaxPool2d(2, stride=2),
-            #LAYER 9
-            nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[3]),
-            # LAYER 10
-            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[3]),
-            # LAYER 11
+            DownsampleBlock(in_channels=channels[2], out_channels=channels[3]),
+            # ResBlock(dim=channels[3]),
             nn.MaxPool2d(2, stride=2),
             nn.Conv2d(channels[3], channels[3], kernel_size=7, stride=1, padding=0),
             nn.GELU(),
-            nn.BatchNorm2d(channels[3]), 
+            nn.BatchNorm2d(channels[3])
         )
         self.decoder = nn.Sequential(
-            # Corresponds to LAYER 6 in Encoder
             nn.Upsample(scale_factor=14, mode='bilinear'),
-            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[3]),
-            # Corresponds to LAYER 5 in Encoder
-            nn.Conv2d(channels[3], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # Corresponds to LAYER 6 in Encoder
+            UpsampleBlock(in_channels=channels[3], out_channels=channels[2]),
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # Corresponds to LAYER 5 in Encoder
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[2]),
-            # Corresponds to LAYER 4 in Encoder
+            UpsampleBlock(in_channels=channels[2], out_channels=channels[1]),
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[1]),
-            # Corresponds to LAYER 5 in Encoder
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[1]),
-            # Corresponds to LAYER 4 in Encoder
+            UpsampleBlock(in_channels=channels[1], out_channels=channels[0]),
             nn.Upsample(scale_factor=2, mode='bilinear'),
-            nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
-            nn.BatchNorm2d(channels[0]),
-            # Corresponds to LAYER 2 in Encoder
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.GELU(),
             nn.BatchNorm2d(channels[0]),
-            # Corresponds to LAYER 1 in Encoder
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
+            nn.GELU()
+
             )
 
 
@@ -138,7 +126,7 @@ class Classifier56(nn.Module):
         return x
 
 
-class Block(nn.Module):
+class ResBlock(nn.Module):
     r""" ConvNeXt Block. There are two equivalent implementations:
     (1) DwConv -> LayerNorm (channels_first) -> 1x1 Conv -> GELU -> 1x1 Conv; all in (N, C, H, W)
     (2) DwConv -> Permute to (N, H, W, C); LayerNorm (channels_last) -> Linear -> GELU -> Linear; Permute back
@@ -152,7 +140,8 @@ class Block(nn.Module):
     def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6):
         super().__init__()
         self.dwconv = nn.Conv2d(dim, dim, kernel_size=7, padding=3, groups=dim) # depthwise conv
-        self.norm = LayerNorm(dim, eps=1e-6)
+        # self.norm = LayerNorm(dim, eps=1e-6)
+        self.norm = nn.BatchNorm2d(dim, eps=1e-6)
         self.pwconv1 = nn.Linear(dim, 4 * dim) # pointwise/1x1 convs, implemented with linear layers
         self.act = nn.GELU()
         self.pwconv2 = nn.Linear(4 * dim, dim)

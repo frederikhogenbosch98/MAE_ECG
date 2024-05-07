@@ -14,6 +14,7 @@ from ptflops import get_model_complexity_info
 import math
 from models.resnet50 import ResNet
 from datetime import datetime
+import platform
 
 
 class CosineAnnealingwithWarmUp():
@@ -567,12 +568,16 @@ if __name__ == "__main__":
         transforms.Resize((112,112)), 
         transforms.ToTensor(),         
         ])
-    data_dir = 'data/physionet/mitbih/'
-    dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-    # print(len(dataset))
+
+    mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
+    mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
+    mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
+    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
+    print(len(mitbih_dataset_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
-    trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [80000, 20000, 9446])
+    # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
+    trainset_sup, valset_sup = torch.utils.data.random_split(mitbih_dataset_train, [45000, 5000])
+    testset_sup = mitbih_dataset_test
 
 
     MASK_RATIO = 0
