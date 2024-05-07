@@ -601,7 +601,7 @@ if __name__ == "__main__":
 
 
             num_warmup_epochs_mae = 5
-            num_epochs_mae = 20 + num_warmup_epochs_mae
+            num_epochs_mae = 100 + num_warmup_epochs_mae
             mae = train_mae(model=mae, 
                             trainset=trainset_un,
                             valset=valset_un,
@@ -619,9 +619,9 @@ if __name__ == "__main__":
             num_classes = 5
             # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            print(count_parameters(mae))
-            print(count_parameters(mae.encoder))
-            print(count_parameters(mae.decoder))
+            # print(count_parameters(mae))
+            # print(count_parameters(mae.encoder))
+            # print(count_parameters(mae.decoder))
             # classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
             num_warmup_epochs_classifier = 0
             num_epochs_classifier = 20 + num_warmup_epochs_classifier
