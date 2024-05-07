@@ -132,7 +132,6 @@ def create_input_tensor():
             im_gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
             im_gray = cv2.resize(im_gray, size, interpolation=cv2.INTER_LANCZOS4)
             cv2.imwrite(filename, im_gray)
-            plt.show()
             plt.cla()
             plt.clf()
             plt.close('all')
