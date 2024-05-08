@@ -105,6 +105,7 @@ class Classifier56(nn.Module):
     def forward(self, x):
         x = self.encoder(x)
         # print(x.shape)
+        x = self.avg_pool(x)
         x = self.classifier(x)
         return x
 
