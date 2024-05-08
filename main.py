@@ -73,6 +73,8 @@ def get_args_parser():
 
 def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, p=4):
     # torch.manual_seed(42)
+    now = datetime.now()
+
     if TRAIN_MAE:
 
         criterion = nn.MSELoss() # mean square error loss
@@ -128,7 +130,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
                 running_loss += loss.item()
             scheduler.step()
 
-            if epoch % 20 == 0:
+            if epoch % 20 == 0 and epoch != 0:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
 
             if valset:
@@ -163,7 +165,6 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
         t_end = time.time()
         print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
 
-        now = datetime.now()
         if SAVE_MODEL_MAE:
             save_folder = f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
             # save_folder = 'trained_models/tranpose_02_05_10am.pth'
@@ -242,6 +243,7 @@ def eval_mae(model, testset, batch_size=128):
 
 def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=1e-6, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=5e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
 
+    now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
         for param in classifier.encoder.parameters():
@@ -295,7 +297,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                 running_loss += loss.item()
             scheduler.step()
 
-            if epoch % 20 == 0:
+            if epoch % 20 == 0 and epoch != 0:
                 torch.save(classifier.state_dict(), f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
 
 
@@ -338,7 +340,6 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         t_end = time.time()
         print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
 
-        now = datetime.now()
         if SAVE_MODEL_CLASSIFIER:
             save_folder = f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
             torch.save(classifier.state_dict(), save_folder)
@@ -441,6 +442,7 @@ if __name__ == "__main__":
     trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [180000, 48072])
     testset_sup = mitbih_dataset_test
 
+    R_LIST = np.arange(args.rank_start, args.rank_stop + args.rank_increment, args.rank_increment).tolist()
 
     if args.model == 'cp':
         fact_list = ['cp']
@@ -450,9 +452,9 @@ if __name__ == "__main__":
         fact_list = ['cp', 'tucker']
     elif args.model == 'default':
         fact_list = ['default']
+        R_LIST = [0]
 
 
-    R_LIST = np.arange(args.rank_start, args.rank_stop + args.rank_increment, args.rank_increment).tolist()
     channels = [args.channel_start, 2*args.channel_start, 3*args.channel_start]
     mses = []
     accuracies = []
