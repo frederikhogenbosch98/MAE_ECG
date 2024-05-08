@@ -432,19 +432,19 @@ if __name__ == "__main__":
         transforms.ToTensor(),         
         ])
 
-    ptbxl_dir = 'data/physionet/ptbxl_full/'
+    ptbxl_dir = 'data/physionet/ptbxl_full_224/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
     # print(len(ptbxl_dataset))
 
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
 
-    mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
-    mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
+    mitbih_ds1_dir = 'data/physionet/mitbih_224/DS1/'
+    mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
     mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
     mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
 
-    incartdb = 'data/physionet/incartdb/render/imgs'
+    incartdb = 'data/physionet/incartdb_224/render/imgs'
     incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
 
     # print(len(mitbih_dataset_train))
