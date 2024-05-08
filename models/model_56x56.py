@@ -238,8 +238,7 @@ class AutoEncoder56(nn.Module):
             nn.GELU(),
             # Corresponds to LAYER 1 in Encoder
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(channels[0]),
-            nn.GELU(),
+            nn.Sigmoid(),
 
         )
 
