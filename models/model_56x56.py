@@ -180,64 +180,65 @@ class AutoEncoder56(nn.Module):
         self.encoder = nn.Sequential(
             # LAYER 1
             nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             # LAYER 2
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             # LAYER 3
             nn.MaxPool2d(2, stride=2),
             # LAYER 4
             nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
             # LAYER 5
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
             # LAYER 6
             nn.MaxPool2d(2, stride=2),
             # LAYER 6
             nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
             # LAYER 7
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
             # LAYER 8
             nn.MaxPool2d(2, stride=2)
         )
         self.decoder = nn.Sequential(
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
             # Corresponds to LAYER 5 in Encoder
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
             # Corresponds to LAYER 5 in Encoder
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             # Corresponds to LAYER 2 in Encoder
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
-            nn.GELU(),
             nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             # Corresponds to LAYER 1 in Encoder
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[0]),
             nn.GELU(),
 
         )

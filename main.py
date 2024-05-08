@@ -14,7 +14,7 @@ from torchvision.datasets import ImageFolder
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
 
-from models.model_56x56_TD import AutoEncoder56_CPD, Classifier56_CPD
+from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
 
@@ -489,9 +489,9 @@ if __name__ == "__main__":
                     mae = AutoEncoder56().to(device)
             else:
                 if args.gpu == 'all':
-                    mae = nn.DataParallel(AutoEncoder56_CPD(R, in_channels=1, channels=channels)).to(device)
+                    mae = nn.DataParallel(AutoEncoder56_TD(R, in_channels=1, channels=channels)).to(device)
                 else:
-                    mae = AutoEncoder56_CPD(R, in_channels=1, channels=channels).to(device) 
+                    mae = AutoEncoder56_TD(R, in_channels=1, channels=channels).to(device) 
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
@@ -518,8 +518,8 @@ if __name__ == "__main__":
             mses.append(eval_mae(mae, testset_un))
             
             num_classes = 5
-            # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+            classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+            # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
 
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
