@@ -29,14 +29,14 @@ def get_args_parser():
     parser.add_argument('--batch_size_mae', default=256, type=int,
                         help='Per GPU batch size')
     parser.add_argument('--epochs_mae', default=50, type=int)
-    parser.add_argument('--warmup_epochs_mae', type=int, default=5,
+    parser.add_argument('--warmup_epochs_mae', type=int, default=0,
                         help='epochs to warmup LR')
 
 
     parser.add_argument('--batch_size_class', default=256, type=int,
                         help='Per GPU batch size')
     parser.add_argument('--epochs_class', default=20, type=int)
-    parser.add_argument('--warmup_epochs_class', type=int, default=5,
+    parser.add_argument('--warmup_epochs_class', type=int, default=0,
                         help='epochs to warmup LR')
     
     # Model parameters
@@ -421,7 +421,7 @@ if __name__ == "__main__":
 
     ptbxl_dir = 'data/physionet/ptbxl_full/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
-    print(len(ptbxl_dataset))
+    # print(len(ptbxl_dataset))
 
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
@@ -438,7 +438,7 @@ if __name__ == "__main__":
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
     combined_dataset_train = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
-    print(len(combined_dataset_train))
+    # print(len(combined_dataset_train))
     trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [180000, 48072])
     testset_sup = mitbih_dataset_test
 
