@@ -66,6 +66,9 @@ def get_args_parser():
     parser.add_argument('--rank_increment', type=int, default=5)
     parser.add_argument('--rank_stop', default='25', type=int,
                         help='stop rank')
+    parser.add_argument('--gpu', default='all', type=str,
+                        help='single or all')
+    
 
 
     return parser
@@ -472,19 +475,25 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
     class_val_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
 
+    now = datetime.now()
+    run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
     for fact in fact_list:
         for i, R in enumerate(R_LIST):
-            now = datetime.now()
-            run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
             os.makedirs(run_dir, exist_ok=True)
 
             print(f'fact: {fact}, R: {R}')
             factorization=fact
 
             if args.model == 'default':
-                mae = nn.DataParallel(AutoEncoder56()).to(device)
+                if args.gpu == 'all':
+                    mae = nn.DataParallel(AutoEncoder56()).to(device)
+                else:
+                    mae = AutoEncoder56().to(device)
             else:
-                mae = nn.DataParallel(AutoEncoder56_CPD(R, in_channels=1, channels=channels)).to(device)
+                if args.gpu == 'all':
+                    mae = nn.DataParallel(AutoEncoder56_CPD(R, in_channels=1, channels=channels)).to(device)
+                else:
+                    mae = AutoEncoder56_CPD(R, in_channels=1, channels=channels).to(device) 
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
@@ -505,8 +514,8 @@ if __name__ == "__main__":
                             fact=fact,
                             run_dir = run_dir)
             
-            mae_losses_run.append(mae_losses)
-            mae_val_losses_run.append(mae_val_losses)
+            mae_losses_run[i,:] = mae_losses
+            mae_val_losses_run[i,:] = mae_val_losses
 
             mses.append(eval_mae(mae, testset_un))
             
@@ -529,8 +538,8 @@ if __name__ == "__main__":
                                         fact=fact,
                                         run_dir = run_dir)
             
-            class_losses_run.append(class_losses)
-            class_val_losses_run.append()
+            class_losses_run[i,:] = class_losses
+            class_val_losses_run[i,:] = class_val_losses
 
             print(count_parameters(classifier))
             accuracies.append(eval_classifier(classifier, testset_sup))
@@ -540,13 +549,13 @@ if __name__ == "__main__":
 
 
     
-    mae_save_folder = f'{run_dir}/MAE_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
-    class_save_folder = f'{run_dir}/CLASS_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy'
-    np.save(mae_save_folder, mae_losses_run)
-    np.save(class_save_folder, class_losses_run)
-    np.save(np.array(accuracies), f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy')
-    np.save(np.array(mses), f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}.npy')
-    np.save(np.array(accuracies), f'{run_dir}/summary.txt')
+            mae_save_folder = f'{run_dir}/MAE_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+            class_save_folder = f'{run_dir}/CLASS_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+            np.save(mae_save_folder, mae_losses_run)
+            np.save(class_save_folder, class_losses_run)
+            np.save(np.array(accuracies), f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy')
+            np.save(np.array(mses), f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy')
+            np.save(np.array(accuracies), f'{run_dir}/summary_{fact}_{R}.txt')
 
 
 
