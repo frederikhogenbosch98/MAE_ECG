@@ -91,13 +91,15 @@ class Classifier56(nn.Module):
         #         nn.Dropout(0.5),
         #         nn.Linear(2048, out_features)
         # )
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(12544, 2048),
+                # nn.Linear(12544, 2048),
+                nn.Linear(64, 64),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=2048),
+                nn.BatchNorm1d(num_features=64),
                 nn.Dropout(0.5),
-                nn.Linear(2048, out_features)
+                nn.Linear(64, out_features)
         )
 
     def forward(self, x):
