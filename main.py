@@ -70,6 +70,11 @@ def get_args_parser():
                         help='single or all')
 
     parser.add_argument('--contrun', default=False, type=bool, help='continue from last run')
+    parser.add_argument('--train_mae', default=True, type=bool, help='Train MAE')
+    parser.add_argument('--train_class', default=True, type=bool, help='Train Classifier')
+    parser.add_argument('--save_mae', default=True, type=bool, help='Save MAE model')
+    parser.add_argument('--save_class', default=True, type=bool, help='Save Classifier model')
+
     
 
 
@@ -138,7 +143,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
                 running_loss += loss.item()
             scheduler.step()
 
-            if epoch % 20 == 0 and epoch != 0:
+            if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
                 torch.save(model.state_dict(), 'trained_models/last/last_run.pth')
 
@@ -187,7 +192,8 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
+        # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('trained_models/last/last_run.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
         print(f'dataset loaded')
         losses = np.zeros(num_epochs)
@@ -512,8 +518,8 @@ if __name__ == "__main__":
                             weight_decay = args.weight_decay_mae,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=True,
-                            SAVE_MODEL_MAE=True,
+                            TRAIN_MAE=args.train_mae,
+                            SAVE_MODEL_MAE=args.save_mae,
                             R=R,
                             batch_size=args.batch_size_mae,
                             fact=fact,
@@ -539,8 +545,8 @@ if __name__ == "__main__":
                                         min_lr = args.min_lr_class,
                                         weight_decay = args.weight_decay_class,
                                         batch_size=args.batch_size_class, 
-                                        TRAIN_CLASSIFIER=True, 
-                                        SAVE_MODEL_CLASSIFIER=True,
+                                        TRAIN_CLASSIFIER=args.train_class, 
+                                        SAVE_MODEL_CLASSIFIER=args.save_class,
                                         R=R,
                                         fact=fact,
                                         run_dir = run_dir)
