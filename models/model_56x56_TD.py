@@ -55,7 +55,7 @@ class AutoEncoder56_TD(nn.Module):
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
             # Corresponds to LAYER 5 in Encoder
-            ntltorch.FactorizedConv.from_conv(n.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
