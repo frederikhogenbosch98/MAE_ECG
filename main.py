@@ -493,8 +493,8 @@ if __name__ == "__main__":
                 else:
                     mae = AutoEncoder56_TD(R, in_channels=1, channels=channels).to(device) 
 
-            current_pams = count_parameters(mae)
-            print(f'num params: {current_pams}')
+            # current_pams = count_parameters(mae)
+            # print(f'num params: {current_pams}')
 
 
             mae, mae_losses, mae_val_losses = train_mae(model=mae, 
@@ -518,9 +518,10 @@ if __name__ == "__main__":
             mses.append(eval_mae(mae, testset_un))
             
             num_classes = 5
-            classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-            # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-
+            if args.model == 'default':
+                classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+            else:
+                classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
                                         valset=valset_sup, 
@@ -539,7 +540,7 @@ if __name__ == "__main__":
             class_losses_run[i,:] = class_losses
             class_val_losses_run[i,:] = class_val_losses
 
-            print(count_parameters(classifier))
+            # print(count_parameters(classifier))
             accuracies.append(eval_classifier(classifier, testset_sup))
 
             mae_losses_run[i,:] = mae_losses
@@ -553,7 +554,7 @@ if __name__ == "__main__":
             np.save(class_save_folder, class_losses_run)
             np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
             np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
-            np.save(f'{run_dir}/summary_{fact}_{R}.txt', np.array(accuracies))
+            np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
 
 
 
