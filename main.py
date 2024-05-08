@@ -452,7 +452,7 @@ if __name__ == "__main__":
         fact_list = ['default']
 
 
-    R_LIST = np.arange(args.rank_start, args.rank_stop + args.rank_increment, args.rank_increment).to_list()
+    R_LIST = np.arange(args.rank_start, args.rank_stop + args.rank_increment, args.rank_increment).tolist()
     channels = [args.channel_start, 2*args.channel_start, 3*args.channel_start]
     mses = []
     accuracies = []
