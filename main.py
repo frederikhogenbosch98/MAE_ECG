@@ -69,11 +69,11 @@ def get_args_parser():
     parser.add_argument('--gpu', default='all', type=str,
                         help='single or all')
 
-    parser.add_argument('--contrun', default=False, type=bool, help='continue from last run')
-    parser.add_argument('--train_mae', default=True, type=bool, help='Train MAE')
-    parser.add_argument('--train_class', default=True, type=bool, help='Train Classifier')
-    parser.add_argument('--save_mae', default=True, type=bool, help='Save MAE model')
-    parser.add_argument('--save_class', default=True, type=bool, help='Save Classifier model')
+    parser.add_argument('--contrun', action='store_true', help='flag continue from last run')
+    parser.add_argument('--no_train_mae', action='store_false', type=bool, help='Train MAE', dest='train_mae')
+    parser.add_argument('--no_train_class', action='store_false', type=bool, help='Train Classifier', dest='train_class')
+    parser.add_argument('--no_save_mae', action='store_false', type=bool, help='Save MAE model', dest='save_mae')
+    parser.add_argument('--no_save_class', action='store_false', type=bool, help='Save Classifier model', dest='save_class')
 
     
 
