@@ -82,9 +82,9 @@ class AutoEncoder56_TD(nn.Module):
 
 
 
-class Classifier56_CPD(nn.Module):
+class Classifier56_TD(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
-        super(Classifier56_CPD, self).__init__()
+        super(Classifier56_TD, self).__init__()
         self.encoder = autoencoder.encoder
 
         self.norm = nn.LayerNorm(in_features, eps=1e-6) 
