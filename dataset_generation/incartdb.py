@@ -16,13 +16,14 @@ import os
 import wfdb
 import numpy as np
 from scipy.signal import resample
+from PIL import Image
 
 _range_to_ignore = 20
 _directory = '../datasets/physionet.org/files/files/'
-_dataset_dir = 'data/physionet/incartdb/render/imgs'
+_dataset_dir = 'data/physionet/incartdb_224/render/imgs'
 
 
-def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(112, 112), augmentation=True):
+def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224, 224), augmentation=True):
     """
        For each beat for each patient creates img apply some filters
        :param size: the img size
@@ -67,17 +68,36 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(112
 
             filename = '{}/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
 
-            fig.savefig(filename)
-            im_gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-            im_gray = cv2.resize(im_gray, size, interpolation=cv2.INTER_LANCZOS4)
-            cv2.imwrite(filename, im_gray)
-            # if augmentation:
-            #     cropping(im_gray, filename, size)
+            buf = create_img(plot_x, 224, 224)
+            image_pil = Image.open(buf)
+            image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
+            cv2.imwrite(filename, image_cv)
             plt.cla()
             plt.clf()
             plt.close('all')
 
 
+def create_img(signal, width, height):
+
+    dpi = 230 
+    fig_width_in = width / dpi
+    fig_height_in = height / dpi
+    t = np.linspace(0, 1, len(signal))  
+
+    fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+
+    ax.plot(t, signal, color='black', linewidth=0.5)
+    ax.axis('off')
+    buf = io.BytesIO()
+
+    plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
+    plt.close(fig)
+    
+    return buf
 
 
 if __name__ == "__main__":

@@ -17,8 +17,8 @@ import cv2
 import tqdm
 
 physio_root = 'data/physionet/ptbxl/records500'
-# _directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = 'data/physionet/ptbxl_full'
+_directory = '../../extra_reps/data/mitbih/'
+_dataset_dir = 'data/physionet/ptbxl_full_224/class'
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -119,28 +119,40 @@ def create_input_tensor():
 
         for i in range(len(segs)):
 
-            plot_x = segs[i]
-            plot_y = [i * 1 for i in range(len(segs[i]))]
-
-            fig = plt.figure(frameon=False)
-            plt.plot(plot_y, plot_x)
-            plt.xticks([]), plt.yticks([])
-            for spine in plt.gca().spines.values():
-                spine.set_visible(False)
 
             filename = '{}/{}_{}.png'.format(_dataset_dir, file[-8:-3], i)            
-            fig.savefig(filename)
-            im_gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-            im_gray = cv2.resize(im_gray, size, interpolation=cv2.INTER_LANCZOS4)
-            cv2.imwrite(filename, im_gray)
+            buf = create_img(segs[i], 224, 224)
+            image_pil = Image.open(buf)
+            image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
+            cv2.imwrite(filename, image_cv)
             plt.cla()
             plt.clf()
             plt.close('all')
 
-        if idx == 10000:
-            break
 
 
+
+def create_img(signal, width, height):
+
+    dpi = 230 
+    fig_width_in = width / dpi
+    fig_height_in = height / dpi
+    t = np.linspace(0, 1, len(signal))  
+
+    fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+
+    ax.plot(t, signal, color='black', linewidth=0.5)
+    ax.axis('off')
+    buf = io.BytesIO()
+
+    plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
+    plt.close(fig)
+    
+    return buf
 
 
 

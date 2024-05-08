@@ -15,16 +15,17 @@ from os import listdir
 import os
 import wfdb
 import numpy as np
+from PIL import Image
 
 _range_to_ignore = 20
 _directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = '../data/physionet/mitbih/'
+_dataset_dir = '../data/physionet/mitbih_224/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .50
 _split_validation_percentage = 0.70
 _split_test_percentage = 0.50
 
-def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128, 128), augmentation=True):
+def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224, 224), augmentation=True):
     """
        For each beat for each patient creates img apply some filters
        :param size: the img size
@@ -62,14 +63,6 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
 
             ''' Get the signals '''
             plot_x = [sig[i][0] for i in range(start, end)]
-            plot_y = [i * 1 for i in range(start, end)]
-
-            ''' Plot and save the beat'''
-            fig = plt.figure(frameon=False)
-            plt.plot(plot_y, plot_x)
-            plt.xticks([]), plt.yticks([])
-            for spine in plt.gca().spines.values():
-                spine.set_visible(False)
 
             ''' Convert in gray scale and resize img '''
 
@@ -77,17 +70,37 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(128
                 filename = '{}DS1/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
             else:
                 filename = '{}DS2/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
-            fig.savefig(filename)
-            im_gray = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-            im_gray = cv2.resize(im_gray, size, interpolation=cv2.INTER_LANCZOS4)
-            cv2.imwrite(filename, im_gray)
-            # if augmentation:
-            #     cropping(im_gray, filename, size)
+            buf = create_img(plot_x, 224, 224)
+            image_pil = Image.open(buf)
+            image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
+            cv2.imwrite(filename, image_cv)
             plt.cla()
             plt.clf()
             plt.close('all')
 
 
+
+def create_img(signal, width, height):
+
+    dpi = 230 
+    fig_width_in = width / dpi
+    fig_height_in = height / dpi
+    t = np.linspace(0, 1, len(signal))  
+
+    fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+
+    ax.plot(t, signal, color='black', linewidth=0.5)
+    ax.axis('off')
+    buf = io.BytesIO()
+
+    plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
+    plt.close(fig)
+    
+    return buf
 
 
 if __name__ == "__main__":
