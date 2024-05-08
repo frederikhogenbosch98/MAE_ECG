@@ -70,10 +70,10 @@ def get_args_parser():
                         help='single or all')
 
     parser.add_argument('--contrun', action='store_true', help='flag continue from last run')
-    parser.add_argument('--no_train_mae', action='store_false', type=bool, help='Train MAE', dest='train_mae')
-    parser.add_argument('--no_train_class', action='store_false', type=bool, help='Train Classifier', dest='train_class')
-    parser.add_argument('--no_save_mae', action='store_false', type=bool, help='Save MAE model', dest='save_mae')
-    parser.add_argument('--no_save_class', action='store_false', type=bool, help='Save Classifier model', dest='save_class')
+    parser.add_argument('--no_train_mae', action='store_false',  help='Train MAE', dest='train_mae')
+    parser.add_argument('--no_train_class', action='store_false', help='Train Classifier', dest='train_class')
+    parser.add_argument('--no_save_mae', action='store_false',  help='Save MAE model', dest='save_mae')
+    parser.add_argument('--no_save_class', action='store_false', help='Save Classifier model', dest='save_class')
 
     
 
