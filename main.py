@@ -469,6 +469,7 @@ if __name__ == "__main__":
 
 
     channels = [args.channel_start, 2*args.channel_start, 3*args.channel_start]
+    print(channels)
     mses = []
     accuracies = []
 
