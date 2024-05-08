@@ -176,7 +176,6 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
 
         # plot_losses(epoch+1, losses)        
         print("\n")
-        print("\n")
 
 
     else:
@@ -520,7 +519,7 @@ if __name__ == "__main__":
             
             num_classes = 5
             # classifier = Classifier56_CPD(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
-            classifier = Classifier56(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+            classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
 
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 
