@@ -19,7 +19,7 @@ from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
-from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, get_model_path
+from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper
 
 
 
