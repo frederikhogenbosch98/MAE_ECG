@@ -162,7 +162,6 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             t_epoch_end = time.time()
 
             print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
-            losses.append(epoch_loss)
 
            
         t_end = time.time()
