@@ -451,7 +451,7 @@ if __name__ == "__main__":
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
     combined_dataset_train = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
-    # print(len(combined_dataset_train))
+    print(len(combined_dataset_train))
     trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [180000, 48072])
     testset_sup = mitbih_dataset_test
 
