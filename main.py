@@ -468,7 +468,7 @@ if __name__ == "__main__":
         R_LIST = [0]
 
 
-    channels = [args.channel_start, 2*args.channel_start, 3*args.channel_start]
+    channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start]
     print(channels)
     mses = []
     accuracies = []
