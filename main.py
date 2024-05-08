@@ -67,8 +67,7 @@ def get_args_parser():
     parser.add_argument('--rank_stop', default='25', type=int,
                         help='stop rank')
 
-    parser.add_argument('--', default='25', type=int,
-                        help='stop rank')
+
     return parser
 
 
