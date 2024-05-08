@@ -69,8 +69,7 @@ class AutoEncoder56_TD(nn.Module):
             nn.GELU(),
             # Corresponds to LAYER 1 in Encoder
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
-            nn.BatchNorm2d(channels[0]),
-            nn.GELU(),
+            nn.Sigmoid(),
 
         )
 
