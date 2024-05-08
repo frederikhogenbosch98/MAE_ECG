@@ -447,7 +447,7 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=False,
+                            TRAIN_MAE=True,
                             SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
