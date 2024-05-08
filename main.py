@@ -123,7 +123,6 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             for i, data in enumerate(train_loader):
                 img, _ = data
                 img = img.to(device)
-                print(torch.max(img[0]), torch.min(img[0]))
                 unmasked_img = img
                 img = img.to(device)
                 recon = model(img)
