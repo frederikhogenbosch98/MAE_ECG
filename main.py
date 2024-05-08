@@ -459,7 +459,7 @@ if __name__ == "__main__":
 
     # MAE
     num_warmup_epochs_mae = args.warmup_epochs_mae
-    num_epochs_mae = args.epochs + num_warmup_epochs_mae
+    num_epochs_mae = args.epochs_mae + num_warmup_epochs_mae
 
     # CLASSIFIER
     num_warmup_epochs_classifier = args.warmup_epochs_class
