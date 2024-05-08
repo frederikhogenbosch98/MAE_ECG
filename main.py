@@ -19,7 +19,7 @@ from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
-from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper
+from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, get_model_path
 
 
 
@@ -68,17 +68,22 @@ def get_args_parser():
                         help='stop rank')
     parser.add_argument('--gpu', default='all', type=str,
                         help='single or all')
+
+    parser.add_argument('--contrun', default=False, type=bool, help='continue from last run')
     
 
 
     return parser
 
 
-def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, p=4):
+def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False):
     # torch.manual_seed(42)
     now = datetime.now()
 
     if TRAIN_MAE:
+
+        if contrun:
+            model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
 
         criterion = nn.MSELoss() # mean square error loss
         # optimizer = torch.optim.Adam(model.parameters(),
@@ -135,6 +140,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
 
             if epoch % 20 == 0 and epoch != 0:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
+                torch.save(model.state_dict(), 'trained_models/last/last_run.pth')
 
             if valset:
                 model.eval()
@@ -172,6 +178,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             # save_folder = 'trained_models/tranpose_02_05_10am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
+            torch.save(model.state_dict(), 'trained_models/last/last_run.pth')
             print(f'MAE model saved to {save_folder}')
 
         # plot_losses(epoch+1, losses)        
@@ -510,7 +517,8 @@ if __name__ == "__main__":
                             R=R,
                             batch_size=args.batch_size_mae,
                             fact=fact,
-                            run_dir = run_dir)
+                            run_dir = run_dir,
+                            contrun = args.contrun)
             
             mae_losses_run[i,:] = mae_losses
             mae_val_losses_run[i,:] = mae_val_losses
