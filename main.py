@@ -26,6 +26,10 @@ from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper
 
 def get_args_parser():
     parser = argparse.ArgumentParser('training', add_help=False)
+
+    # Model parameters
+    parser.add_argument('--model', default='default', type=str, metavar='MODEL',
+                        help='Name of model to train')
     parser.add_argument('--batch_size_mae', default=256, type=int,
                         help='Per GPU batch size')
     parser.add_argument('--epochs_mae', default=50, type=int)
@@ -37,11 +41,7 @@ def get_args_parser():
                         help='Per GPU batch size')
     parser.add_argument('--epochs_class', default=20, type=int)
     parser.add_argument('--warmup_epochs_class', type=int, default=0,
-                        help='epochs to warmup LR')
-    
-    # Model parameters
-    parser.add_argument('--model', default='default', type=str, metavar='MODEL',
-                        help='Name of model to train')
+                        help='epochs to warmup LR') 
     
     # Optimizer parameters
     parser.add_argument('--weight_decay_mae', type=float, default=1e-4,
@@ -50,8 +50,6 @@ def get_args_parser():
                         help='learning rate (absolute lr)')
     parser.add_argument('--min_lr_mae', type=float, default=1e-5, metavar='LR',
                         help='lower lr bound for cyclic schedulers that hit 0')
-
-
     parser.add_argument('--weight_decay_class', type=float, default=1e-4,
                         help='weight decay (default: 1e-4)')
     parser.add_argument('--lr_class', type=float, default=5e-4, metavar='LR',
@@ -59,7 +57,7 @@ def get_args_parser():
     parser.add_argument('--min_lr_class', type=float, default=1e-5, metavar='LR',
                         help='lower lr bound for cyclic schedulers that hit 0')
     
-    # distributed training parameters
+    # decomposition parameters
     parser.add_argument('--channel_start', default=16, type=int,
                         help='channels to start with')
     parser.add_argument('--rank_start', default=10, type=int)
@@ -69,6 +67,7 @@ def get_args_parser():
     parser.add_argument('--gpu', default='all', type=str,
                         help='single or all')
 
+    # save parameters
     parser.add_argument('--contrun', action='store_true', help='flag continue from last run')
     parser.add_argument('--no_train_mae', action='store_false',  help='Train MAE', dest='train_mae')
     parser.add_argument('--no_train_class', action='store_false', help='Train Classifier', dest='train_class')
@@ -569,10 +568,4 @@ if __name__ == "__main__":
             np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
             np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
             np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
-
-
-
-            
-
-
 
