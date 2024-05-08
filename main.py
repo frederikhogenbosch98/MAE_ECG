@@ -132,8 +132,9 @@ def train_mae(model, trainset, valset=None, MASK_RATIO=0.0, num_epochs=50, n_war
 
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
-        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_7_5_21_41.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
+        print(f'dataset loaded')
 
 
         return model
@@ -184,7 +185,10 @@ def eval_mae(model, testset, batch_size=128):
     for i in range(10):
         recon_cpu = recon[i,:,:,:]#.detach().numpy()
         recon_cpu = recon_cpu.cpu()
+        print(test_data_tensor[i,:,:,:].shape)
+        print(recon_cpu.shape)
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
+        
 
     return average_loss
 
@@ -386,8 +390,8 @@ if __name__ == "__main__":
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
     print(len(ptbxl_dataset))
 
-    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
+    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
 
     # mitbih_ds1_dir = 'data/physionet/mitbih/DS1/'
     # mitbih_ds2_dir = 'data/physionet/mitbih/DS2/'
@@ -443,7 +447,7 @@ if __name__ == "__main__":
                             MASK_RATIO=MASK_RATIO,
                             num_epochs=num_epochs_mae,
                             n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=True,
+                            TRAIN_MAE=False,
                             SAVE_MODEL_MAE=True,
                             R=R,
                             fact=fact)
