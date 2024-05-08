@@ -94,18 +94,18 @@ class Classifier56(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                # nn.Linear(12544, 2048),
-                nn.Linear(64, 64),
+                nn.Linear(12544, 256),
+                # nn.Linear(64, 64),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=64),
+                nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
-                nn.Linear(64, out_features)
+                nn.Linear(256, out_features)
         )
 
     def forward(self, x):
         x = self.encoder(x)
         # print(x.shape)
-        x = self.avg_pool(x)
+        # x = self.avg_pool(x)
         x = self.classifier(x)
         return x
 
