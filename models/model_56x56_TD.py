@@ -95,7 +95,7 @@ class Classifier56_TD(nn.Module):
         # )
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(9408, 2048),
+                nn.Linear(12544, 2048),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=2048),
                 nn.Dropout(0.5),
