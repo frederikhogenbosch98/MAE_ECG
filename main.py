@@ -428,16 +428,10 @@ if __name__ == "__main__":
 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((128,128)),
-        transforms.RandomCrop((112, 112)), 
+        transforms.Resize((112, 112)), 
         transforms.ToTensor(),         
         ])
 
-    transform_ds2 = transforms.Compose([
-        transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112,112)),
-        transforms.ToTensor(),         
-        ])
 
     ptbxl_dir = 'data/physionet/ptbxl_full_224/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
@@ -449,7 +443,7 @@ if __name__ == "__main__":
     mitbih_ds1_dir = 'data/physionet/mitbih_224/DS1/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
     mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
-    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform_ds2) 
+    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
 
     incartdb = 'data/physionet/incartdb_224/render/imgs'
     incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
