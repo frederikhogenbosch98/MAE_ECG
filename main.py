@@ -428,8 +428,8 @@ if __name__ == "__main__":
 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112,112)),
-        # transforms.RandomCrop((112, 112)), 
+        transforms.Resize((128,128)),
+        transforms.RandomCrop((112, 112)), 
         transforms.ToTensor(),         
         ])
 
