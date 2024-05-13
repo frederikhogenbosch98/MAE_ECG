@@ -16,6 +16,7 @@ import os
 import wfdb
 import numpy as np
 from PIL import Image
+import io
 
 _range_to_ignore = 20
 _directory = '../../extra_reps/data/mitbih/'
