@@ -110,13 +110,13 @@ class Classifier56(nn.Module):
         )
 
     def forward(self, x):
-        print(x.shape)
+        # print(x.shape)
         x = self.enc1(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.pool1(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.enc2(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.pool2(x)
         x = self.enc3(x)
         x = self.pool3(x)
