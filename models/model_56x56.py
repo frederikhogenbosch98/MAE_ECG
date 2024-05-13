@@ -79,7 +79,7 @@ class ResBlock(nn.Module):
 class Classifier56(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier56, self).__init__()
-        self.encoder = autoencoder.encoder
+        # self.encoder = autoencoder.encoder
         self.enc1 = autoencoder.enc1
         self.pool1 = autoencoder.pool1
         self.enc2 = autoencoder.enc2
@@ -110,7 +110,7 @@ class Classifier56(nn.Module):
         )
 
     def forward(self, x):
-        x = self.encoder(x)
+        # x = self.encoder(x)
         x = self.pool1(x)
         x = self.enc2(x)
         x = self.pool2(x)
