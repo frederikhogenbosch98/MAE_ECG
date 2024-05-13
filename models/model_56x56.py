@@ -80,6 +80,13 @@ class Classifier56(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier56, self).__init__()
         self.encoder = autoencoder.encoder
+        self.enc1 = autoencoder.enc1
+        self.pool1 = autoencoder.pool1
+        self.enc2 = autoencoder.enc2
+        self.pool2 = autoencoder.pool2
+        self.enc3 = autoencoder.enc3
+        self.pool3 = autoencoder.pool3
+
 
         self.norm = nn.LayerNorm(in_features, eps=1e-6) 
 
@@ -104,6 +111,12 @@ class Classifier56(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
+        x = self.pool1(x)
+        x = self.enc2(x)
+        x = self.pool2(x)
+        x = self.enc3(x)
+        x = self.pool3(x)
+        # x = self.encoder(x)
         # print(x.shape)
         # x = self.avg_pool(x)
         x = self.classifier(x)
@@ -423,3 +436,5 @@ class AutoEncoder56(nn.Module):
         x = self.dec1(x)
 
         return x
+
+
