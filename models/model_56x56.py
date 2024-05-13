@@ -175,6 +175,86 @@ class LayerNorm(nn.Module):
             x = self.weight[:, None, None] * x + self.bias[:, None, None]
             return x
 
+# class Encoder56(nn.Module):
+#     def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
+#     # def __init__(self, in_channels=1, channels=[64, 128, 256], depths=[1, 1, 1]):
+#         super(Encoder56, self).__init__()
+
+#         self.conv1 = nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1)
+#         self.norm1 =  nn.BatchNorm2d(channels[0])
+#         self.conv2 = nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1)
+#         self.norm2 = nn.BatchNorm2d(channels[0])
+#         self.conv3 = nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1)
+#         self.norm3 = nn.BatchNorm2d(channels[1]) 
+#         self.conv4 = nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1)
+#         self.norm4 = nn.BatchNorm2d(channels[1]) 
+#         self.conv5 = nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1)
+#         self.norm5 = nn.BatchNorm2d(channels[2]) 
+#         self.conv6 = nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1)
+#         self.norm6 = nn.BatchNorm2d(channels[2]) 
+#         self.conv7 = nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1)
+#         self.norm7 = nn.BatchNorm2d(channels[2]) 
+
+#         self.maxpool2d = nn.MaxPool2d(2, stride=2)
+#         self.gelu = nn.GELU()
+
+#     def forwward(self, x):
+#         input = x
+#         x = self.conv1(x)
+#         x = self.norm1(x)
+#         x = self.gelu(x)
+#         x = self.conv2(x)
+#         x = self.norm2(x)
+#         x = self.gelu(x) 
+#         x = self.conv3(x)
+#         x = self.norm3(x)
+#         x = self.gelu(x) 
+#         x = self.conv4(x)
+#         x = self.norm4(x)
+#         x = self.gelu(x) 
+#         x = self.conv5(x)
+#         x = self.norm5(x)
+#         x = self.gelu(x) 
+#         x = self.conv6(x)
+#         x = self.norm6(x)
+#         x = self.gelu(x) 
+#         x = self.conv7(x)
+#         x = self.norm7(x)
+#         x = self.gelu(x)
+#         x = x + input
+
+#         self.encoder = nn.Sequential(
+#             # LAYER 1
+#             nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
+#             nn.BatchNorm2d(channels[0]),
+#             nn.GELU(),
+#             # LAYER 2
+#             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+#             nn.BatchNorm2d(channels[0]),
+#             nn.GELU(),
+#             # LAYER 3
+#             nn.MaxPool2d(2, stride=2),
+#             # LAYER 4
+#             nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
+#             nn.BatchNorm2d(channels[1]),
+#             nn.GELU(),
+#             # LAYER 5
+#             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+#             nn.BatchNorm2d(channels[1]),
+#             nn.GELU(),
+#             # LAYER 6
+#             nn.MaxPool2d(2, stride=2),
+#             # LAYER 6
+#             nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+#             nn.BatchNorm2d(channels[2]),
+#             nn.GELU(),
+#             # LAYER 7
+#             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+#             nn.BatchNorm2d(channels[2]),
+#             nn.GELU(),
+#             # LAYER 8
+#             nn.MaxPool2d(2, stride=2)
+#         )
 
 class AutoEncoder56(nn.Module):
     def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
@@ -185,30 +265,36 @@ class AutoEncoder56(nn.Module):
             nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # LAYER 2
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # LAYER 3
             nn.MaxPool2d(2, stride=2),
             # LAYER 4
             nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # LAYER 5
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # LAYER 6
             nn.MaxPool2d(2, stride=2),
             # LAYER 6
             nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # LAYER 7
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # LAYER 8
             nn.MaxPool2d(2, stride=2)
         )
@@ -217,31 +303,38 @@ class AutoEncoder56(nn.Module):
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # Corresponds to LAYER 5 in Encoder
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # Corresponds to LAYER 5 in Encoder
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # Corresponds to LAYER 2 in Encoder
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+            nn.Dropout(p=0.5),
             # Corresponds to LAYER 1 in Encoder
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
             nn.Sigmoid(),
+
 
         )
 
