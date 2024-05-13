@@ -366,7 +366,10 @@ class AutoEncoder56(nn.Module):
         super(AutoEncoder56, self).__init__()
         # Encoder
         self.enc1 = nn.Sequential(
-            nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
@@ -382,11 +385,17 @@ class AutoEncoder56(nn.Module):
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
+            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
         )
         self.pool2 = nn.MaxPool2d(2, stride=2)
 
         self.enc3 = nn.Sequential(
             nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),

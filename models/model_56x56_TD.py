@@ -10,6 +10,9 @@ class AutoEncoder56_TD(nn.Module):
         super(AutoEncoder56_TD, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
@@ -23,6 +26,9 @@ class AutoEncoder56_TD(nn.Module):
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
             # LAYER 5
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[1]),
@@ -31,6 +37,9 @@ class AutoEncoder56_TD(nn.Module):
             nn.MaxPool2d(2, stride=2),
             # LAYER 6
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
             # LAYER 7
