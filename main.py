@@ -259,8 +259,19 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
     now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        for param in classifier.encoder.parameters():
+        for param in classifier.enc1.parameters():
             param.requires_grad = False
+        for param in classifier.enc2.parameters():
+            param.requires_grad = False
+        for param in classifier.enc3.parameters():
+            param.requires_grad = False
+        for param in classifier.pool1.parameters():
+            param.requires_grad = False
+        for param in classifier.pool2.parameters():
+            param.requires_grad = False
+        for param in classifier.pool2.parameters():
+            param.requires_grad = False
+
         
 
         train_loader = torch.utils.data.DataLoader(trainset, 
