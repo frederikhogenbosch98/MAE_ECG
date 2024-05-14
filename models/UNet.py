@@ -35,17 +35,17 @@ class UNet(nn.Module):
         x = self.outc(x)
         return x
 
-    def use_checkpointing(self):
-        self.inc = torch.utils.checkpoint(self.inc)
-        self.down1 = torch.utils.checkpoint(self.down1)
-        self.down2 = torch.utils.checkpoint(self.down2)
-        self.down3 = torch.utils.checkpoint(self.down3)
-        self.down4 = torch.utils.checkpoint(self.down4)
-        self.up1 = torch.utils.checkpoint(self.up1)
-        self.up2 = torch.utils.checkpoint(self.up2)
-        self.up3 = torch.utils.checkpoint(self.up3)
-        self.up4 = torch.utils.checkpoint(self.up4)
-        self.outc = torch.utils.checkpoint(self.outc)
+    # def use_checkpointing(self):
+    #     self.inc = torch.utils.checkpoint(self.inc)
+    #     self.down1 = torch.utils.checkpoint(self.down1)
+    #     self.down2 = torch.utils.checkpoint(self.down2)
+    #     self.down3 = torch.utils.checkpoint(self.down3)
+    #     self.down4 = torch.utils.checkpoint(self.down4)
+    #     self.up1 = torch.utils.checkpoint(self.up1)
+    #     self.up2 = torch.utils.checkpoint(self.up2)
+    #     self.up3 = torch.utils.checkpoint(self.up3)
+    #     self.up4 = torch.utils.checkpoint(self.up4)
+    #     self.outc = torch.utils.checkpoint(self.outc)
 
 
 class DoubleConv(nn.Module):
