@@ -17,8 +17,8 @@ import cv2
 import tqdm
 from scipy.io import loadmat
 
-physio_root = 'data/physionet/china_raw/'
-# physio_root = '../datasets/WFDB/'
+# physio_root = 'data/physionet/china_raw/'
+physio_root = '../datasets/china_raw/'
 _directory = '../../extra_reps/data/mitbih/'
 _dataset_dir = 'data/physionet/china/class'
 
