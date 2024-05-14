@@ -60,7 +60,7 @@ class UClassifier(nn.Module):
 
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(100352, 256),
+                nn.Linear(25088, 256),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
