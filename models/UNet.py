@@ -53,10 +53,10 @@ class UClassifier(nn.Module):
         super(UClassifier, self).__init__()
         # self.encoder = autoencoder.encoder
         self.inc = autoencoder.inc
-        self.conv1 = autoencoder.down1
-        self.conv2 = autoencoder.down2
-        self.conv3 = autoencoder.down3
-        self.conv4 = autoencoder.down4
+        self.down1 = autoencoder.down1
+        self.down2 = autoencoder.down2
+        self.down3 = autoencoder.down3
+        self.down4 = autoencoder.down4
 
 
         # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
@@ -82,10 +82,10 @@ class UClassifier(nn.Module):
 
     def forward(self, x):
         x = self.inc(x)
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
+        x = self.down1(x)
+        x = self.down2(x)
+        x = self.down3(x)
+        x = self.down4(x)
         print(x.shape)
         x = self.classifier(x)
         return x
