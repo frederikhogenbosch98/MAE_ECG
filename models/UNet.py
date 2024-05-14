@@ -10,7 +10,7 @@ class UNet(nn.Module):
         self.n_channels = n_channels
         self.bilinear = bilinear
 
-        self.inc = (DoubleConv(n_channels, 64))
+        self.inc = (DoubleConv(n_channels, 16))
         self.down1 = (Down(16, 32))
         self.down2 = (Down(32, 64))
         self.down3 = (Down(64, 128))
