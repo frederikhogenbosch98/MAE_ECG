@@ -317,14 +317,17 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
             running_loss = 0.0
             classifier.train()
             t_epoch_start = time.time()
-            for i, (inputs, labels) in enumerate(train_loader):
-                inputs, labels = inputs.to(device), labels.to(device)
-                outputs = classifier(inputs)
-                loss = loss_function(outputs, labels)
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                running_loss += loss.item()
+            with tqdm.tqdm(train_loader, unit="batch", leave=False) as tepoch:
+                for inputs, labels in tepoch: 
+                    tepoch.set_description(f"epoch {epoch+1}")
+                    inputs, labels = inputs.to(device), labels.to(device)
+                    outputs = classifier(inputs)
+                    loss = loss_function(outputs, labels)
+                    optimizer.zero_grad()
+                    loss.backward()
+                    optimizer.step()
+                    running_loss += loss.item()
+                    tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
             scheduler.step()
 
             if epoch % 20 == 0 and epoch != 0:
@@ -520,8 +523,8 @@ if __name__ == "__main__":
 
             if args.model == 'default':
                 if args.gpu == 'all':
-                    # mae = nn.DataParallel(AutoEncoder56()).to(device)
-                    mae = nn.DataParallel(UNet()).to(device)
+                    mae = nn.DataParallel(AutoEncoder56()).to(device)
+                    # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
             else:
@@ -557,8 +560,8 @@ if __name__ == "__main__":
             
             num_classes = 5
             if args.model == 'default':
-                # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-                classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
+                classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                    # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
                 classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
