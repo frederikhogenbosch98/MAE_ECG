@@ -49,7 +49,7 @@ class UNet(nn.Module):
 
 
 class UClassifier(nn.Module):
-    def __init__(self, autoencoder, in_features, out_features):
+    def __init__(self, autoencoder, out_features):
         super(UClassifier, self).__init__()
         # self.encoder = autoencoder.encoder
         self.inc = autoencoder.inc
@@ -59,7 +59,7 @@ class UClassifier(nn.Module):
         self.conv4 = autoencoder.conv4
 
 
-        self.norm = nn.LayerNorm(in_features, eps=1e-6) 
+        # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
 
         # self.classifier = nn.Sequential(
         #         nn.Flatten(),

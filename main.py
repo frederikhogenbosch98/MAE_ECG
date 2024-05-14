@@ -558,7 +558,7 @@ if __name__ == "__main__":
             num_classes = 5
             if args.model == 'default':
                 # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-                classifier = UClassifier().to(device)
+                classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
                 classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
