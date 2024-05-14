@@ -11,16 +11,16 @@ class UNet(nn.Module):
         self.bilinear = bilinear
 
         self.inc = (DoubleConv(n_channels, 64))
-        self.down1 = (Down(64, 128))
-        self.down2 = (Down(128, 256))
-        self.down3 = (Down(256, 512))
+        self.down1 = (Down(16, 32))
+        self.down2 = (Down(32, 64))
+        self.down3 = (Down(64, 128))
         factor = 2 if bilinear else 1
-        self.down4 = (Down(512, 1024 // factor))
-        self.up1 = (Up(1024, 512 // factor, bilinear))
-        self.up2 = (Up(512, 256 // factor, bilinear))
-        self.up3 = (Up(256, 128 // factor, bilinear))
-        self.up4 = (Up(128, 64, bilinear))
-        self.outc = (OutConv(64, 1))
+        self.down4 = (Down(128, 256 // factor))
+        self.up1 = (Up(256, 128 // factor, bilinear))
+        self.up2 = (Up(128, 64 // factor, bilinear))
+        self.up3 = (Up(64, 32 // factor, bilinear))
+        self.up4 = (Up(32, 16, bilinear))
+        self.outc = (OutConv(16, 1))
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -58,22 +58,9 @@ class UClassifier(nn.Module):
         self.down3 = autoencoder.down3
         self.down4 = autoencoder.down4
 
-
-        # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
-
-        # self.classifier = nn.Sequential(
-        #         nn.Flatten(),
-        #         nn.Linear(12544, 2048),
-        #         nn.GELU(),
-        #         nn.BatchNorm1d(num_features=2048),
-        #         nn.Dropout(0.5),
-        #         nn.Linear(2048, out_features)
-        # )
-        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 nn.Flatten(),
                 nn.Linear(100352, 256),
-                # nn.Linear(64, 64),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
@@ -86,7 +73,6 @@ class UClassifier(nn.Module):
         x = self.down2(x)
         x = self.down3(x)
         x = self.down4(x)
-        # print(x.shape)
         x = self.classifier(x)
         return x
 
