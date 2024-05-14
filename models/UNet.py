@@ -48,6 +48,48 @@ class UNet(nn.Module):
     #     self.outc = torch.utils.checkpoint(self.outc)
 
 
+class UClassifier(nn.Module):
+    def __init__(self, autoencoder, in_features, out_features):
+        super(UClassifier, self).__init__()
+        # self.encoder = autoencoder.encoder
+        self.inc = autoencoder.inc
+        self.conv1 = autoencoder.conv1
+        self.conv2 = autoencoder.conv2
+        self.conv3 = autoencoder.conv3
+        self.conv4 = autoencoder.conv4
+
+
+        self.norm = nn.LayerNorm(in_features, eps=1e-6) 
+
+        # self.classifier = nn.Sequential(
+        #         nn.Flatten(),
+        #         nn.Linear(12544, 2048),
+        #         nn.GELU(),
+        #         nn.BatchNorm1d(num_features=2048),
+        #         nn.Dropout(0.5),
+        #         nn.Linear(2048, out_features)
+        # )
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.classifier = nn.Sequential(
+                nn.Flatten(),
+                nn.Linear(12544, 256),
+                # nn.Linear(64, 64),
+                nn.GELU(),
+                nn.BatchNorm1d(num_features=256),
+                nn.Dropout(0.5),
+                nn.Linear(256, out_features)
+        )
+
+    def forward(self, x):
+        x = self.inc(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+        print(x.shape)
+        x = self.classifier(x)
+        return x
+
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 
@@ -118,3 +160,6 @@ class OutConv(nn.Module):
 
     def forward(self, x):
         return self.conv(x)
+
+
+

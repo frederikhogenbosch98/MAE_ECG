@@ -18,7 +18,7 @@ from ptflops import get_model_complexity_info
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
-from models.UNet import UNet
+from models.UNet import UNet, UClassifier
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper
@@ -144,7 +144,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
                     loss.backward()
                     optimizer.step()
                     running_loss += loss.item()
-                    tepoch.set_postfix(loss=running_loss)
+                    tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
                 scheduler.step()
 
             if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
@@ -264,18 +264,18 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
     now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        for param in classifier.enc1.parameters():
+        for param in classifier.inc.parameters():
             param.requires_grad = False
-        for param in classifier.enc2.parameters():
+        for param in classifier.down1.parameters():
             param.requires_grad = False
-        for param in classifier.enc3.parameters():
+        for param in classifier.down2.parameters():
             param.requires_grad = False
-        for param in classifier.pool1.parameters():
+        for param in classifier.down3.parameters():
             param.requires_grad = False
-        for param in classifier.pool2.parameters():
+        for param in classifier.down4.parameters():
             param.requires_grad = False
-        for param in classifier.pool2.parameters():
-            param.requires_grad = False
+        # for param in classifier.pool2.parameters():
+        #     param.requires_grad = False
 
 
         
@@ -557,7 +557,8 @@ if __name__ == "__main__":
             
             num_classes = 5
             if args.model == 'default':
-                classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                classifier = UClassifier().to(device)
             else:
                 classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
