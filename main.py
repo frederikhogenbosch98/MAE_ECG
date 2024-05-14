@@ -272,6 +272,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         for param in classifier.pool2.parameters():
             param.requires_grad = False
 
+
         
 
         train_loader = torch.utils.data.DataLoader(trainset, 
