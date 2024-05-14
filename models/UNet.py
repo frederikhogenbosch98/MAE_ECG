@@ -5,10 +5,9 @@ import torch.nn.functional as F
 
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, bilinear=True):
+    def __init__(self, n_channels=1, bilinear=True):
         super(UNet, self).__init__()
         self.n_channels = n_channels
-        self.n_classes = n_classes
         self.bilinear = bilinear
 
         self.inc = (DoubleConv(n_channels, 64))
@@ -59,10 +58,10 @@ class DoubleConv(nn.Module):
         self.double_conv = nn.Sequential(
             nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(mid_channels),
-            nn.ReLU(inplace=True),
+            nn.GELU(inplace=True),
             nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1, bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.GELU(inplace=True)
         )
 
     def forward(self, x):

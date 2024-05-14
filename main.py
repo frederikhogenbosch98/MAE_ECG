@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 import numpy as np
+import tqdm
 from datetime import datetime
 
 import torch, torchvision
@@ -130,18 +131,21 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             running_loss = 0.0
             t_epoch_start = time.time()
             model.train()
-            for i, data in enumerate(train_loader):
-                img, _ = data
-                img = img.to(device)
-                unmasked_img = img
-                img = img.to(device)
-                recon = model(img)
-                optimizer.zero_grad()
-                loss = criterion(recon, unmasked_img)
-                loss.backward()
-                optimizer.step()
-                running_loss += loss.item()
-            scheduler.step()
+            with tqdm.tqdm(train_loader, unit="batch", leave=False) as tepoch:
+                for data in tepoch:
+                    tepoch.set_description(f"epoch {epoch}")
+                    img, _ = data
+                    img = img.to(device)
+                    unmasked_img = img
+                    img = img.to(device)
+                    recon = model(img)
+                    optimizer.zero_grad()
+                    loss = criterion(recon, unmasked_img)
+                    loss.backward()
+                    optimizer.step()
+                    running_loss += loss.item()
+                    epoch.set_postfix(loss=running_loss / len(train_loader))
+                scheduler.step()
 
             if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
@@ -455,7 +459,8 @@ if __name__ == "__main__":
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
     print(len(combined_unsupervised_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [0.8*len(combined_unsupervised_train), 0.1*len(combined_unsupervised_train), 0.1*len(combined_unsupervised_train)])    
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [10000, 4000, 2926])
+    # trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 19318])
 
     mitbih_ds1_dir = 'data/physionet/mitbih_224/DS1/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
