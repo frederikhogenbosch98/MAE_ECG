@@ -86,7 +86,7 @@ class UClassifier(nn.Module):
         x = self.down2(x)
         x = self.down3(x)
         x = self.down4(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.classifier(x)
         return x
 
