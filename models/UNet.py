@@ -53,10 +53,10 @@ class UClassifier(nn.Module):
         super(UClassifier, self).__init__()
         # self.encoder = autoencoder.encoder
         self.inc = autoencoder.inc
-        self.conv1 = autoencoder.conv1
-        self.conv2 = autoencoder.conv2
-        self.conv3 = autoencoder.conv3
-        self.conv4 = autoencoder.conv4
+        self.conv1 = autoencoder.down1
+        self.conv2 = autoencoder.down2
+        self.conv3 = autoencoder.down3
+        self.conv4 = autoencoder.down4
 
 
         # self.norm = nn.LayerNorm(in_features, eps=1e-6) 
