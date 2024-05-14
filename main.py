@@ -133,7 +133,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             model.train()
             with tqdm.tqdm(train_loader, unit="batch", leave=False) as tepoch:
                 for data in tepoch:
-                    tepoch.set_description(f"epoch {epoch}")
+                    tepoch.set_description(f"epoch {epoch+1}")
                     img, _ = data
                     img = img.to(device)
                     unmasked_img = img
@@ -144,7 +144,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
                     loss.backward()
                     optimizer.step()
                     running_loss += loss.item()
-                    epoch.set_postfix(loss=running_loss / len(train_loader))
+                    tepoch.set_postfix(loss=running_loss / len(train_loader))
                 scheduler.step()
 
             if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
