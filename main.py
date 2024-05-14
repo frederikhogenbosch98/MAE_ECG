@@ -440,17 +440,21 @@ if __name__ == "__main__":
 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112, 112)), 
+        transforms.Resize((224, 224)), 
         transforms.ToTensor(),         
         ])
 
 
     ptbxl_dir = 'data/physionet/ptbxl_full_224/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
-    # print(len(ptbxl_dataset))
-
+    georgia_dir = 'data/physionet/georgia/'
+    georgia_dataset = datasets.ImageFolder(root=georgia_dir, transform=transform)
+    china_dir = 'data/physionet/china/'
+    china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
+    combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
+    print(len(combined_unsupervised_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [100000, 20000, 10794])    
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [0.8*len(combined_unsupervised_train), 0.1*len(combined_unsupervised_train), 0.1*len(combined_unsupervised_train)])    
 
     mitbih_ds1_dir = 'data/physionet/mitbih_224/DS1/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
