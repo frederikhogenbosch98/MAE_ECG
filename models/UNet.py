@@ -72,7 +72,7 @@ class UClassifier(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(12544, 256),
+                nn.Linear(100352, 256),
                 # nn.Linear(64, 64),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
