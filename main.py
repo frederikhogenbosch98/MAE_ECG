@@ -17,6 +17,7 @@ from ptflops import get_model_complexity_info
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
+from models.UNet import UNet
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper
@@ -514,7 +515,8 @@ if __name__ == "__main__":
 
             if args.model == 'default':
                 if args.gpu == 'all':
-                    mae = nn.DataParallel(AutoEncoder56()).to(device)
+                    # mae = nn.DataParallel(AutoEncoder56()).to(device)
+                    mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
             else:
