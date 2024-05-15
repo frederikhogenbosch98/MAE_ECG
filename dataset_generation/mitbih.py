@@ -19,12 +19,28 @@ from PIL import Image
 import io
 
 _range_to_ignore = 20
-_directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = '../data/physionet/mitbih_224/'
+# _directory = '../../extra_reps/data/mitbih/'
+_directory = 'data/physionet/mitbih_raw/'
+# _dataset_dir = '../data/physionet/mitbih_224/'
+_dataset_dir = 'data/physionet/mitbih/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .50
-_split_validation_percentage = 0.70
+_split_validation_percentage = 0.3
 _split_test_percentage = 0.50
+
+
+def nearest_integers(lst, index, num_neighbors=7):
+    if index < 0 or index >= len(lst):
+        raise ValueError("Index out of bounds")
+    
+    start_index = max(0, index - num_neighbors // 2)
+    end_index = min(len(lst), start_index + num_neighbors + 1)
+    
+    if end_index - start_index < num_neighbors + 1:
+        start_index = max(0, end_index - num_neighbors - 1)
+    
+    return lst[start_index:end_index]
+
 
 def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224, 224), augmentation=True):
     """
@@ -40,12 +56,18 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
     random.shuffle(files)
     ds1 = files[: int(len(files) * _split_percentage)]
+    ds11 = files[int(len(ds1) * _split_validation_percentage):]
+    ds12 = files[: int(len(ds1) * _split_validation_percentage)]
+    print(f'ds11 files: {ds11}')
+    print(f'ds12 files: {ds12}')
     ds2 = files[int(len(files) * _split_percentage):]
+    print(f'ds2 files: {ds2}')
 
     for file in files:
         sig, _ = wfdb.rdsamp(_directory + file)
         ann = wfdb.rdann(_directory + file, extension='atr')
-        for i in tqdm.tqdm(range(1, len(ann.sample) - 1)):
+        len_sample = len(ann.sample)
+        for i in tqdm.tqdm(range(1, len_sample - 1)):
             if ann.symbol[i] not in lboriginal_labels:
                 continue
             label = lboriginal_labels[ann.symbol[i]]
@@ -57,7 +79,16 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
             if not os.path.exists(dir):
                 os.makedirs(dir)
-            print(ann.sample[i])
+
+            print(f'--------{i}---------')
+            print(f'--------{label}---------')
+            
+            rr_intervals = []
+            for j in nearest_integers(np.arange(len_sample), i):
+                rr_intervals.append(ann.sample[j+1] - ann.sample[j])
+
+            print(np.mean(rr_intervals))
+
             ''' Get the Q-peak intervall '''
             start = ann.sample[i - 1] + _range_to_ignore
             end = ann.sample[i + 1] - _range_to_ignore
