@@ -73,7 +73,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         ann = wfdb.rdann(_directory + file, extension='atr')
         len_sample = len(ann.sample)
         print(len_sample)
-        for i in tqdm.tqdm(range(len_sample-10, len_sample - 2)):
+        for i in tqdm.tqdm(range(len_sample, len_sample - 2)):
             if ann.symbol[i] not in lboriginal_labels:
                 continue
             label = lboriginal_labels[ann.symbol[i]]
@@ -94,9 +94,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
 
             rr_intervals = []
-            for j in nearest_integers(np.arange(1, len_sample), i):
-                print(j+1)
-                print(nearest_integers(np.arange(1, len_sample),i))
+            for j in nearest_integers(np.arange(1, len_sample+1), i):
                 rr_intervals.append((ann.sample[j+1] - ann.sample[j])/360)
 
             mean_RR = np.mean(rr_intervals)
