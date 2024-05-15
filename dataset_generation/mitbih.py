@@ -38,10 +38,10 @@ def nearest_integers(lst, index, num_neighbors=4):
     end_index = min(len(lst), start_index + num_neighbors + 1)
     print(end_index)
     
-    # if end_index - start_index < num_neighbors + 1:
-    #     start_index = max(1, end_index - num_neighbors - 1)
+    if end_index - start_index < num_neighbors + 1:
+        start_index = max(1, end_index - num_neighbors - 1)
     
-    return lst[start_index:end_index]
+    return np.arange(start_index, end_index)
 
 
 def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224, 224), augmentation=True):
