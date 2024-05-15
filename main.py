@@ -264,18 +264,18 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
     now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        for param in classifier.inc.parameters():
+        for param in classifier.enc1.parameters():
             param.requires_grad = False
-        for param in classifier.down1.parameters():
+        for param in classifier.enc2.parameters():
             param.requires_grad = False
-        for param in classifier.down2.parameters():
+        for param in classifier.enc3.parameters():
             param.requires_grad = False
-        for param in classifier.down3.parameters():
+        for param in classifier.pool1.parameters():
             param.requires_grad = False
-        for param in classifier.down4.parameters():
+        for param in classifier.pool2.parameters():
             param.requires_grad = False
-        # for param in classifier.pool2.parameters():
-        #     param.requires_grad = False
+        for param in classifier.pool3.parameters():
+            param.requires_grad = False
 
 
         
@@ -460,7 +460,7 @@ if __name__ == "__main__":
     china_dir = 'data/physionet/china/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
-    print(len(combined_unsupervised_train))
+    # print(len(combined_unsupervised_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [10000, 4000, 2926])
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17076])
