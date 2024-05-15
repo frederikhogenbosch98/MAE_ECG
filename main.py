@@ -127,7 +127,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
 
         print(f"Start MAE training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")
         t_start = time.time()
-        for epoch in range(num_epochs):
+        for epoch in tqdm.tqdm(range(num_epochs)):
             running_loss = 0.0
             t_epoch_start = time.time()
             model.train()
@@ -313,7 +313,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         val_losses = []
         print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")        
         t_start = time.time()
-        for epoch in range(num_epochs):
+        for epoch in tqdm.tqdm(range(num_epochs)):
             running_loss = 0.0
             classifier.train()
             t_epoch_start = time.time()
