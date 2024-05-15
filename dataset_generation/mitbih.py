@@ -142,11 +142,6 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             with open(filename_std, 'w') as file2: 
                 file2.write(str(sdnn))
 
-        print(f'N: {np.mean(N_std)}')
-        print(f'S: {np.mean(S_std)}')
-        print(f'V: {np.mean(V_std)}')
-        print(f'F: {np.mean(F_std)}')
-        print(f'Q: {np.mean(Q_std)}')
     print(f'N: {np.mean(N_std)}')
     print(f'S: {np.mean(S_std)}')
     print(f'V: {np.mean(V_std)}')
