@@ -29,14 +29,12 @@ _split_validation_percentage = 0.3
 _split_test_percentage = 0.50
 
 
-def nearest_integers(lst, index, num_neighbors=6):
+def nearest_integers(lst, index, num_neighbors=4):
     if index < 1 or index >= len(lst):
         raise ValueError("Index out of bounds")
     
     start_index = max(1, index - num_neighbors // 2)
-    print(start_index)
     end_index = min(len(lst), start_index + num_neighbors + 1)
-    print(end_index)
     
     if end_index - start_index < num_neighbors + 1:
         start_index = max(1, end_index - num_neighbors - 1)
@@ -90,14 +88,14 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
                 os.makedirs(dir)
 
             # if label == 'S':
-            print(f'--------{i}---------')
+            # print(f'--------{i}---------')
             # print(f'--------{label}---------')
 
 
             rr_intervals = []
             for j in nearest_integers(np.arange(2, len_sample-2), i):
                 rr_intervals.append((ann.sample[j] - ann.sample[j-1])/360)
-                print(nearest_integers(np.arange(2, len_sample-2), i))
+                # print(nearest_integers(np.arange(2, len_sample-2), i))
 
             mean_RR = np.mean(rr_intervals)
             sdnn = np.std(rr_intervals, ddof=1)
