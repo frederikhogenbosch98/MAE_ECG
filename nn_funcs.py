@@ -168,7 +168,9 @@ class ImageWithFeatureDataset(torch.utils.data.Dataset):
 
         # Convert features to tensor
         self.features = torch.tensor(self.features, dtype=torch.float32)
-
+        print(self.features.shape)
+        print(len(self.images_paths))
+        
         # Calculate scaling parameters
         if scale_method == 'normalize':
             self.feature_min = self.features.min().item()
