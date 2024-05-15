@@ -62,6 +62,11 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
     print(f'ds12 files: {ds12}')
     ds2 = files[int(len(files) * _split_percentage):]
     print(f'ds2 files: {ds2}')
+    N_std = []
+    S_std = []
+    F_std = []
+    V_std = []
+    Q_std = [] 
 
     for file in files:
         sig, _ = wfdb.rdsamp(_directory + file)
@@ -80,15 +85,29 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             if not os.path.exists(dir):
                 os.makedirs(dir)
 
-            print(f'--------{i}---------')
-            print(f'--------{label}---------')
-            
+            # if label == 'S':
+            # print(f'--------{i}---------')
+            # print(f'--------{label}---------')
+
+
             rr_intervals = []
             for j in nearest_integers(np.arange(len_sample), i):
-                rr_intervals.append(ann.sample[j+1] - ann.sample[j])
+                rr_intervals.append((ann.sample[j+1] - ann.sample[j])/360)
 
-            print(np.mean(rr_intervals))
+            mean_RR = np.mean(rr_intervals)
+            sdnn = np.std(rr_intervals, ddof=1)
+            # print(sdnn)
 
+            if label == "N":
+                N_std.append(sdnn)
+            elif label == "S":
+                S_std.append(sdnn)
+            elif label == "V":
+                V_std.append(sdnn)
+            elif label == "F":
+                F_std.append(sdnn)
+            elif label == "Q":
+                Q_std.append(sdnn)
             ''' Get the Q-peak intervall '''
             start = ann.sample[i - 1] + _range_to_ignore
             end = ann.sample[i + 1] - _range_to_ignore
@@ -109,7 +128,13 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             plt.cla()
             plt.clf()
             plt.close('all')
-        break
+        
+
+    print(f'N: {np.mean(N_std)}')
+    print(f'S: {np.mean(S_std)}')
+    print(f'V: {np.mean(V_std)}')
+    print(f'F: {np.mean(F_std)}')
+    print(f'Q: {np.mean(Q_std)}')
 
 
 
