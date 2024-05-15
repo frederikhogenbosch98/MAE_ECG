@@ -161,14 +161,15 @@ class ImageWithFeatureDataset(torch.utils.data.Dataset):
                         # Load feature to collect all features for scaling
                         with open(feature_path, 'r') as f:
                             feature = float(f.read().strip())
-                            # print(feature)
+                            print(feature)
                             self.features.append(feature)
+                            print(len(self.features))
 
         # Print collected paths for debugging
         # print(f"Collected {len(self.image_paths)} image paths and {len(self.feature_paths)} feature paths")
 
         # Convert features to tensor
-        print((self.features))
+        print(len(self.features))
         self.features = torch.tensor(self.features, dtype=torch.float32)
         print(self.features.shape)
         print(len(self.image_paths))
