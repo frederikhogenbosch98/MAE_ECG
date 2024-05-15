@@ -136,7 +136,7 @@ def mask(batch, ratio, p):
     # plt.imshow(imgs[8,0,:,:].cpu().detach().numpy(), cmap="gray")
     # plt.show()
 
-class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
+class ImageWithFeatureDataset(torch.utils.data.Dataset):
     def __init__(self, root_dir, transform=None, scale_method='normalize'):
         self.root_dir = root_dir
         self.transform = transform
@@ -219,6 +219,7 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         #     label_idx = transforms.ToTensor()(label_idx)
 
         return image, feature, label_idx
+
 
 
 class UnsupervisedDataset(torch.utils.data.Dataset):

@@ -21,7 +21,7 @@ from models.resnet50 import ResNet
 from models.UNet import UNet, UClassifier
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
-from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset
+from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, ImageWithFeatureDataset
 
 
 
@@ -402,9 +402,9 @@ def eval_classifier(model, testset, batch_size=128):
     total = 0
     test_accuracy = []
     with torch.no_grad():
-        for images, labels in test_loader:
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
+        for images, features, labels in test_loader:
+            images, features, labels = images.to(device), features.to(device), labels.to(device)
+            outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
@@ -470,16 +470,16 @@ if __name__ == "__main__":
     mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
     mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
-    mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
-    mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
-    mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
+    mitbih_dataset_train = ImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
+    mitbih_dataset_val = ImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
+    mitbih_dataset_test = ImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
 
-    # incartdb = 'data/physionet/incartdb_224/render/imgs'
-    # incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
+    incartdb = 'data/physionet/incartdb_224/render/imgs'
+    incartdb_dataset = ImageWithFeatureDataset(root_dir=incartdb, transform=transform)
 
 
-    # trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
-    trainset_sup = mitbih_dataset_train 
+    trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    # trainset_sup = mitbih_dataset_train 
     valset_sup = mitbih_dataset_val
     testset_sup = mitbih_dataset_test
 
