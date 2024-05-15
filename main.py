@@ -468,9 +468,9 @@ if __name__ == "__main__":
     mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
     mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
-    mitbih_dataset_train = MITBIHImageWithFeatureDataset(root=mitbih_ds11_dir, transform=transform)
-    mitbih_dataset_val = MITBIHImageWithFeatureDataset(root=mitbih_ds12_dir, transform=transform)
-    mitbih_dataset_test = MITBIHImageWithFeatureDataset(root=mitbih_ds11_dir, transform=transform) 
+    mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
+    mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
+    mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
 
     # incartdb = 'data/physionet/incartdb_224/render/imgs'
     # incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
