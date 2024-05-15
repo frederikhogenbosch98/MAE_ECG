@@ -180,6 +180,8 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         else:
             raise ValueError("scale_method should be either 'normalize' or 'standardize'")
 
+        self.label_to_index = {label: idx for idx, label in enumerate(sorted(set(os.path.basename(os.path.dirname(path)) for path in self.image_paths)))}
+
     def __len__(self):
         return len(self.image_paths)
 
@@ -212,11 +214,11 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
 
         # Extract label from the path (assuming the structure is root/class_name/filename)
         label = os.path.basename(os.path.dirname(image_path))
+        label_idx = self.label_to_index[label]
+        if not isinstance(label_idx, torch.Tensor):
+            label_idx = transforms.ToTensor()(label_idx)
 
-        if not isinstance(label, torch.Tensor):
-            label = transforms.ToTensor()(label)
-
-        return image, feature, label
+        return image, feature, label_idx
 
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
