@@ -342,9 +342,9 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                 correct = 0
                 total = 0
                 with torch.no_grad():  
-                    for data, target in val_loader:
-                        data, target = data.to(device), target.to(device)
-                        output = classifier(data)
+                    for data, features, target in val_loader:
+                        data, features, target = data.to(device), features.to(device), target.to(device)
+                        output = classifier(data, features)
                         loss = loss_function(output, target)
                         validation_loss += loss.item() * data.size(0)
                         _, predicted = torch.max(output.data, 1)
