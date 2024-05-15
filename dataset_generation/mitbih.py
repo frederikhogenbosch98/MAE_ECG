@@ -29,7 +29,7 @@ _split_validation_percentage = 0.3
 _split_test_percentage = 0.50
 
 
-def nearest_integers(lst, index, num_neighbors=4):
+def nearest_integers(lst, index, num_neighbors=6):
     if index < 1 or index >= len(lst):
         raise ValueError("Index out of bounds")
     
