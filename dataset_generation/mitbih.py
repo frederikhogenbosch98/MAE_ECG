@@ -77,8 +77,10 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
                 continue
             label = lboriginal_labels[ann.symbol[i]]
 
-            if file in ds1:
-                dir = '{}DS1/{}'.format(_dataset_dir, label)
+            if file in ds11:
+                dir = '{}DS11/{}'.format(_dataset_dir, label)
+            elif file in ds12:
+                dir = '{}DS12/{}'.format(_dataset_dir, label) 
             else:
                 dir = '{}DS2/{}'.format(_dataset_dir, label)
 
@@ -119,8 +121,10 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
             ''' Convert in gray scale and resize img '''
 
-            if file in ds1:
-                filename = '{}DS1/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+            if file in ds11:
+                filename = '{}DS11/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+            elif file in ds12:
+                filename = '{}DS12/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end) 
             else:
                 filename = '{}DS2/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
             buf = create_img(plot_x, 224, 224)
