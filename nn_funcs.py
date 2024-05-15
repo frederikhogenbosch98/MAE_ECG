@@ -153,28 +153,28 @@ class ImageWithFeatureDataset(torch.utils.data.Dataset):
                 if file.endswith('.png'):
                     image_path = os.path.join(root, file)
                     feature_path = os.path.splitext(image_path)[0] + 'std.txt'
-                    print(image_path) 
+                    # print(image_path) 
                     if os.path.exists(feature_path):
                         self.image_paths.append(image_path)
-                        print(len(self.image_paths))
+                        # print(len(self.image_paths))
                         self.feature_paths.append(feature_path)
-                        print(len(self.feature_paths))
+                        # print(len(self.feature_paths))
                         
                         # Load feature to collect all features for scaling
                         with open(feature_path, 'r') as f:
                             feature = float(f.read().strip())
-                            print(feature)
+                            # print(feature)
                             self.features.append(feature)
-                            print(len(self.features))
+                            # print(len(self.features))
 
         # Print collected paths for debugging
         # print(f"Collected {len(self.image_paths)} image paths and {len(self.feature_paths)} feature paths")
 
         # Convert features to tensor
-        print(len(self.features))
+        # print(len(self.features))
         self.features = torch.tensor(self.features, dtype=torch.float32)
-        print(self.features.shape)
-        print(len(self.image_paths))
+        # print(self.features.shape)
+        # print(len(self.image_paths))
         
         # Calculate scaling parameters
         if scale_method == 'normalize':
