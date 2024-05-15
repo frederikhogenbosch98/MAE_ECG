@@ -23,6 +23,20 @@ _directory = '../datasets/physionet.org/files/files/'
 _dataset_dir = 'data/physionet/incartdb_224/render/imgs'
 
 
+def nearest_integers(lst, index, num_neighbors=4):
+    # if index < 1 or index >= len(lst):
+        # raise ValueError("Index out of bounds")
+    
+    start_index = max(1, index - num_neighbors // 2)
+    end_index = min(len(lst), start_index + num_neighbors + 1)
+    
+    if end_index - start_index < num_neighbors + 1:
+        start_index = max(1, end_index - num_neighbors - 1)
+    
+    return np.arange(start_index, end_index)
+
+
+
 def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224, 224), augmentation=True):
     """
        For each beat for each patient creates img apply some filters
@@ -34,19 +48,46 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         os.makedirs(_directory)
 
     files = [f[:-4] for f in listdir(_directory) if isfile(join(_directory, f)) if (f.find('.dat') != -1)]
-
+    N_std = []
+    S_std = []
+    F_std = []
+    V_std = []
+    Q_std = [] 
     for file in files:
         sig, _ = wfdb.rdsamp(_directory + file)
         # sig = sig[:,0]
 
         ann = wfdb.rdann(_directory + file, extension='atr')
-        for i in tqdm.tqdm(range(1, len(ann.sample) - 1)):
+        len_sample = len(ann.sample)
+        for i in tqdm.tqdm(range(1, len_sample - 2)):
             if ann.symbol[i] not in lboriginal_labels:
                 continue
             label = lboriginal_labels[ann.symbol[i]]
             dir = '{}/{}'.format(_dataset_dir, label)
             if not os.path.exists(dir):
                 os.makedirs(dir)
+
+            rr_intervals = []
+            for j in nearest_integers(np.arange(2, len_sample-2), i):
+                rr_intervals.append((ann.sample[j] - ann.sample[j-1])/360)
+                if i == len_sample -2:
+                    print(i)
+                    print(nearest_integers(np.arange(2, len_sample-2), i))
+
+            mean_RR = np.mean(rr_intervals)
+            sdnn = np.std(rr_intervals, ddof=1)
+            # print(sdnn)
+
+            if label == "N":
+                N_std.append(sdnn)
+            elif label == "S":
+                S_std.append(sdnn)
+            elif label == "V":
+                V_std.append(sdnn)
+            elif label == "F":
+                F_std.append(sdnn)
+            elif label == "Q":
+                Q_std.append(sdnn)
 
             ''' Get the Q-peak intervall '''
             start = ann.sample[i - 1] + _range_to_ignore
@@ -66,7 +107,9 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
             ''' Convert in gray scale and resize img '''
 
-            filename = '{}/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
+            filename = '{}/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
+            filename_std = '{}/{}/{}_{}{}{}_std.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
+
 
             buf = create_img(plot_x, 224, 224)
             image_pil = Image.open(buf)
@@ -75,6 +118,13 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             plt.cla()
             plt.clf()
             plt.close('all')
+            with open(filename_std, 'w') as file2: 
+                file2.write(str(sdnn))
+    print(f'N: {np.mean(N_std)}')
+    print(f'S: {np.mean(S_std)}')
+    print(f'V: {np.mean(V_std)}')
+    print(f'F: {np.mean(F_std)}')
+    print(f'Q: {np.mean(Q_std)}')
 
 
 def create_img(signal, width, height):
