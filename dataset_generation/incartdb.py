@@ -70,9 +70,9 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             rr_intervals = []
             for j in nearest_integers(np.arange(2, len_sample-2), i):
                 rr_intervals.append((ann.sample[j] - ann.sample[j-1])/257)
-                if i == len_sample -2:
-                    print(i)
-                    print(nearest_integers(np.arange(2, len_sample-2), i))
+                # if i == len_sample -2:
+                    # print(i)
+                    # print(nearest_integers(np.arange(2, len_sample-2), i))
 
             mean_RR = np.mean(rr_intervals)
             sdnn = np.std(rr_intervals, ddof=1)
@@ -108,7 +108,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             ''' Convert in gray scale and resize img '''
 
             filename = '{}/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
-            filename_std = '{}/{}/{}_{}{}{}_std.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
+            filename_std = '{}/{}/{}_{}{}{}_std.txt'.format(_dataset_dir, label, label, file[-3:], start, end)            
 
 
             buf = create_img(plot_x, 224, 224)
