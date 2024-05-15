@@ -159,7 +159,7 @@ class Classifier56(nn.Module):
         self.classifier = nn.Sequential(
                 nn.Flatten(),
                 # nn.Linear(200704, 256),
-                nn.Linear(3136, 256),
+                nn.Linear(3136+1, 256),
                 # nn.Linear(64, 64),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
@@ -167,9 +167,9 @@ class Classifier56(nn.Module):
                 nn.Linear(256, out_features)
         )
 
-    def forward(self, x):
+    def forward(self, images, features):
         # print(x.shape)
-        x = self.enc1(x)
+        x = self.enc1(images)
         # print(x.shape)
         x = self.pool1(x)
         # print(x.shape)
@@ -180,7 +180,8 @@ class Classifier56(nn.Module):
         x = self.pool3(x)
         # x = self.encoder(x)
         # x = self.avg_pool(x)
-        x = self.classifier(x)
+        combined_features = torch.cat((x, features), dim=1)
+        x = self.classifier(combined_features)
         return x
 
 

@@ -38,7 +38,7 @@ class MITBIHImageWithFeatureDataset(Dataset):
                             self.features.append(feature)
 
         # Print collected paths for debugging
-        print(f"Collected {len(self.image_paths)} image paths and {len(self.feature_paths)} feature paths")
+        # print(f"Collected {len(self.image_paths)} image paths and {len(self.feature_paths)} feature paths")
 
         # Convert features to tensor
         self.features = torch.tensor(self.features, dtype=torch.float32)
