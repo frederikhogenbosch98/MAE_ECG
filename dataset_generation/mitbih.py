@@ -19,10 +19,10 @@ from PIL import Image
 import io
 
 _range_to_ignore = 20
-_directory = '../../extra_reps/data/mitbih/'
-# _directory = 'data/physionet/mitbih_raw/'
-_dataset_dir = '../data/physionet/mitbih_224/'
-# _dataset_dir = 'data/physionet/mitbih/'
+# _directory = '../../extra_reps/data/mitbih/'
+_directory = 'data/physionet/mitbih_raw/'
+# _dataset_dir = '../data/physionet/mitbih_224/'
+_dataset_dir = 'data/physionet/mitbih/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .50
 _split_validation_percentage = 0.3
@@ -72,7 +72,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         sig, _ = wfdb.rdsamp(_directory + file)
         ann = wfdb.rdann(_directory + file, extension='atr')
         len_sample = len(ann.sample)
-        for i in tqdm.tqdm(range(1, len_sample - 1)):
+        for i in tqdm.tqdm(range(2, len_sample - 1)):
             if ann.symbol[i] not in lboriginal_labels:
                 continue
             label = lboriginal_labels[ann.symbol[i]]
@@ -93,7 +93,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
 
             rr_intervals = []
-            for j in nearest_integers(np.arange(len_sample)-1, i):
+            for j in nearest_integers(np.arange(2, len_sample)-1, i):
                 rr_intervals.append((ann.sample[j+1] - ann.sample[j])/360)
 
             mean_RR = np.mean(rr_intervals)
@@ -120,13 +120,15 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             plot_x = [sig[i][0] for i in range(start, end)]
 
             ''' Convert in gray scale and resize img '''
-
             if file in ds11:
-                filename = '{}DS11/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+                filename = '{}DS11/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end)
+                filename_std = '{}DS11/{}/{}_{}{}{}{}.txt'.format(_dataset_dir, label, label, file[-3:], start, end, 'std')
             elif file in ds12:
-                filename = '{}DS12/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end) 
+                filename = '{}DS12/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end) 
+                filename_std = '{}DS12/{}/{}_{}{}{}{}.txt'.format(_dataset_dir, label, label, file[-3:],start, end, 'std')
             else:
-                filename = '{}DS2/{}/{}_{}{}{}0.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
+                filename = '{}DS2/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
+                filename_std = '{}DS2/{}/{}_{}{}{}{}.txt'.format(_dataset_dir, label, label, file[-3:], start, end, 'std')
             buf = create_img(plot_x, 224, 224)
             image_pil = Image.open(buf)
             image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
@@ -134,8 +136,14 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             plt.cla()
             plt.clf()
             plt.close('all')
-        
+            with open(filename_std, 'w') as file2: 
+                file2.write(str(sdnn))
 
+        print(f'N: {np.mean(N_std)}')
+        print(f'S: {np.mean(S_std)}')
+        print(f'V: {np.mean(V_std)}')
+        print(f'F: {np.mean(F_std)}')
+        print(f'Q: {np.mean(Q_std)}')
     print(f'N: {np.mean(N_std)}')
     print(f'S: {np.mean(S_std)}')
     print(f'V: {np.mean(V_std)}')

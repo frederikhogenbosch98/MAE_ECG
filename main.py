@@ -465,10 +465,12 @@ if __name__ == "__main__":
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [10000, 4000, 2926])
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17076])
 
-    mitbih_ds1_dir = 'data/physionet/mitbih_224/DS1/'
+    mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
+    mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
-    mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds1_dir, transform=transform)
-    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds2_dir, transform=transform) 
+    mitbih_dataset_train = datasets.ImageFolder(root=mitbih_ds11_dir, transform=transform)
+    mitbih_dataset_val = datasets.ImageFolder(root=mitbih_ds12_dir, transform=transform)
+    mitbih_dataset_test = datasets.ImageFolder(root=mitbih_ds11_dir, transform=transform) 
 
     incartdb = 'data/physionet/incartdb_224/render/imgs'
     incartdb_dataset = datasets.ImageFolder(root=incartdb, transform=transform)
@@ -476,9 +478,8 @@ if __name__ == "__main__":
     # print(len(mitbih_dataset_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(dataset, [13000, 6000, 2003])
     # trainset_sup, testset_sup, valset_sup = torch.utils.data.random_split(dataset, [11000, 7002, 3001])
-    combined_dataset_train = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
-    # print(len(combined_dataset_train))
-    trainset_sup, valset_sup = torch.utils.data.random_split(combined_dataset_train, [180000, 47341])
+    trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    valset_sup = mitbih_dataset_val
     testset_sup = mitbih_dataset_test
 
     R_LIST = np.arange(args.rank_start, args.rank_stop + args.rank_increment, args.rank_increment).tolist()
