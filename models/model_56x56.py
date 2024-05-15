@@ -144,6 +144,7 @@ class Classifier56(nn.Module):
         self.enc3 = autoencoder.enc3
         self.pool3 = autoencoder.pool3
 
+        self.flatten == nn.Flatten()
 
         self.norm = nn.LayerNorm(in_features, eps=1e-6) 
 
@@ -156,7 +157,6 @@ class Classifier56(nn.Module):
         #         nn.Linear(2048, out_features)
         # )
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.flatten == nn.Flatten()
         self.classifier = nn.Sequential(
                 # nn.Flatten(),
                 # nn.Linear(200704, 256),
