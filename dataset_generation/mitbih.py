@@ -95,7 +95,9 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             rr_intervals = []
             for j in nearest_integers(np.arange(2, len_sample-2), i):
                 rr_intervals.append((ann.sample[j] - ann.sample[j-1])/360)
-                # print(nearest_integers(np.arange(2, len_sample-2), i))
+                if i == len_sample -2:
+                    print(i)
+                    print(nearest_integers(np.arange(2, len_sample-2), i))
 
             mean_RR = np.mean(rr_intervals)
             sdnn = np.std(rr_intervals, ddof=1)
