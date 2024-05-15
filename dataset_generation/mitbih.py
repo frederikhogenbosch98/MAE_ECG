@@ -19,10 +19,10 @@ from PIL import Image
 import io
 
 _range_to_ignore = 20
-# _directory = '../../extra_reps/data/mitbih/'
-_directory = 'data/physionet/mitbih_raw/'
-# _dataset_dir = '../data/physionet/mitbih_224/'
-_dataset_dir = 'data/physionet/mitbih/'
+_directory = '../../extra_reps/data/mitbih/'
+# _directory = 'data/physionet/mitbih_raw/'
+_dataset_dir = '../data/physionet/mitbih_224/'
+# _dataset_dir = 'data/physionet/mitbih/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .50
 _split_validation_percentage = 0.3
@@ -56,11 +56,11 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
     random.shuffle(files)
     ds1 = files[: int(len(files) * _split_percentage)]
-    ds11 = files[int(len(ds1) * _split_validation_percentage):]
-    ds12 = files[: int(len(ds1) * _split_validation_percentage)]
+    ds2 = files[int(len(files) * _split_percentage):]
+    ds11 = ds1[int(len(ds1) * _split_validation_percentage):]
+    ds12 = ds1[: int(len(ds1) * _split_validation_percentage)]
     print(f'ds11 files: {ds11}')
     print(f'ds12 files: {ds12}')
-    ds2 = files[int(len(files) * _split_percentage):]
     print(f'ds2 files: {ds2}')
     N_std = []
     S_std = []
