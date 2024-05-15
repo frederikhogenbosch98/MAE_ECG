@@ -73,7 +73,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         ann = wfdb.rdann(_directory + file, extension='atr')
         len_sample = len(ann.sample)
         print(len_sample)
-        for i in tqdm.tqdm(range(2, len_sample - 2)):
+        for i in tqdm.tqdm(range(len_sample-10, len_sample - 2)):
             if ann.symbol[i] not in lboriginal_labels:
                 continue
             label = lboriginal_labels[ann.symbol[i]]
