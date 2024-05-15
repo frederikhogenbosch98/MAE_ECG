@@ -11,9 +11,9 @@ from torchvision import transforms
 from PIL import Image
 
 class MITBIHImageWithFeatureDataset(Dataset):
-    def __init__(self, root_dir, transform=None, scale_method='normalize'):
+    def __init__(self, root, transform=None, scale_method='normalize'):
         self.root_dir = root_dir
-        self.transform = transform
+        self.transform = root
         self.scale_method = scale_method
 
         # Gather all image and feature paths
@@ -22,7 +22,7 @@ class MITBIHImageWithFeatureDataset(Dataset):
         self.features = []
 
         # Traverse the directory structure
-        for root, _, files in os.walk(root_dir):
+        for root, _, files in os.walk(root):
             for file in files:
                 if file.endswith('.png'):
                     image_path = os.path.join(root, file)
