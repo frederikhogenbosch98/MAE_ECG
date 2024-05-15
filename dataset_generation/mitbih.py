@@ -74,7 +74,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         len_sample = len(ann.sample)
         for i in tqdm.tqdm(range(2, len_sample - 2)):
             print(range(2, len_sample - 2))
-            print(np.arange(1, len_sample-1))
+            print(np.arange(1, len_sample))
 
             if ann.symbol[i] not in lboriginal_labels:
                 continue
