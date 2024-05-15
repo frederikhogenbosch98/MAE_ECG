@@ -149,12 +149,12 @@ class ImageWithFeatureDataset(torch.utils.data.Dataset):
 
         # Traverse the directory structure
         for root, _, files in os.walk(root_dir):
-            print(root)
             for file in files:
-                print(file)
                 if file.endswith('.png'):
                     image_path = os.path.join(root, file)
+                    print(image_path)
                     feature_path = os.path.splitext(image_path)[0] + 'std.txt'
+                    print(feature_path)
                     
                     if os.path.exists(feature_path):
                         self.image_paths.append(image_path)
