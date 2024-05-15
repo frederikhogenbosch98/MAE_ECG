@@ -69,7 +69,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
             rr_intervals = []
             for j in nearest_integers(np.arange(2, len_sample-2), i):
-                rr_intervals.append((ann.sample[j] - ann.sample[j-1])/360)
+                rr_intervals.append((ann.sample[j] - ann.sample[j-1])/257)
                 if i == len_sample -2:
                     print(i)
                     print(nearest_integers(np.arange(2, len_sample-2), i))
