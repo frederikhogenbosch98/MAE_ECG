@@ -320,7 +320,9 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
             with tqdm.tqdm(train_loader, unit="batch", leave=False) as tepoch:
                 for inputs, features, labels in tepoch: 
                     tepoch.set_description(f"epoch {epoch+1}")
-                    inputs, features, labels = inputs.to(device), features.to(device), labels.to(device)
+                    inputs = inputs.to(device)
+                    features = features.to(device)
+                    labels = labels.to(device)
                     outputs = classifier(inputs, features)
                     loss = loss_function(outputs, labels)
                     optimizer.zero_grad()
