@@ -19,10 +19,10 @@ from PIL import Image
 import io
 
 _range_to_ignore = 20
-# _directory = '../../extra_reps/data/mitbih/'
-_directory = 'data/physionet/mitbih_raw/'
-# _dataset_dir = '../data/physionet/mitbih_224/'
-_dataset_dir = 'data/physionet/mitbih/'
+_directory = '../../extra_reps/data/mitbih/'
+# _directory = 'data/physionet/mitbih_raw/'
+_dataset_dir = '../data/physionet/mitbih_224/'
+# _dataset_dir = 'data/physionet/mitbih/'
 _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .50
 _split_validation_percentage = 0.3
