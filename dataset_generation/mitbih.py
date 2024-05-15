@@ -88,7 +88,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
                 os.makedirs(dir)
 
             # if label == 'S':
-            print(f'--------{i}---------')
+            # print(f'--------{i}---------')
             # print(f'--------{label}---------')
 
 
