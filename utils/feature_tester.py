@@ -4,11 +4,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
 
-import os
-import torch
-from torch.utils.data import Dataset
-from torchvision import transforms
-from PIL import Image
+
 
 class MITBIHImageWithFeatureDataset(Dataset):
     def __init__(self, root_dir, transform=None, scale_method='normalize'):
@@ -47,8 +43,6 @@ class MITBIHImageWithFeatureDataset(Dataset):
         if scale_method == 'normalize':
             self.feature_min = self.features.min().item()
             self.feature_max = self.features.max().item()
-            print(self.feature_min)
-            print(self.feature_max)
         elif scale_method == 'standardize':
             self.feature_mean = self.features.mean().item()
             self.feature_std = self.features.std().item()

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 import os
+from PIL import Image
 
 class CosineAnnealingwithWarmUp():
 
