@@ -173,8 +173,7 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         if scale_method == 'normalize':
             self.feature_min = self.features.min().item()
             self.feature_max = self.features.max().item()
-            print(self.feature_min)
-            print(self.feature_max)
+
         elif scale_method == 'standardize':
             self.feature_mean = self.features.mean().item()
             self.feature_std = self.features.std().item()
@@ -195,6 +194,8 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         if self.transform:
             image = self.transform(image)
 
+        if not isinstance(image, torch.Tensor):
+            image = transforms.ToTensor()(image)
         # Load feature
         with open(feature_path, 'r') as f:
             feature = float(f.read().strip())
