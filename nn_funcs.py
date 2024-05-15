@@ -209,8 +209,12 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         # Convert feature to tensor
         feature = torch.tensor([feature], dtype=torch.float32)
 
+
         # Extract label from the path (assuming the structure is root/class_name/filename)
         label = os.path.basename(os.path.dirname(image_path))
+
+        if not isinstance(label, torch.Tensor):
+            label = transforms.ToTensor()(label)
 
         return image, feature, label
 
