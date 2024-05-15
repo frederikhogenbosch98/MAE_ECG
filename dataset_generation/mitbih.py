@@ -33,7 +33,7 @@ def nearest_integers(lst, index, num_neighbors=4):
     if index < 0 or index >= len(lst):
         raise ValueError("Index out of bounds")
     
-    start_index = max(1, index - num_neighbors // 2)
+    start_index = max(0, index - num_neighbors // 2)
     end_index = min(len(lst), start_index + num_neighbors + 1)
     
     if end_index - start_index < num_neighbors + 1:
