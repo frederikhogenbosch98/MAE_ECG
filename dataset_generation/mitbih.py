@@ -57,7 +57,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
             if not os.path.exists(dir):
                 os.makedirs(dir)
-
+            print(ann.sample[i])
             ''' Get the Q-peak intervall '''
             start = ann.sample[i - 1] + _range_to_ignore
             end = ann.sample[i + 1] - _range_to_ignore
@@ -78,6 +78,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             plt.cla()
             plt.clf()
             plt.close('all')
+        break
 
 
 

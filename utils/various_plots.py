@@ -14,25 +14,25 @@ def plot_compression_cp():
     plt.show()
 
 def plot_accs_cp():
-    R = [5, 10, 15, 20, 25]
-    num_params = [6290, 11235, 16180, 21125, 26070]
-    full_params = 2881921
-    accuracies = [0.8209, 0.8406, 0.8482, 0.8322, 0.8443]
+    R = [15, 20, 25]
+    # num_params = [6290, 11235, 16180, 21125, 26070]
+    # full_params = 2881921
+    accuracies = [0.895795, 0.903269, 0.902985]
     
     # Calculate compression ratios
-    a = [full_params / i for i in num_params]
+    # a = [full_params / i for i in num_params]
 
     
     plt.plot(R, accuracies, 'o-', label='Accuracies')  # 'r-' is for red solid line
     plt.xlabel('rank')
     plt.ylabel('Accuracies')
     plt.tick_params('y')
-    plt.ylim(0.80, 1.0)  # Set the range of the accuracy axis
+    plt.ylim(0.85, 1.0)  # Set the range of the accuracy axis
     
     # Add horizontal lines for literature and 250 epochs benchmarks
-    plt.axhline(0.9439, color='gray', linestyle='-', label='Literature (0.9439)')
-    plt.axhline(0.9652, color='red', linestyle='-', label='250 Epochs (0.9652)')
-    plt.title('CP accuracies with 100 MAE epoch and 25 CLASSIFIER epochs')
+    # plt.axhline(0.9439, color='gray', linestyle='-', label='Literature (0.9439)')
+    plt.axhline(0.896515, color='red', linestyle='-', label='uncompressed')
+    plt.title('CP accuracies with 50 MAE epoch and 25 CLASSIFIER epochs')
     plt.xticks(R)
     plt.legend() 
     plt.show()
@@ -51,31 +51,31 @@ def plot_compression_tucker():
     plt.show()
 
 def plot_accs_tucker():
-    R = [5, 10, 15, 20, 25]
-    num_params = [6290, 11235, 16180, 21125, 26070]
-    full_params = 2881921
-    accuracies = [0.8239, 0.8591, 0.8306, 0.8354, 0.8243]
-    
+    R = [15, 20, 25]
+    # num_params = [6290, 11235, 16180, 21125, 26070]
+    # full_params = 2881921
+    accuracies = [0.900821, 0.900894, 0.898160]
+
     # Calculate compression ratios
-    a = [full_params / i for i in num_params]
+    # a = [full_params / i for i in num_params]
 
     
     plt.plot(R, accuracies, 'o-', label='Accuracies')  # 'r-' is for red solid line
     plt.xlabel('rank')
     plt.ylabel('Accuracies')
     plt.tick_params('y')
-    plt.ylim(0.80, 1.0)  # Set the range of the accuracy axis
+    plt.ylim(0.85, 1.0)  # Set the range of the accuracy axis
     
     # Add horizontal lines for literature and 250 epochs benchmarks
-    plt.axhline(0.9439, color='gray', linestyle='-', label='Literature (0.9439)')
-    plt.axhline(0.9652, color='red', linestyle='-', label='250 Epochs (0.9652)')
-    plt.title('Tucker accuracies with 100 MAE epoch and 25 CLASSIFIER epochs')
+    # plt.axhline(0.9439, color='gray', linestyle='-', label='Literature (0.9439)')
+    plt.axhline(0.896515, color='red', linestyle='-', label='uncompressed')
+    plt.title('Tucker accuracies with 50 MAE epoch and 25 CLASSIFIER epochs')
     plt.xticks(R)
     plt.legend() 
     plt.show()
 
 if __name__ == '__main__':
-    plot_compression_cp()
+    # plot_compression_cp()
     plot_accs_cp()
-    plot_compression_tucker()
+    # plot_compression_tucker()
     plot_accs_tucker()
