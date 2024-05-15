@@ -93,7 +93,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
 
             rr_intervals = []
-            for j in nearest_integers(np.arange(1, len_sample+1), i):
+            for j in nearest_integers(np.arange(1, len_sample+2), i):
                 rr_intervals.append((ann.sample[j+1] - ann.sample[j])/360)
 
             mean_RR = np.mean(rr_intervals)
