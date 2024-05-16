@@ -53,7 +53,10 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         os.makedirs(_directory)
 
     files = [f[:-4] for f in listdir(_directory) if isfile(join(_directory, f)) if (f.find('.dat') != -1)]
-    files.remove('104', '102', '107', '217')
+    to_remove = ['104', '102', '107', '217']
+    for fl in to_remove:
+        files.remove(fl)
+    print(files)
 
     # random.shuffle(files)
     # ds1 = files[: int(len(files) * _split_percentage)]
