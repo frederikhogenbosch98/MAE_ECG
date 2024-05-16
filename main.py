@@ -83,7 +83,6 @@ def get_args_parser():
 
 
 def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False):
-    # torch.manual_seed(42)
     now = datetime.now()
 
     if TRAIN_MAE:
@@ -433,6 +432,7 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 if __name__ == "__main__":
+    torch.manual_seed(42)
 
     args = get_args_parser()
     args = args.parse_args()
