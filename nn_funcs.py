@@ -136,7 +136,99 @@ def mask(batch, ratio, p):
     # plt.imshow(imgs[8,0,:,:].cpu().detach().numpy(), cmap="gray")
     # plt.show()
 
-class ImageWithFeatureDataset(torch.utils.data.Dataset):
+class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
+    def __init__(self, root_dir, transform=None, scale_method='normalize'):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.scale_method = scale_method
+
+        # Gather all image and feature paths
+        self.image_paths = []
+        self.feature_paths = []
+        self.features = []
+
+        # Traverse the directory structure
+        for root, _, files in os.walk(root_dir):
+            for file in files:
+                if file.endswith('.png'):
+                    image_path = os.path.join(root, file)
+                    feature_path = os.path.splitext(image_path)[0] + 'std.txt'
+                    # print(image_path) 
+                    # print(feature_path) 
+                    if os.path.exists(feature_path):
+                        self.image_paths.append(image_path)
+                        # print(len(self.image_paths))
+                        self.feature_paths.append(feature_path)
+                        # print(len(self.feature_paths))
+                        
+                        # Load feature to collect all features for scaling
+                        with open(feature_path, 'r') as f:
+                            feature = float(f.read().strip())
+                            # print(feature)
+                            self.features.append(feature)
+                            # print(len(self.features))
+
+        # Print collected paths for debugging
+        # print(f"Collected {len(self.image_paths)} image paths and {len(self.feature_paths)} feature paths")
+
+        # Convert features to tensor
+        # print(len(self.features))
+        self.features = torch.tensor(self.features, dtype=torch.float32)
+        # print(self.features.shape)
+        # print(len(self.image_paths))
+        
+        # Calculate scaling parameters
+        if scale_method == 'normalize':
+            self.feature_min = self.features.min().item()
+            self.feature_max = self.features.max().item()
+
+        elif scale_method == 'standardize':
+            self.feature_mean = self.features.mean().item()
+            self.feature_std = self.features.std().item()
+        else:
+            raise ValueError("scale_method should be either 'normalize' or 'standardize'")
+
+        self.label_to_index = {label: idx for idx, label in enumerate(sorted(set(os.path.basename(os.path.dirname(path)) for path in self.image_paths)))}
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, index):
+        image_path = self.image_paths[index]
+        feature_path = self.feature_paths[index]
+
+
+
+        # Load image
+        image = Image.open(image_path).convert('L')  # 'L' mode for grayscale
+        if self.transform:
+            image = self.transform(image)
+
+        if not isinstance(image, torch.Tensor):
+            image = transforms.ToTensor()(image)
+        # Load feature
+        with open(feature_path, 'r') as f:
+            feature = float(f.read().strip())
+
+        # Scale feature
+        if self.scale_method == 'normalize':
+            feature = (feature - self.feature_min) / (self.feature_max - self.feature_min)
+        elif self.scale_method == 'standardize':
+            feature = (feature - self.feature_mean) / self.feature_std
+
+        # Convert feature to tensor
+        feature = torch.tensor([feature], dtype=torch.float32)
+
+
+        # Extract label from the path (assuming the structure is root/class_name/filename)
+        label = os.path.basename(os.path.dirname(image_path))
+        label_idx = self.label_to_index[label]
+        # if not isinstance(label_idx, torch.Tensor):
+        #     label_idx = transforms.ToTensor()(label_idx)
+
+        return image, feature, label_idx
+
+class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
     def __init__(self, root_dir, transform=None, scale_method='normalize'):
         self.root_dir = root_dir
         self.transform = transform
@@ -227,8 +319,6 @@ class ImageWithFeatureDataset(torch.utils.data.Dataset):
         #     label_idx = transforms.ToTensor()(label_idx)
 
         return image, feature, label_idx
-
-
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
     def __init__(self, data_path, resize_shape=(112,112)):
