@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         # Encoder
         self.enc1 = nn.Sequential(
@@ -44,7 +44,7 @@ class AutoEncoder56(nn.Module):
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
         )
-        self.pool3 = nn.MaxPool2d(4, stride=4)
+        self.pool3 = nn.MaxPool2d(2, stride=2)
 
 
         self.enc4 = nn.Sequential(
@@ -76,7 +76,7 @@ class AutoEncoder56(nn.Module):
             
         )
 
-        self.up3 = nn.Upsample(scale_factor=4, mode='bilinear', align_corners=False)
+        self.up3 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
         self.dec3 = nn.Sequential(
             nn.Conv2d(channels[2] + channels[2], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
@@ -159,8 +159,8 @@ class Classifier56(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 # nn.Flatten(),
-                # nn.Linear(200704, 256),
-                nn.Linear(3136+1, 256),
+                nn.Linear(200704+1, 256),
+                # nn.Linear(3136+1, 256),
                 # nn.Linear(64, 64),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
