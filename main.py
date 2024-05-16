@@ -601,8 +601,8 @@ if __name__ == "__main__":
 
 
     
-            mae_save_folder = f'{run_dir}/MAE_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
-            class_save_folder = f'{run_dir}/CLASS_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+            mae_save_folder = f'{run_dir}/MAE_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+            class_save_folder = f'{run_dir}/CLASS_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
             np.save(mae_save_folder, mae_losses_run)
             np.save(class_save_folder, class_losses_run)
             np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
