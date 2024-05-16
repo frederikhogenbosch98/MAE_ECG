@@ -470,9 +470,9 @@ if __name__ == "__main__":
     mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
     mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
-    mitbih_dataset_train = ImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
-    mitbih_dataset_val = ImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
-    mitbih_dataset_test = ImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
+    # mitbih_dataset_train = ImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
+    # mitbih_dataset_val = ImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
+    # mitbih_dataset_test = ImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
 
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = ImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
