@@ -479,6 +479,7 @@ if __name__ == "__main__":
     print(len(mitbih_dataset_test))
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
+    print(len(incartdb_dataset))
 
 
     trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
