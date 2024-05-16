@@ -477,12 +477,12 @@ if __name__ == "__main__":
     mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
     mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
     mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
-    print(len(mitbih_dataset_train))
-    print(len(mitbih_dataset_val))
-    print(len(mitbih_dataset_test))
+    # print(len(mitbih_dataset_train))
+    # print(len(mitbih_dataset_val))
+    # print(len(mitbih_dataset_test))
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
-    print(len(incartdb_dataset))
+    # print(len(incartdb_dataset))
 
 
     trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])

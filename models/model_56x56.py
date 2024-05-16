@@ -121,7 +121,7 @@ class Classifier56(nn.Module):
         )
 
     def forward(self, images, features):
-        x = self.encoder(x)
+        x = self.encoder(images)
         x = self.flatten(x)
         # combined_features = torch.cat((x, features), dim=1)
         # x = self.classifier(combined_features)
