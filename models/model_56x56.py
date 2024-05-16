@@ -47,10 +47,10 @@ class AutoEncoder56(nn.Module):
             nn.MaxPool2d(2, stride=2),
 
             nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(channels[2]),
+            nn.BatchNorm2d(channels[3]),
             nn.GELU(),
             nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(channels[2]),
+            nn.BatchNorm2d(channels[3]),
             nn.GELU(),
             nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[3]),
