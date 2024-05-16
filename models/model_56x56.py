@@ -159,7 +159,7 @@ class Classifier56(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 # nn.Flatten(),
-                nn.Linear(200704+1, 256),
+                nn.Linear(50177+1, 256),
                 # nn.Linear(3136+1, 256),
                 # nn.Linear(64, 64),
                 nn.GELU(),
