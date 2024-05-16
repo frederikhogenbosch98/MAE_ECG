@@ -53,6 +53,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         os.makedirs(_directory)
 
     files = [f[:-4] for f in listdir(_directory) if isfile(join(_directory, f)) if (f.find('.dat') != -1)]
+    files.remove('104', '102', '107', '217')
 
     # random.shuffle(files)
     # ds1 = files[: int(len(files) * _split_percentage)]
@@ -133,9 +134,11 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             elif file in ds12:
                 filename = '{}DS12/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end) 
                 filename_std = '{}DS12/{}/{}_{}{}{}{}.txt'.format(_dataset_dir, label, label, file[-3:],start, end, 'std')
-            else:
+            elif file in ds2:
                 filename = '{}DS2/{}/{}_{}{}{}.png'.format(_dataset_dir, label, label, file[-3:], start, end)            
                 filename_std = '{}DS2/{}/{}_{}{}{}{}.txt'.format(_dataset_dir, label, label, file[-3:], start, end, 'std')
+            else:
+                continue
             buf = create_img(plot_x, 224, 224)
             image_pil = Image.open(buf)
             image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
