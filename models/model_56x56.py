@@ -160,7 +160,7 @@ class Classifier56(nn.Module):
         self.classifier = nn.Sequential(
                 # nn.Flatten(),
                 nn.Linear(50176, 256),
-                nn.Linear(50176+1, 256),
+                # nn.Linear(50176+1, 256),
                 # nn.Linear(3136+1, 256),
                 # nn.Linear(64, 64),
                 nn.GELU(),
