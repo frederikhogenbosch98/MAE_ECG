@@ -90,7 +90,7 @@ class AutoEncoder56(nn.Module):
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            n.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
             # Corresponds to LAYER 1 in Encoder
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
             nn.Sigmoid(),
