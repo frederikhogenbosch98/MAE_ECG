@@ -159,8 +159,8 @@ class Classifier56(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 # nn.Flatten(),
-                nn.Linear(50176, 256),
-                # nn.Linear(50176+1, 256),
+                # nn.Linear(50176, 256),
+                nn.Linear(50176+1, 256),
                 # nn.Linear(3136+1, 256),
                 # nn.Linear(64, 64),
                 nn.GELU(),
@@ -186,9 +186,9 @@ class Classifier56(nn.Module):
         # print(x.shape)
         # print(features.shape)
         x = self.flatten(x)
-        # combined_features = torch.cat((x, features), dim=1)
-        # x = self.classifier(combined_features)
-        x = self.classifier(x)
+        combined_features = torch.cat((x, features), dim=1)
+        x = self.classifier(combined_features)
+        # x = self.classifier(x)
         return x
 
 
