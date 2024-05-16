@@ -179,7 +179,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
 
            
         t_end = time.time()
-        print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)}s. Training loss: {loss}.")
+        print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)/60.0}m. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
             save_folder = f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
@@ -373,7 +373,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
 
 
         t_end = time.time()
-        print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)}s. final loss: {loss}.")
+        print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)/60.0}m. final loss: {loss}.")
 
         if SAVE_MODEL_CLASSIFIER:
             save_folder = f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
@@ -474,7 +474,9 @@ if __name__ == "__main__":
     mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
     mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
     mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
-
+    print(len(mitbih_dataset_train))
+    print(len(mitbih_dataset_val))
+    print(len(mitbih_dataset_test))
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
 
