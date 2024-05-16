@@ -113,7 +113,7 @@ class Classifier56(nn.Module):
         self.flatten = nn.Flatten()
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
-                nn.Linear(50176, 256),
+                nn.Linear(12544, 256),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
