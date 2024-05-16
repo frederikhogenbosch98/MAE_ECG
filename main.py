@@ -473,7 +473,7 @@ if __name__ == "__main__":
     mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
     mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
     mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
-    mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform) 
+    mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
     print(len(mitbih_dataset_train))
     print(len(mitbih_dataset_val))
     print(len(mitbih_dataset_test))
