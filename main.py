@@ -198,7 +198,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/last/last_run.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('trained/models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
+        model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
         print(f'dataset loaded')
         losses = np.zeros(num_epochs)
