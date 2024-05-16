@@ -543,8 +543,8 @@ if __name__ == "__main__":
                 else:
                     mae = AutoEncoder56_TD(R, in_channels=1, channels=channels).to(device) 
 
-            # current_pams = count_parameters(mae)
-            # print(f'num params: {current_pams}')
+            current_pams = count_parameters(mae)
+            print(f'num params: {current_pams}')
 
 
             mae, mae_losses, mae_val_losses = train_mae(model=mae, 
