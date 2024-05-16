@@ -153,18 +153,18 @@ class ImageWithFeatureDataset(torch.utils.data.Dataset):
                 if file.endswith('.png'):
                     image_path = os.path.join(root, file)
                     feature_path = os.path.splitext(image_path)[0] + '_std.txt'
-                    print(image_path) 
-                    print(feature_path) 
+                    # print(image_path) 
+                    # print(feature_path) 
                     if os.path.exists(feature_path):
                         self.image_paths.append(image_path)
-                        # print(len(self.image_paths))
+                        print(len(self.image_paths))
                         self.feature_paths.append(feature_path)
                         # print(len(self.feature_paths))
                         
                         # Load feature to collect all features for scaling
                         with open(feature_path, 'r') as f:
                             feature = float(f.read().strip())
-                            # print(feature)
+                            print(feature)
                             self.features.append(feature)
                             # print(len(self.features))
 
