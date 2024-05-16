@@ -3,149 +3,190 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+class AutoEncoder56Unet(nn.Module):
+    def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1]):
+        super(AutoEncoder56Unet, self).__init__()
+        # Encoder
+        self.enc1 = nn.Sequential(
+            nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+        )
+        self.pool1 = nn.MaxPool2d(2, stride=2)
 
-class UNet(nn.Module):
-    def __init__(self, n_channels=1, bilinear=True):
-        super(UNet, self).__init__()
-        self.n_channels = n_channels
-        self.bilinear = bilinear
+        self.enc2 = nn.Sequential(
+            nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
+            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
+            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
+        )
+        self.pool2 = nn.MaxPool2d(2, stride=2)
 
-        self.inc = (DoubleConv(n_channels, 16))
-        self.down1 = (Down(16, 32))
-        self.down2 = (Down(32, 64))
-        self.down3 = (Down(64, 128))
-        factor = 2 if bilinear else 1
-        self.down4 = (Down(128, 256 // factor))
-        self.up1 = (Up(256, 128 // factor, bilinear))
-        self.up2 = (Up(128, 64 // factor, bilinear))
-        self.up3 = (Up(64, 32 // factor, bilinear))
-        self.up4 = (Up(32, 16, bilinear))
-        self.outc = (OutConv(16, 1))
+        self.enc3 = nn.Sequential(
+            nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+        )
+        self.pool3 = nn.MaxPool2d(2, stride=2)
+
+
+        self.enc4 = nn.Sequential(
+            nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[3]),
+            nn.GELU(),
+        )
+        self.pool4 = nn.MaxPool2d(2, stride=2)
+
+
+        # Decoder
+        self.up4 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
+        self.dec4 = nn.Sequential(
+            nn.Conv2d(channels[3] + channels[3], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(), 
+            
+        )
+
+        self.up3 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
+        self.dec3 = nn.Sequential(
+            nn.Conv2d(channels[2] + channels[2], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
+            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
+            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
+        )
+
+        self.up2 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
+        self.dec2 = nn.Sequential(
+            nn.Conv2d(channels[1] + channels[1], channels[0], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
+        )
+
+        self.up1 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
+        self.dec1 = nn.Sequential(
+            nn.Conv2d(channels[0] + channels[0], in_channels, kernel_size=3, stride=1, padding=1),
+            nn.Sigmoid()
+        )
 
     def forward(self, x):
-        x1 = self.inc(x)
-        x2 = self.down1(x1)
-        x3 = self.down2(x2)
-        x4 = self.down3(x3)
-        x5 = self.down4(x4)
-        x = self.up1(x5, x4)
-        x = self.up2(x, x3)
-        x = self.up3(x, x2)
-        x = self.up4(x, x1)
-        x = self.outc(x)
+        # Encoder
+        enc1 = self.enc1(x)
+        x = self.pool1(enc1)
+        enc2 = self.enc2(x)
+        x = self.pool2(enc2)
+        enc3 = self.enc3(x)
+        x = self.pool3(enc3)
+
+        # Decoder
+        x = self.up3(x)
+        x = torch.cat([x, enc3], dim=1)
+        x = self.dec3(x)
+
+        x = self.up2(x)
+        x = torch.cat([x, enc2], dim=1)
+        x = self.dec2(x)
+
+        x = self.up1(x)
+        x = torch.cat([x, enc1], dim=1)
+        x = self.dec1(x)
+
         return x
 
-    # def use_checkpointing(self):
-    #     self.inc = torch.utils.checkpoint(self.inc)
-    #     self.down1 = torch.utils.checkpoint(self.down1)
-    #     self.down2 = torch.utils.checkpoint(self.down2)
-    #     self.down3 = torch.utils.checkpoint(self.down3)
-    #     self.down4 = torch.utils.checkpoint(self.down4)
-    #     self.up1 = torch.utils.checkpoint(self.up1)
-    #     self.up2 = torch.utils.checkpoint(self.up2)
-    #     self.up3 = torch.utils.checkpoint(self.up3)
-    #     self.up4 = torch.utils.checkpoint(self.up4)
-    #     self.outc = torch.utils.checkpoint(self.outc)
 
-
-class UClassifier(nn.Module):
-    def __init__(self, autoencoder, out_features):
-        super(UClassifier, self).__init__()
+class Classifier56Unet(nn.Module):
+    def __init__(self, autoencoder, in_features, out_features):
+        super(Classifier56Unet, self).__init__()
         # self.encoder = autoencoder.encoder
-        self.inc = autoencoder.inc
-        self.down1 = autoencoder.down1
-        self.down2 = autoencoder.down2
-        self.down3 = autoencoder.down3
-        self.down4 = autoencoder.down4
+        self.enc1 = autoencoder.enc1
+        self.pool1 = autoencoder.pool1
+        self.enc2 = autoencoder.enc2
+        self.pool2 = autoencoder.pool2
+        self.enc3 = autoencoder.enc3
+        self.pool3 = autoencoder.pool3
 
+        self.flatten = nn.Flatten()
+
+        self.norm = nn.LayerNorm(in_features, eps=1e-6) 
+
+        # self.classifier = nn.Sequential(
+        #         nn.Flatten(),
+        #         nn.Linear(12544, 2048),
+        #         nn.GELU(),
+        #         nn.BatchNorm1d(num_features=2048),
+        #         nn.Dropout(0.5),
+        #         nn.Linear(2048, out_features)
+        # )
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
-                nn.Flatten(),
-                nn.Linear(25088, 256),
+                # nn.Flatten(),
+                # nn.Linear(50176, 256),
+                nn.Linear(50176+1, 256),
+                # nn.Linear(3136+1, 256),
+                # nn.Linear(64, 64),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
                 nn.Linear(256, out_features)
         )
 
-    def forward(self, x):
-        x = self.inc(x)
-        x = self.down1(x)
-        x = self.down2(x)
-        x = self.down3(x)
-        x = self.down4(x)
-        x = self.classifier(x)
+    def forward(self, images, features):
+        # print(x.shape)
+        x = self.enc1(images)
+        # print(x.shape)
+        x = self.pool1(x)
+        # print(x.shape)
+        x = self.enc2(x)
+        # print(x.shape)
+        x = self.pool2(x)
+        x = self.enc3(x)
+        x = self.pool3(x)
+        # x = self.encoder(x)
+        # x = self.avg_pool(x)
+        # print(features)
+        # print(x.shape)
+        # print(features.shape)
+        x = self.flatten(x)
+        combined_features = torch.cat((x, features), dim=1)
+        x = self.classifier(combined_features)
+        # x = self.classifier(x)
         return x
-
-class DoubleConv(nn.Module):
-    """(convolution => [BN] => ReLU) * 2"""
-
-    def __init__(self, in_channels, out_channels, mid_channels=None):
-        super().__init__()
-        if not mid_channels:
-            mid_channels = out_channels
-        self.double_conv = nn.Sequential(
-            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(mid_channels),
-            nn.GELU(),
-            nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.GELU()
-        )
-
-    def forward(self, x):
-        return self.double_conv(x)
-
-
-class Down(nn.Module):
-    """Downscaling with maxpool then double conv"""
-
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
-        self.maxpool_conv = nn.Sequential(
-            nn.MaxPool2d(2),
-            DoubleConv(in_channels, out_channels)
-        )
-
-    def forward(self, x):
-        return self.maxpool_conv(x)
-
-
-class Up(nn.Module):
-    """Upscaling then double conv"""
-
-    def __init__(self, in_channels, out_channels, bilinear=True):
-        super().__init__()
-
-        # if bilinear, use the normal convolutions to reduce the number of channels
-        if bilinear:
-            self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-            self.conv = DoubleConv(in_channels, out_channels, in_channels // 2)
-        else:
-            self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2)
-            self.conv = DoubleConv(in_channels, out_channels)
-
-    def forward(self, x1, x2):
-        x1 = self.up(x1)
-        # input is CHW
-        diffY = x2.size()[2] - x1.size()[2]
-        diffX = x2.size()[3] - x1.size()[3]
-
-        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
-                        diffY // 2, diffY - diffY // 2])
-        # if you have padding issues, see
-        # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
-        # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
-        x = torch.cat([x2, x1], dim=1)
-        return self.conv(x)
-
-
-class OutConv(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(OutConv, self).__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
-
-    def forward(self, x):
-        return self.conv(x)
-
-
-

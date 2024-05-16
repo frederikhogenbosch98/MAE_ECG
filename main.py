@@ -18,7 +18,7 @@ from ptflops import get_model_complexity_info
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
-from models.UNet import UNet, UClassifier
+from models.UNet import AutoEncoder56Unet, Classifier56Unet
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
@@ -196,8 +196,8 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
-        # model.load_state_dict(torch.load('trained_models/last/last_run.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
+        model.load_state_dict(torch.load('trained_models/last/last_run.pth', map_location=torch.device('cpu')))
+        # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
         print(f'dataset loaded')
         losses = np.zeros(num_epochs)
@@ -264,17 +264,20 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
     now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        for param in classifier.enc1.parameters():
-            param.requires_grad = False
-        for param in classifier.enc2.parameters():
-            param.requires_grad = False
-        for param in classifier.enc3.parameters():
-            param.requires_grad = False
-        for param in classifier.pool1.parameters():
-            param.requires_grad = False
-        for param in classifier.pool2.parameters():
-            param.requires_grad = False
-        for param in classifier.pool3.parameters():
+        # for param in classifier.enc1.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.enc2.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.enc3.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.pool1.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.pool2.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.pool3.parameters():
+        #     param.requires_grad = False
+
+        for param in classifier.encoder.parameters():
             param.requires_grad = False
 
 
@@ -529,6 +532,7 @@ if __name__ == "__main__":
 
             if args.model == 'default':
                 if args.gpu == 'all':
+                    # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
                     mae = nn.DataParallel(AutoEncoder56()).to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
@@ -567,6 +571,7 @@ if __name__ == "__main__":
             num_classes = 5
             if args.model == 'default':
                 classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                     # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
                 classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
