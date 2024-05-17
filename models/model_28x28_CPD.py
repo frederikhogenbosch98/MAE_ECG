@@ -57,10 +57,10 @@ class ParafacConvolution2D(nn.Module):
         self.s_to_r = nn.Conv2d(conv.in_channels, R, (1, 1), stride=1, padding=0, bias=False)
         self.s_to_r.weight.data = factors[1].permute(1,0).unsqueeze(-1).unsqueeze(-1)
 
-        self.depth_vert = nn.Conv2d(R, R, (factors[2].shape[0], 1), groups=1, stride=(conv.stride[0],1), padding=(conv.padding[0],0), bias=False)
+        self.depth_vert = nn.Conv2d(R, R, (factors[2].shape[0], 1), groups=R, stride=(conv.stride[0],1), padding=(conv.padding[0],0), bias=False)
         self.depth_vert.weight.data = factors[2].permute(1,0).unsqueeze(1).unsqueeze(-1)
 
-        self.depth_hor = nn.Conv2d(R, R, (1, factors[3].shape[0]), groups=1, stride=(1, conv.stride[1]), padding=(0, conv.padding[1]), bias=False)
+        self.depth_hor = nn.Conv2d(R, R, (1, factors[3].shape[0]), groups=R, stride=(1, conv.stride[1]), padding=(0, conv.padding[1]), bias=False)
         self.depth_hor.weight.data = factors[3].permute(1,0).unsqueeze(1).unsqueeze(1)
 
         self.r_to_t = nn.Conv2d(R, conv.out_channels, (1, 1), stride=1, padding=0, bias=True)
