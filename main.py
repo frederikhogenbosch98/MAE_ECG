@@ -63,9 +63,9 @@ def get_args_parser():
     # decomposition parameters
     parser.add_argument('--channel_start', default=16, type=int,
                         help='channels to start with')
-    parser.add_argument('--rank_start', default=10, type=int)
-    parser.add_argument('--rank_increment', type=int, default=5)
-    parser.add_argument('--rank_stop', default='25', type=int,
+    parser.add_argument('--rank_start', default=10, type=float)
+    parser.add_argument('--rank_increment', type=float, default=5)
+    parser.add_argument('--rank_stop', default='25', type=float,
                         help='stop rank')
     parser.add_argument('--gpu', default='all', type=str,
                         help='single or all')
