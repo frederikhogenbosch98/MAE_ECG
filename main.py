@@ -534,14 +534,14 @@ if __name__ == "__main__":
             if args.model == 'default':
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
-                    mae = nn.DataParallel(AutoEncoder56(), channels=channels).to(device)
+                    mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
             else:
                 if args.gpu == 'all':
-                    # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
-                     mae = nn.DataParallel(AutoEncoder_self_TD(R=R, in_channels=1)).to(device)
+                    mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
+                    #  mae = nn.DataParallel(AutoEncoder_self_TD(R=R, in_channels=1)).to(device)
                 else:
                     mae = AutoEncoder56_TD(R, in_channels=1, channels=channels).to(device) 
 
