@@ -569,7 +569,7 @@ if __name__ == "__main__":
             mae_val_losses_run[i,:] = mae_val_losses
 
             mses.append(eval_mae(mae, testset_un))
-            
+             
             num_classes = 5
             if args.model == 'default':
                 # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)

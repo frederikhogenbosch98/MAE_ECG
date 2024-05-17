@@ -111,6 +111,7 @@ class Classifier_self_TD(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier_self_TD, self).__init__()
         self.encoder = autoencoder.encoder
+        print('classifier self')
         self.flatten = nn.Flatten()
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
