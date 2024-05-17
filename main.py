@@ -387,6 +387,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         print("\n")
     else:
         # classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
+        print('classifier model loaded')
         classifier.load_state_dict(torch.load('trained_models/RUN_16_5_22_32/CLASSIFIER_RUN_default_R0_17_5_1_55.pth', map_location=torch.device('cpu')))
         losses = np.zeros(num_epochs)
         val_losses = np.zeros(num_epochs)
@@ -478,9 +479,9 @@ if __name__ == "__main__":
     mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
     mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
     mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
-    # print(len(mitbih_dataset_train))
-    # print(len(mitbih_dataset_val))
-    # print(len(mitbih_dataset_test))
+    print(len(mitbih_dataset_train))
+    print(len(mitbih_dataset_val))
+    print(len(mitbih_dataset_test))
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
     # print(len(incartdb_dataset))
