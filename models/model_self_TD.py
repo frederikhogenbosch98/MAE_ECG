@@ -2,13 +2,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import tltorch
-from model_28x28_CPD import ParafacConvolution2D
+from models.model_28x28_CPD import ParafacConvolution2D
 
 
-class AutoEncoder56_TD(nn.Module):
+class AutoEncoder_self_TD(nn.Module):
     def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1], R=0.5, factorization='cp'):
     # def __init__(self, in_channels=1, channels=[32, 64, 128], depths=[1, 1, 1]):
-        super(AutoEncoder56_TD, self).__init__()
+        super(AutoEncoder_self_TD, self).__init__()
         self.encoder = nn.Sequential(
             # LAYER 1
             ParafacConvolution2D(nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3),R=R),
@@ -107,9 +107,9 @@ class AutoEncoder56_TD(nn.Module):
 
 
 
-class Classifier56_TD(nn.Module):
+class Classifier_self_TD(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
-        super(Classifier56_TD, self).__init__()
+        super(Classifier_self_TD, self).__init__()
         self.encoder = autoencoder.encoder
         self.flatten = nn.Flatten()
         self.classifier = nn.Sequential(
