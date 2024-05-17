@@ -386,7 +386,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         print("\n")
     else:
         # classifier.load_state_dict(torch.load('data/models_mnist/CLASSIFIER_MR_02.pth'))
-        classifier.load_state_dict(torch.load('trained_models/CLASSIFIER_RUN_cp_R20_6_5_20_31.pth', map_location=torch.device('cpu')))
+        classifier.load_state_dict(torch.load('trained_models/RUN_16_5_22_32/CLASSIFIER_RUN_default_R0_17_5_1_55.pth', map_location=torch.device('cpu')))
         losses = np.zeros(num_epochs)
         val_losses = np.zeros(num_epochs)
 
@@ -590,11 +590,11 @@ if __name__ == "__main__":
                                         fact=fact,
                                         run_dir = run_dir)
             
+            accuracies.append(eval_classifier(classifier, testset_sup))
             class_losses_run[i,:] = class_losses
             class_val_losses_run[i,:] = class_val_losses
 
             # print(count_parameters(classifier))
-            accuracies.append(eval_classifier(classifier, testset_sup))
 
             mae_losses_run[i,:] = mae_losses
             class_losses_run[i,:] = class_losses
