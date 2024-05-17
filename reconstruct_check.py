@@ -4,6 +4,9 @@ from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 import torch.nn as nn
+
+
+
 def eval_mae(model, testset, batch_size=128):
     device = torch.device("mps")
 
@@ -54,10 +57,10 @@ if __name__ == "__main__":
     testset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
 
     # model = AutoEncoder56().to(device)
-    model = nn.DataParallel(AutoEncoder56()).to(device)
+    model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/last/last_run.pth', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load('trained_models/dropbox/MAE_RUN_default_R0_16_5_22_32.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
     eval_mae(model, testset)
