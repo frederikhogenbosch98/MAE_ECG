@@ -39,7 +39,7 @@ class AutoEncoder11(nn.Module):
             # LAYER 6
             nn.MaxPool2d(2, stride=2),
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
-            nn.BatchNorm2d(channels[2]),
+            nn.BatchNorm2d(channels[3]),
             nn.GELU(),
             # LAYER 5
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
