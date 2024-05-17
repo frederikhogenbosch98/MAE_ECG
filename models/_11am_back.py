@@ -37,12 +37,29 @@ class AutoEncoder11(nn.Module):
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
             # LAYER 6
+            nn.MaxPool2d(2, stride=2),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            # LAYER 5
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            # LAYER 6
             nn.MaxPool2d(2, stride=2)
             
         )
 
         self.decoder = nn.Sequential(
             # Corresponds to LAYER 6 in Encoder
+            nn.Upsample(scale_factor=2, mode='nearest'),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
+            # Corresponds to LAYER 5 in Encoder
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[2]),
+            nn.GELU(),
             nn.Upsample(scale_factor=2, mode='nearest'),
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[2]),
