@@ -115,7 +115,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
                                                 warmup_lr=1e-5,
                                                 start_lr=1e-3,
                                                 lower_lr=5e-5,
-                                                alpha=0.75,
+                                                alpha=0.85,
                                                 epoch_int=10,
                                                 num_epochs=num_epochs)
 
