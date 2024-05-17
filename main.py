@@ -113,10 +113,10 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             scheduler = CosineAnnealingwithWarmUp(optimizer, 
                                                 n_warmup_epochs=n_warmup_epochs,
                                                 warmup_lr=1e-5,
-                                                start_lr=5e-4,
-                                                lower_lr=1e-5,
+                                                start_lr=1e-3,
+                                                lower_lr=5e-5,
                                                 alpha=0.75,
-                                                epoch_int=1,
+                                                epoch_int=10,
                                                 num_epochs=num_epochs)
 
 
