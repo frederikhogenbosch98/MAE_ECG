@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class AutoEncoder56(nn.Module):
-    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1]):
     # def __init__(self, in_channels=1, channels=[32, 64, 128], depths=[1, 1, 1]):
         super(AutoEncoder56, self).__init__()
         self.encoder = nn.Sequential(
@@ -114,7 +114,7 @@ class Classifier56(nn.Module):
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
                 # nn.Linear(6272, 256), #16
-                nn.Linear(12544, 256), #32
+                nn.Linear(12455, 256), #32
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
