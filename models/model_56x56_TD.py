@@ -5,7 +5,7 @@ import tltorch
 
 
 class AutoEncoder56_TD(nn.Module):
-    def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1], R=0.5, factorization='cp'):
+    def __init__(self, in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1], R=20, factorization='cp'):
     # def __init__(self, in_channels=1, channels=[32, 64, 128], depths=[1, 1, 1]):
         super(AutoEncoder56_TD, self).__init__()
         self.encoder = nn.Sequential(

@@ -197,7 +197,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('trained_models/last/last_run.pth', map_location=torch.device('cpu')))
+        model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
         # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
         print(f'dataset loaded')
@@ -504,8 +504,8 @@ if __name__ == "__main__":
         R_LIST = [0]
 
 
-    channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start]
-    # print(channels)
+    channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start, 8*args.channel_start]
+    print(channels)
     mses = []
     accuracies = []
 
@@ -534,7 +534,7 @@ if __name__ == "__main__":
             if args.model == 'default':
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
-                    mae = nn.DataParallel(AutoEncoder56()).to(device)
+                    mae = nn.DataParallel(AutoEncoder56(), channels=channels).to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
