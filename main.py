@@ -20,6 +20,7 @@ from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
 from models.UNet import AutoEncoder56Unet, Classifier56Unet
 from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
+from models._11am_back import AutoEncoder11
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
@@ -112,10 +113,10 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
             scheduler = CosineAnnealingwithWarmUp(optimizer, 
                                                 n_warmup_epochs=n_warmup_epochs,
                                                 warmup_lr=1e-5,
-                                                start_lr=learning_rate,
-                                                lower_lr=min_lr,
-                                                alpha=0.5,
-                                                epoch_int=20,
+                                                start_lr=5e-4,
+                                                lower_lr=1e-5,
+                                                alpha=0.75,
+                                                epoch_int=1,
                                                 num_epochs=num_epochs)
 
 
@@ -535,7 +536,8 @@ if __name__ == "__main__":
             if args.model == 'default':
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
-                    mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
+                    # mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
+                    mae = nn.DataParallel(AutoEncoder11()).to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
