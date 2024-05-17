@@ -180,7 +180,7 @@ def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1
 
            
         t_end = time.time()
-        print(f"End of MAE training. Training duration: {np.round((t_end-t_start),2)/60.0}m. Training loss: {loss}.")
+        print(f"End of MAE training. Training duration: {np.round((t_end-t_start)/60.0,2)}m. Training loss: {loss}.")
 
         if SAVE_MODEL_MAE:
             save_folder = f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
@@ -377,7 +377,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
 
 
         t_end = time.time()
-        print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start),2)/60.0}m. final loss: {loss}.")
+        print(f"End of CLASSIFIER training. Training duration: {np.round((t_end-t_start)/60.0,2)}m. final loss: {loss}.")
 
         if SAVE_MODEL_CLASSIFIER:
             save_folder = f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}.pth'
