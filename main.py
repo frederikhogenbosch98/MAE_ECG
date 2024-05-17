@@ -572,7 +572,8 @@ if __name__ == "__main__":
             
             num_classes = 5
             if args.model == 'default':
-                classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                 # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                     # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
