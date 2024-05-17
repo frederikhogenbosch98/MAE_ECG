@@ -541,8 +541,7 @@ if __name__ == "__main__":
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
-                    print('hello')
-                    mae = nn.DataParallel(AutoEncoder_self_TD(R=R, in_channels=1)).to(device)
+                     mae = nn.DataParallel(AutoEncoder_self_TD(R=R, in_channels=1)).to(device)
                 else:
                     mae = AutoEncoder56_TD(R, in_channels=1, channels=channels).to(device) 
 
@@ -574,6 +573,8 @@ if __name__ == "__main__":
             num_classes = 5
             if args.model == 'default':
                 # classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                print('hello')
+
                 classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                 # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                     # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
