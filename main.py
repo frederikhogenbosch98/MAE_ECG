@@ -506,6 +506,9 @@ if __name__ == "__main__":
     elif args.model == 'default':
         fact_list = ['default']
         R_LIST = [0]
+    else:
+        fact_list = ['default']
+        R_LIST = [0]
 
 
     channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start, 8*args.channel_start]
