@@ -23,6 +23,7 @@ from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
 from models._11am_back import AutoEncoder11
 from models._11am_down import AutoEncoder11_DOWN
 from models.convnext import ConvNext
+from models._11am_un import AutoEncoder11_UN
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
