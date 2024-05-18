@@ -86,7 +86,7 @@ def get_args_parser():
     return parser
 
 
-def train_mae(model, trainset, run_dir, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False):
+def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False):
     now = datetime.now()
 
     if TRAIN_MAE:
@@ -547,12 +547,16 @@ if __name__ == "__main__":
                 else:
                     mae = AutoEncoder56().to(device)
             elif args.model == 'convnext':
-                mae = nn.DataParallel(ConvNext(layer_dims=channels), device_ids=[3]).to(torch.device("cuda:3"))
+                device = torch.device("cuda:3")
+                mae = nn.DataParallel(ConvNext(layer_dims=channels), device_ids=[3]).to(device)
             elif args.model == 'down11am':
+                device = torch.device("cuda:2")
                 mae = nn.DataParallel(AutoEncoder11_DOWN(channels=channels), device_ids=[2]).to(device)
             elif args.model == '11am64':
+                device = torch.device("cuda:1")
                 mae = nn.DataParallel(AutoEncoder11_UN(channels=[64, 128, 256, 512]), device_ids=[1]).to(device)
             elif args.model == '11am32':
+                device = torch.device("cuda:0")
                 mae = nn.DataParallel(AutoEncoder11(channels=[32, 64, 128, 256]), device_ids=[0]).to(device)
             else:
                 if args.gpu == 'all':
@@ -581,7 +585,8 @@ if __name__ == "__main__":
                             batch_size=args.batch_size_mae,
                             fact=fact,
                             run_dir = run_dir,
-                            contrun = args.contrun)
+                            contrun = args.contrun,
+                            device = device)
             
             mae_losses_run[i,:] = mae_losses
             mae_val_losses_run[i,:] = mae_val_losses
