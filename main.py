@@ -460,7 +460,7 @@ if __name__ == "__main__":
 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
-        transforms.Resize((112, 112)), 
+        transforms.Resize((128, 128)), 
         transforms.ToTensor(),         
         ])
 
@@ -549,7 +549,7 @@ if __name__ == "__main__":
                     mae = AutoEncoder56().to(device)
             elif args.model == 'convnext':
                 device = torch.device("cuda:3")
-                mae = nn.DataParallel(ConvNext(layer_dims=channels), device_ids=[3]).to(device)
+                mae = nn.DataParallel(ConvNext(), device_ids=[3]).to(device)
             elif args.model == 'down11am':
                 device = torch.device("cuda:2")
                 mae = nn.DataParallel(AutoEncoder11_DOWN(channels=channels), device_ids=[2]).to(device)
