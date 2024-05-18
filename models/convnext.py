@@ -160,13 +160,13 @@ class ConvNextDecoder(nn.Module):
 
                 
         self.upsample_layers.append(
-            nn.Conv2d(layer_dims[-1], num_channels, kernel_size=patch_size, stride=patch_size)
+            nn.Conv2d(layer_dims[-1], num_channels, kernel_size=1, stride=1)
         )
         self.upsamples = nn.ModuleList([])
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
+        self.upsamples.append(nn.Upsample(scale_factor=3, mode='bilinear'))
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
-        self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
-        self.upsamples.append(nn.Upsample(scale_factor=4, mode='bilinear'))
+        self.upsamples.append(nn.Upsample(scale_factor=112/36, mode='bilinear'))
 
     def forward(self, x):
         all_layers = list(zip(self.upsamples, self.upsample_layers, self.stage_layers))
