@@ -547,7 +547,7 @@ if __name__ == "__main__":
                 else:
                     mae = AutoEncoder56().to(device)
             elif args.model == 'convnext':
-                mae = nn.DataParallel(ConvNext(layer_dims=channels), device_ids=[3]).to(device)
+                mae = nn.DataParallel(ConvNext(layer_dims=channels), device_ids=[3]).to(torch.device("cuda:3"))
             elif args.model == 'down11am':
                 mae = nn.DataParallel(AutoEncoder11_DOWN(channels=channels), device_ids=[2]).to(device)
             elif args.model == '11am64':
