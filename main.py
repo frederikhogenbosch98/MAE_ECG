@@ -547,11 +547,13 @@ if __name__ == "__main__":
                 else:
                     mae = AutoEncoder56().to(device)
             elif args.model == 'convnext':
-                mae = ConvNext(layer_dims=channels).to(device)
+                mae = nn.DataParallel(ConvNext(layer_dims=channels), device_ids=[3]).to(device)
             elif args.model == 'down11am':
-                mae = AutoEncoder11_DOWN(channels=channels).to(device)
-            elif args.model == '11am':
-                mae = AutoEncoder11(channels=channels)
+                mae = nn.DataParallel(AutoEncoder11_DOWN(channels=channels), device_ids=[2]).to(device)
+            elif args.model == '11am64':
+                mae = nn.DataParallel(AutoEncoder11_UN(channels=[64, 128, 256, 512]), device_ids=[1]).to(device)
+            elif args.model == '11am32':
+                mae = nn.DataParallel(AutoEncoder11(channels=[32, 64, 128, 256]), device_ids=[0]).to(device)
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)

@@ -86,8 +86,7 @@ class ConvNextLayer(nn.Module):
 class ConvNextEncoder(nn.Module):
 
     def __init__(self,
-                 num_channels=3,
-                 num_classes=10,
+                 num_channels=1,
                  patch_size=4,
                  layer_dims=[96, 192, 384, 768],
                  depths=[3, 3, 9, 3],
@@ -135,7 +134,7 @@ class ConvNextEncoder(nn.Module):
 class ConvNextDecoder(nn.Module):
 
     def __init__(self,
-                 num_channels=3,
+                 num_channels=1,
                  num_classes=10,
                  patch_size=4,
                  layer_dims=[96, 192, 384, 768],
@@ -143,6 +142,13 @@ class ConvNextDecoder(nn.Module):
                  drop_rate=0.):
         super(ConvNextDecoder, self).__init__()
 
+        self.upsample_layers = nn.ModuleList([])
+
+        for idx in reversed(range(len(layer_dims) - 1)):
+            self.upsample_layers.append(nn.Conv2d(layer_dims[idx],
+                              layer_dims[idx + 1],
+                              kernel_size=1,
+                              stride=1))
 
         drop_rates=[x.item() for x in torch.linspace(0, drop_rate, sum(depths))] 
         self.stage_layers = nn.ModuleList([])
@@ -151,6 +157,10 @@ class ConvNextDecoder(nn.Module):
             self.stage_layers.append(
                 ConvNextLayer(filter_dim=layer_dim, depth=depths[idx], drop_rates=layer_dr))
 
+                
+        self.upsample_layers.append(
+            nn.Conv2d(layer_dims[0], num_channels, kernel_size=patch_size, stride=patch_size)
+        )
         self.upsamples = nn.ModuleList([])
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
