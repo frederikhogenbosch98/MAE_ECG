@@ -160,7 +160,7 @@ class ConvNextDecoder(nn.Module):
 
                 
         self.upsample_layers.append(
-            nn.Conv2d(layer_dims[0], num_channels, kernel_size=patch_size, stride=patch_size)
+            nn.Conv2d(layer_dims[-1], num_channels, kernel_size=patch_size, stride=patch_size)
         )
         self.upsamples = nn.ModuleList([])
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
