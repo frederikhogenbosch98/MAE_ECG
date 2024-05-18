@@ -145,6 +145,7 @@ class ConvNextDecoder(nn.Module):
         self.upsample_layers = nn.ModuleList([])
 
         for idx in range(len(layer_dims) - 1):
+            print(layer_dims[idx])
             self.upsample_layers.append(nn.Conv2d(layer_dims[idx],
                               layer_dims[idx + 1],
                               kernel_size=1,
