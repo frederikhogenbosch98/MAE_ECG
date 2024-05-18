@@ -10,7 +10,7 @@ class AutoEncoder11_UN(nn.Module):
         print(channels)
         self.encoder = nn.Sequential(
             # LAYER 1
-            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
             # LAYER 2
