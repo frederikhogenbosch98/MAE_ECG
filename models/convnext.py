@@ -172,9 +172,9 @@ class ConvNextDecoder(nn.Module):
         for upsample, upsample_layers, stage_layer in all_layers:
             x = upsample(x)
             print(x.shape)
-            x = upsample_layers(x)
-            print(x.shape)
             x = stage_layer(x)
+            print(x.shape)
+            x = upsample_layers(x)
             print(x.shape)
 
         return x
