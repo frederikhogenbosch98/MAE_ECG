@@ -141,10 +141,10 @@ class ConvNextDecoder(nn.Module):
                  depths=[3, 3, 9, 3],
                  drop_rate=0.):
         super(ConvNextDecoder, self).__init__()
-
+        layer_dims = reversed(layer_dims)
         self.upsample_layers = nn.ModuleList([])
 
-        for idx in reversed(range(len(layer_dims) - 1)):
+        for idx in range(len(layer_dims) - 1):
             self.upsample_layers.append(nn.Conv2d(layer_dims[idx],
                               layer_dims[idx + 1],
                               kernel_size=1,
