@@ -186,7 +186,7 @@ class ConvNextDecoder(nn.Module):
 class ConvNext(nn.Module):
     def __init__(self,
                  layer_dims=[32, 64, 128, 256],
-                 depths=[3, 3, 9, 9]
+                 depths=[3, 3, 9, 3]
                  ):
 
         super(ConvNext, self).__init__()
