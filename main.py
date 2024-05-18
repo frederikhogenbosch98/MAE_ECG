@@ -21,6 +21,8 @@ from models.resnet50 import ResNet
 from models.UNet import AutoEncoder56Unet, Classifier56Unet
 from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
 from models._11am_back import AutoEncoder11
+from models._11am_down import AutoEncoder11_DOWN
+from models.convnext import ConvNext
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
@@ -541,12 +543,20 @@ if __name__ == "__main__":
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
+            elif args.model == 'convnext':
+                mae = ConvNext(layer_dims=channels).to(device)
+            elif args.model == 'down11am':
+                mae = AutoEncoder11_DOWN(channels=channels).to(device)
+            elif args.model == '11am':
+                mae = AutoEncoder11(channels=channels)
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
                     mae = nn.DataParallel(AutoEncoder_self_TD(R=R, in_channels=1, channels=channels)).to(device)
                 else:
                     mae = AutoEncoder56_TD(R, in_channels=1, channels=channels).to(device) 
+
+                
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')

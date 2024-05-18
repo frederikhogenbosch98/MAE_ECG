@@ -4,12 +4,15 @@ import torch.nn.functional as F
 import tltorch
 
 ### TEST RUN 11 AM
-class AutoEncoder11(nn.Module):
+class AutoEncoder11_DOWN(nn.Module):
     def __init__(self, R=20, factorization='cp', in_channels=1, channels=[16, 32, 64, 128], depths=[1, 1, 1]):
-        super(AutoEncoder11, self).__init__()
+        super(AutoEncoder11_DOWN, self).__init__()
         print(channels)
         self.encoder = nn.Sequential(
             # LAYER 1
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[0]),
+            nn.GELU(),
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
@@ -20,6 +23,9 @@ class AutoEncoder11(nn.Module):
             # LAYER 3
             nn.MaxPool2d(2, stride=2),
             # LAYER 4
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=2, padding=1), rank=R, decompose_weights=True, factorization=factorization),
+            nn.BatchNorm2d(channels[1]),
+            nn.GELU(),
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
@@ -70,7 +76,7 @@ class AutoEncoder11(nn.Module):
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=2, mode='bilinear'),
+            nn.Upsample(scale_factor=4, mode='bilinear'),
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
@@ -87,6 +93,7 @@ class AutoEncoder11(nn.Module):
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
             # Corresponds to LAYER 1 in Encoder
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization),
             nn.Sigmoid(),
