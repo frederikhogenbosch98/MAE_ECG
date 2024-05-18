@@ -168,9 +168,10 @@ class ConvNextDecoder(nn.Module):
         self.upsamples.append(nn.Upsample(scale_factor=4, mode='bilinear'))
 
     def forward(self, x):
-        all_layers = list(zip(self.upsamples, self.stage_layers))
-        for upsample, stage_layer in all_layers:
+        all_layers = list(zip(self.upsamples, self.upsample_layers, self.stage_layers))
+        for upsample, upsample_layers, stage_layer in all_layers:
             x = upsample(x)
+            x = upsample_layers(x)
             x = stage_layer(x)
 
         return x
