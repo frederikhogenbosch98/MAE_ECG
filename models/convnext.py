@@ -172,11 +172,11 @@ class ConvNextDecoder(nn.Module):
         all_layers = list(zip(self.upsamples, self.upsample_layers, self.stage_layers))
         for upsample, upsample_layers, stage_layer in all_layers:
             x = upsample(x)
-            print(x.shape)
+            # print(x.shape)
             x = stage_layer(x)
-            print(x.shape)
+            # print(x.shape)
             x = upsample_layers(x)
-            print(x.shape)
+            # print(x.shape)
 
         return x
 
@@ -195,6 +195,6 @@ class ConvNext(nn.Module):
 
     def forward(self,x):
         x = self.encoder(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.decoder(x)
         return x
