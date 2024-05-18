@@ -20,7 +20,7 @@ class AutoEncoder11_UN(nn.Module):
             # LAYER 3
             nn.MaxPool2d(2, stride=2),
             # LAYER 4
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
             # LAYER 5
