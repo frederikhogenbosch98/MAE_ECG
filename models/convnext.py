@@ -92,7 +92,7 @@ class ConvNextEncoder(nn.Module):
                  layer_dims=[96, 192, 384, 768],
                  depths=[3, 3, 9, 3],
                  drop_rate=0.):
-        super().__init__()
+        super(ConvNextEncoder, self).__init__()
 
         # init downsample layers with stem
         self.downsample_layers = nn.ModuleList(
@@ -141,7 +141,7 @@ class ConvNextDecoder(nn.Module):
                  layer_dims=[96, 192, 384, 768],
                  depths=[3, 3, 9, 3],
                  drop_rate=0.):
-        super().__init__()
+        super(ConvNextDecoder, self).__init__()
 
 
         drop_rates=[x.item() for x in torch.linspace(0, drop_rate, sum(depths))] 
@@ -173,6 +173,8 @@ class ConvNext(nn.Module):
                  layer_dims=[16, 32, 64, 128],
                  depths=[1, 1, 3, 1]
                  ):
+
+        super(ConvNext, self).__init__()
         self.encoder = ConvNextEncoder(layer_dims=layer_dims, depths=depths)
         self.decoder = ConvNextDecoder(layer_dims=layer_dims, depths=depths)
 
