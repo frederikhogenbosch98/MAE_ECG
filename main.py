@@ -555,7 +555,7 @@ if __name__ == "__main__":
                 mae = nn.DataParallel(AutoEncoder11_DOWN(channels=channels), device_ids=[2]).to(device)
             elif args.model == '11am64':
                 device = torch.device("cuda:1")
-                mae = nn.DataParallel(AutoEncoder11_UN(channels=[64, 128, 256, 512]), device_ids=[1]).to(device)
+                mae = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256]), device_ids=[1]).to(device)
             elif args.model == '11am32':
                 device = torch.device("cuda:0")
                 mae = nn.DataParallel(AutoEncoder11(channels=[32, 64, 128, 256]), device_ids=[0]).to(device)
