@@ -538,9 +538,11 @@ if __name__ == "__main__":
     now = datetime.now()
     run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
     for fact in fact_list:
+        print(fact)
         if fact == 'default':
             R_LIST = [0]
         elif fact == 'cp':
+            print('cp')
             R_LIST == [10, 15, 20, 25, 30]
         print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
