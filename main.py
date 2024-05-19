@@ -96,13 +96,13 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
             model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
 
         criterion = nn.MSELoss() # mean square error loss
-        # optimizer = torch.optim.Adam(model.parameters(),
-        #                             lr=learning_rate, 
-        #                             weight_decay=1e-4)
+        optimizer = torch.optim.Adam(model.parameters(),
+                                    lr=learning_rate, 
+                                    weight_decay=1e-4)
 
-        optimizer = torch.optim.SGD(model.parameters(),
-                                    lr=learning_rate,
-                                    weight_decay=weight_decay)
+        # optimizer = torch.optim.SGD(model.parameters(),
+        #                             lr=learning_rate,
+        #                             weight_decay=weight_decay)
 
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
@@ -115,11 +115,11 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
             scheduler = CosineAnnealingwithWarmUp(optimizer, 
                                                 n_warmup_epochs=n_warmup_epochs,
-                                                warmup_lr=1e-5,
-                                                start_lr=1e-3,
-                                                lower_lr=5e-5,
+                                                warmup_lr=5e-5,
+                                                start_lr=5e-4,
+                                                lower_lr=2e-5,
                                                 alpha=0.85,
-                                                epoch_int=10,
+                                                epoch_int=20,
                                                 num_epochs=num_epochs)
 
 
