@@ -80,8 +80,8 @@ if __name__ == "__main__":
     testset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
 
     # model = AutoEncoder56().to(device)
-    # model = nn.DataParallel(AutoEncoder11())
-    model = nn.DataParallel(ConvNext())
+    model = nn.DataParallel(AutoEncoder11())
+    # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
