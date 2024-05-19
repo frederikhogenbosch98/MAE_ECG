@@ -6,7 +6,21 @@ from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 import torch.nn as nn
 # from models._11am import AutoEncoder11
 from models._11am_back import AutoEncoder11
+from PIL import Image
+import numpy as np
 
+def save_image(tensor, filename):
+    # Convert the tensor to a NumPy array
+    image_array = tensor.permute(1, 2, 0).detach().cpu().numpy()
+    
+    # Normalize the image array to 0-255 range
+    image_array = (image_array * 255).astype(np.uint8)
+    
+    # Create an image from the array
+    image = Image.fromarray(image_array)
+    
+    # Save the image
+    image.save(filename)
 
 
 def eval_mae(model, testset, batch_size=128):
@@ -44,6 +58,8 @@ def eval_mae(model, testset, batch_size=128):
         # print(test_data_tensor[i,:,:,:].shape)
         print(recon_cpu.shape)
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
+        save_image(test_data_tensor[i,:,:,:])
+        save_image(recon_cpu, f'reconstructed_image_{i}.png')
         
 
 
@@ -63,7 +79,7 @@ if __name__ == "__main__":
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/dropbox/MAE_RUN_default_R0_17_5_23_43.pth', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load('trained_models/RUN_18_5_11_2/MAE_RUN_default_R0_18_5_11_4_epoch_179.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
