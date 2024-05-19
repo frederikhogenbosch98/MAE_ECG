@@ -20,7 +20,7 @@ from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
 from models.UNet import AutoEncoder56Unet, Classifier56Unet
 from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
-from models._11am import AutoEncoder11
+from models._11am_back import AutoEncoder11
 from models._11am_down import AutoEncoder11_DOWN
 from models.convnext import ConvNext
 from models._11am_un import AutoEncoder11_UN
