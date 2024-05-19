@@ -549,7 +549,7 @@ if __name__ == "__main__":
             print(f'fact: {fact}, R: {R}')
             factorization=fact
 
-            if args.model == 'default':
+            if fact == 'default':
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
                     # mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
