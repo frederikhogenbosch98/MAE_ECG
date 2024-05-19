@@ -24,7 +24,7 @@ def save_image(tensor, filename):
 
 
 def eval_mae(model, testset, batch_size=128):
-    device = torch.device("mps")
+    device = torch.device("cuda")
 
     model.to(device)
     model.eval()
