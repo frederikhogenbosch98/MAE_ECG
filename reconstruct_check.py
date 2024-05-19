@@ -58,8 +58,8 @@ def eval_mae(model, testset, batch_size=128):
         # print(test_data_tensor[i,:,:,:].shape)
         print(recon_cpu.shape)
         plotimg(test_data_tensor[i,:,:,:], recon_cpu)
-        save_image(test_data_tensor[i,:,:,:])
-        save_image(recon_cpu, f'reconstructed_image_{i}.png')
+        save_image(test_data_tensor[i,:,:,:],f'imgs/original_image_{i}.png')
+        save_image(recon_cpu, f'imgs/reconstructed_image_{i}.png')
         
 
 
