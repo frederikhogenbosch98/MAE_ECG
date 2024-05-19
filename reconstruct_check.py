@@ -10,11 +10,15 @@ from PIL import Image
 import numpy as np
 
 def save_image(tensor, filename):
-    # Convert the tensor to a NumPy array
+    # Convert the tensor to a NumPy array and move channels to the last dimension
     image_array = tensor.permute(1, 2, 0).detach().cpu().numpy()
     
     # Normalize the image array to 0-255 range
     image_array = (image_array * 255).astype(np.uint8)
+    
+    # Handle single-channel grayscale images
+    if image_array.shape[2] == 1:
+        image_array = image_array.squeeze(axis=2)
     
     # Create an image from the array
     image = Image.fromarray(image_array)
