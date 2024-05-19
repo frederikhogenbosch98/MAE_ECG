@@ -80,7 +80,7 @@ if __name__ == "__main__":
     testset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
 
     # model = AutoEncoder56().to(device)
-    model = nn.DataParallel(AutoEncoder11())
+    model = nn.DataParallel(AutoEncoder11(channels=[16, 32, 64, 128])).to(device)
     # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
