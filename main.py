@@ -483,9 +483,9 @@ if __name__ == "__main__":
     mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
     mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
     mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
-    print(len(mitbih_dataset_train))
-    print(len(mitbih_dataset_val))
-    print(len(mitbih_dataset_test))
+    # print(len(mitbih_dataset_train))
+    # print(len(mitbih_dataset_val))
+    # print(len(mitbih_dataset_test))
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
     # print(len(incartdb_dataset))
@@ -538,12 +538,10 @@ if __name__ == "__main__":
     now = datetime.now()
     run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
     for fact in fact_list:
-        print(fact)
         if fact == 'default':
             R_LIST = [0]
         elif fact == 'cp':
-            print('cp')
-            R_LIST == [10, 15, 20, 25, 30]
+            R_LIST = [10, 15, 20, 25, 30]
         print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
             os.makedirs(run_dir, exist_ok=True)
