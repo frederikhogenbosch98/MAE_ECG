@@ -97,7 +97,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
         criterion = nn.MSELoss() # mean square error loss
         optimizer = torch.optim.Adam(model.parameters(),
-                                    lr=learning_rate, 
+                                    lr=1e-4, 
                                     weight_decay=1e-4)
 
         # optimizer = torch.optim.SGD(model.parameters(),
@@ -113,14 +113,14 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
 
-            scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                                n_warmup_epochs=n_warmup_epochs,
-                                                warmup_lr=5e-5,
-                                                start_lr=5e-4,
-                                                lower_lr=2e-5,
-                                                alpha=0.85,
-                                                epoch_int=20,
-                                                num_epochs=num_epochs)
+        # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+        #                                     n_warmup_epochs=n_warmup_epochs,
+        #                                     warmup_lr=5e-5,
+        #                                     start_lr=5e-4,
+        #                                     lower_lr=2e-5,
+        #                                     alpha=0.85,
+        #                                     epoch_int=20,
+        #                                     num_epochs=num_epochs)
 
 
             # early_stopper = EarlyStopper(patience=6)
@@ -149,7 +149,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                     optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
-                scheduler.step()
+                # scheduler.step()
 
             if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
