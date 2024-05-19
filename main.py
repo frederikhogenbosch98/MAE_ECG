@@ -124,7 +124,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
 
             # early_stopper = EarlyStopper(patience=6)
-
+        scheduler = StepLR(optimizer, step_size=20, gamma=0.1)
         outputs = []
         losses = []
         val_losses = []
@@ -149,7 +149,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                     optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
-                # scheduler.step()
+                scheduler.step()
 
             if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
@@ -507,9 +507,13 @@ if __name__ == "__main__":
     elif args.model == 'default':
         fact_list = ['default']
         R_LIST = [0]
+    elif args.model == 'combine':
+        fact_list = ['default', 'cp', 'cp',]
+
     else:
         fact_list = ['default']
         R_LIST = [0]
+    
 
 
     channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start, 8*args.channel_start]
@@ -529,6 +533,7 @@ if __name__ == "__main__":
     mae_val_losses_run = np.zeros((len(R_LIST), num_epochs_mae))
     class_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
     class_val_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
+    print(f'for R values: {R_LIST}')
 
     now = datetime.now()
     run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
@@ -547,19 +552,6 @@ if __name__ == "__main__":
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
-            elif args.model == 'convnext':
-                device = torch.device("cuda:3")
-                mae = nn.DataParallel(ConvNext(), device_ids=[3]).to(device)
-            elif args.model == 'down11am':
-                device = torch.device("cuda:2")
-                mae = nn.DataParallel(AutoEncoder11_DOWN(channels=channels), device_ids=[2]).to(device)
-            elif args.model == '11am64':
-                device = torch.device("cuda:1")
-                mae = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256]), device_ids=[1]).to(device)
-            elif args.model == '11am32':
-                # device = torch.device("cuda:0")
-                # mae = nn.DataParallel(AutoEncoder11(channels=[32, 64, 128, 256]), device_ids=[0]).to(device)
-                mae = nn.DataParallel(AutoEncoder11(channels=[32, 64, 128, 256])).to(device)
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
