@@ -6,6 +6,7 @@ from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 import torch.nn as nn
 # from models._11am import AutoEncoder11
 from models._11am_back import AutoEncoder11
+from models._11am_un import AutoEncoder11_UN
 from models.convnext import ConvNext
 from PIL import Image
 import numpy as np
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     testset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
 
     # model = AutoEncoder56().to(device)
-    model = nn.DataParallel(AutoEncoder11(channels=[16, 32, 64, 128])).to(device)
+    model = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256])).to(device)
     # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
