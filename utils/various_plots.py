@@ -81,11 +81,13 @@ def plot_mses_cp():
     # num_params = [6290, 11235, 16180, 21125, 26070]
     # full_params = 2881921
     mses = [0.003701, 0.002618, 0.00215, 0.0005, 0.0001, 0.00024]
+
+    print([np.round(params_un / i, 1) for i in params_cp])
     
     # Calculate compression ratios
     # a = [full_params / i for i in num_params]
 
-    R = [np.round(params_un / i, 0) for i in params_cp]
+    R = [np.round(params_un / i, 1) for i in params_cp]
     plt.plot(R, mses, 'o-', label='Accuracies')  # 'r-' is for red solid line
     plt.xlabel('compression ratio')
     plt.ylabel('Accuracies')
