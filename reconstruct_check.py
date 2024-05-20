@@ -82,12 +82,12 @@ if __name__ == "__main__":
 
     # model = AutoEncoder56().to(device)
     # model = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256])).to(device)
-    model = (nn.DataParallel(AutoEncoder11(R=25, in_channels=1)).to(device))
+    model = (nn.DataParallel(AutoEncoder11(R=20, in_channels=1)).to(device))
     # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth'))
+    model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R20_20_5_7_54.pth'))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
