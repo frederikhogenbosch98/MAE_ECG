@@ -30,7 +30,7 @@ def save_image(tensor, filename):
 
 
 def eval_mae(model, testset, batch_size=128):
-    device = torch.device("cuda")
+    device = torch.device("cpu")
 
     model.to(device)
     model.eval()
@@ -70,7 +70,7 @@ def eval_mae(model, testset, batch_size=128):
 
 
 if __name__ == "__main__":
-    device = torch.device("cuda")
+    device = torch.device("cpu")
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((128,128)), 
