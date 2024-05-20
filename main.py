@@ -201,7 +201,9 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
+        # model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
+        model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_default_R0_19_5_23_14.pth')) #uncompressed
+        # model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth')) #R25
         # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
         print(f'dataset loaded')
@@ -293,23 +295,29 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                                             shuffle=True, num_workers=2)
         
 
-        optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, classifier.parameters()),
-                            lr=learning_rate,
-                            weight_decay=weight_decay)
+        # optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, classifier.parameters()),
+        #                     lr=learning_rate,
+        #                     weight_decay=weight_decay)
+
+
+        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
+                                    lr=1e-4, 
+                                    weight_decay=1e-4)
+        
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
                                 shuffle=False, num_workers=2)    
 
 
-            scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                                  n_warmup_epochs=n_warmup_epochs, 
-                                                  warmup_lr=1e-4, 
-                                                  start_lr=learning_rate, 
-                                                  lower_lr=min_lr,
-                                                  alpha=0.75, 
-                                                  epoch_int=20, 
-                                                  num_epochs=num_epochs)
+        # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+        #                                         n_warmup_epochs=n_warmup_epochs, 
+        #                                         warmup_lr=1e-4, 
+        #                                         start_lr=learning_rate, 
+        #                                         lower_lr=min_lr,
+        #                                         alpha=0.75, 
+        #                                         epoch_int=20, 
+        #                                         num_epochs=num_epochs)
 
 
 
@@ -338,7 +346,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                     optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
-            scheduler.step()
+            # scheduler.step()
 
             if epoch % 20 == 0 and epoch != 0:
                 torch.save(classifier.state_dict(), f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
@@ -592,48 +600,48 @@ if __name__ == "__main__":
 
             mses.append(eval_mae(mae, testset_un))
              
-            # num_classes = 5
-            # if args.model == 'default':
-            #     classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-            #     # print('hello')
+            num_classes = 5
+            if args.model == 'default':
+                classifier = Classifier56(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                # print('hello')
 
-            #     # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-            #         # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
-            # else:
-            #     classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-            #     # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                    # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
+            else:
+                classifier = Classifier56_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
 
-            # classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
-            #                             trainset=trainset_sup, 
-            #                             valset=valset_sup, 
-            #                             num_epochs=num_epochs_classifier, 
-            #                             n_warmup_epochs=num_warmup_epochs_classifier, 
-            #                             learning_rate=args.lr_class,
-            #                             min_lr = args.min_lr_class,
-            #                             weight_decay = args.weight_decay_class,
-            #                             batch_size=args.batch_size_class, 
-            #                             TRAIN_CLASSIFIER=args.train_class, 
-            #                             SAVE_MODEL_CLASSIFIER=args.save_class,
-            #                             R=R,
-            #                             fact=fact,
-            #                             run_dir = run_dir)
+            classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+                                        trainset=trainset_sup, 
+                                        valset=valset_sup, 
+                                        num_epochs=num_epochs_classifier, 
+                                        n_warmup_epochs=num_warmup_epochs_classifier, 
+                                        learning_rate=args.lr_class,
+                                        min_lr = args.min_lr_class,
+                                        weight_decay = args.weight_decay_class,
+                                        batch_size=args.batch_size_class, 
+                                        TRAIN_CLASSIFIER=args.train_class, 
+                                        SAVE_MODEL_CLASSIFIER=args.save_class,
+                                        R=R,
+                                        fact=fact,
+                                        run_dir = run_dir)
             
-            # accuracies.append(eval_classifier(classifier, testset_sup))
-            # class_losses_run[i,:] = class_losses
-            # class_val_losses_run[i,:] = class_val_losses
+            accuracies.append(eval_classifier(classifier, testset_sup))
+            class_losses_run[i,:] = class_losses
+            class_val_losses_run[i,:] = class_val_losses
 
-            # # print(count_parameters(classifier))
+            # print(count_parameters(classifier))
 
-            # mae_losses_run[i,:] = mae_losses
-            # class_losses_run[i,:] = class_losses
+            mae_losses_run[i,:] = mae_losses
+            class_losses_run[i,:] = class_losses
 
 
     
-            # mae_save_folder = f'{run_dir}/MAE_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
-            # class_save_folder = f'{run_dir}/CLASS_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
-            # np.save(mae_save_folder, mae_losses_run)
-            # np.save(class_save_folder, class_losses_run)
-            # np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
-            # np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
-            # np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
+            mae_save_folder = f'{run_dir}/MAE_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+            class_save_folder = f'{run_dir}/CLASS_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+            np.save(mae_save_folder, mae_losses_run)
+            np.save(class_save_folder, class_losses_run)
+            np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
+            np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
+            np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
 
