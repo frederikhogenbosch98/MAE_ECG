@@ -96,13 +96,13 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
             model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
 
         criterion = nn.MSELoss() # mean square error loss
-        optimizer = torch.optim.Adam(model.parameters(),
-                                    lr=1e-4, 
-                                    weight_decay=1e-4)
+        # optimizer = torch.optim.Adam(model.parameters(),
+        #                             lr=1e-4, 
+        #                             weight_decay=1e-4)
 
-        # optimizer = torch.optim.SGD(model.parameters(),
-        #                             lr=learning_rate,
-        #                             weight_decay=weight_decay)
+        optimizer = torch.optim.SGD(model.parameters(),
+                                    lr=learning_rate,
+                                    weight_decay=weight_decay)
 
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
@@ -113,14 +113,14 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
 
-        # scheduler = CosineAnnealingwithWarmUp(optimizer, 
-        #                                     n_warmup_epochs=n_warmup_epochs,
-        #                                     warmup_lr=5e-5,
-        #                                     start_lr=5e-4,
-        #                                     lower_lr=2e-5,
-        #                                     alpha=0.85,
-        #                                     epoch_int=20,
-        #                                     num_epochs=num_epochs)
+        scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                            n_warmup_epochs=n_warmup_epochs,
+                                            warmup_lr=5e-5,
+                                            start_lr=5e-4,
+                                            lower_lr=2e-5,
+                                            alpha=0.85,
+                                            epoch_int=20,
+                                            num_epochs=num_epochs)
 
 
             # early_stopper = EarlyStopper(patience=6)
@@ -180,7 +180,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
             val_losses.append(validation_loss)
             t_epoch_end = time.time()
 
-            print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
+            print('epoch {}: training loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
 
            
         t_end = time.time()
@@ -382,7 +382,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
             t_epoch_end = time.time()
             epoch_loss = running_loss / len(train_loader)
 
-            print('epoch {}: average loss: {:.7f}, val loss: {:.7f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, accuracy, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
+            print('epoch {}: training loss: {:.7f}, val loss: {:.7f}, accuracy: {:.2f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, accuracy, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
 
             losses.append(epoch_loss)
             val_losses.append(validation_loss)
