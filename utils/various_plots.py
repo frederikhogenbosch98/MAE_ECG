@@ -80,7 +80,7 @@ def plot_mses_cp():
     params_cp = [12114, 21539, 30964, 40389, 49814, 70000]
     # num_params = [6290, 11235, 16180, 21125, 26070]
     # full_params = 2881921
-    mses = [0.003701, 0.002618, 0.00215, 0.002287, 0.0019, 0.00024]
+    mses = [0.003701, 0.002618, 0.00215, 0.002287,0.001866, 0.00024]
 
     print([np.round(params_un / i, 1) for i in params_cp])
     
@@ -117,6 +117,7 @@ def plot_sgd_loss():
     plt.ylabel('loss')
     plt.legend()
     plt.show()
+
 
 def plot_adam_loss():
     num_epochs = 30

@@ -295,14 +295,14 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                                             shuffle=True, num_workers=2)
         
 
-        # optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, classifier.parameters()),
-        #                     lr=learning_rate,
-        #                     weight_decay=weight_decay)
+        optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, classifier.parameters()),
+                            lr=learning_rate,
+                            weight_decay=weight_decay)
 
 
-        optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
-                                    lr=1e-4, 
-                                    weight_decay=1e-4)
+        # optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
+        #                             lr=1e-4, 
+        #                             weight_decay=1e-4)
         
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
@@ -310,14 +310,14 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                                 shuffle=False, num_workers=2)    
 
 
-        # scheduler = CosineAnnealingwithWarmUp(optimizer, 
-        #                                         n_warmup_epochs=n_warmup_epochs, 
-        #                                         warmup_lr=1e-4, 
-        #                                         start_lr=learning_rate, 
-        #                                         lower_lr=min_lr,
-        #                                         alpha=0.75, 
-        #                                         epoch_int=20, 
-        #                                         num_epochs=num_epochs)
+        scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                                n_warmup_epochs=n_warmup_epochs, 
+                                                warmup_lr=1e-4, 
+                                                start_lr=learning_rate, 
+                                                lower_lr=min_lr,
+                                                alpha=0.75, 
+                                                epoch_int=20, 
+                                                num_epochs=num_epochs)
 
 
 
@@ -346,7 +346,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                     optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
-            # scheduler.step()
+            scheduler.step()
 
             if epoch % 20 == 0 and epoch != 0:
                 torch.save(classifier.state_dict(), f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
