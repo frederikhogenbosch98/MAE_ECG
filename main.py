@@ -541,7 +541,7 @@ if __name__ == "__main__":
         if fact == 'default':
             R_LIST = [0]
         elif fact == 'cp':
-            R_LIST = [5, 10, 15, 20, 25, 30]
+            R_LIST = R_LIST
         print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
             os.makedirs(run_dir, exist_ok=True)
