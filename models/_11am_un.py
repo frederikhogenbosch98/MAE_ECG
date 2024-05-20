@@ -98,3 +98,29 @@ class AutoEncoder11_UN(nn.Module):
         # print(x.shape)
         x = self.decoder(x)
         return x
+
+
+class Classifier_UN(nn.Module):
+    def __init__(self, autoencoder, in_features, out_features):
+        super(Classifier_UN, self).__init__()
+        self.encoder = autoencoder.encoder
+        self.flatten = nn.Flatten()
+        self.classifier = nn.Sequential(
+                # nn.Linear(50176+1, 256),
+                # nn.Linear(6272, 256), #16
+                nn.Linear(32768, 256), #32
+                # nn.Linear(25088, 256), #32
+                nn.GELU(),
+                nn.BatchNorm1d(num_features=256),
+                nn.Dropout(0.5),
+                nn.Linear(256, out_features)
+        )
+
+    def forward(self, images, features):
+        x = self.encoder(images)
+        x = self.flatten(x)
+        # combined_features = torch.cat((x, features), dim=1)
+        # x = self.classifier(combined_features)
+        x = self.classifier(x)
+        return x
+
