@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/RUN_19_5_18_24/MAE_RUN_default_R0_19_5_18_24.pth'))
+    model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_default_R0_19_5_23_14.pth'))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
