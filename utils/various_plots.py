@@ -174,14 +174,74 @@ def plot_adam_loss():
     0.0021646, 0.0021549, 0.0021544, 0.0021449, 0.0021587,
     0.0021498, 0.0021429, 0.0021406, 0.0021506, 0.0021425]
 
-    plt.plot(epochs, loss_un, label='uncompressed')
-    plt.plot(epochs, loss_cp, label='cpd')
-    plt.title('Adam validation loss uncompressed vs cpd (24x compressed)')
+
+    plt.plot(epochs, loss_un, label='uncompressed adam')
+    plt.plot(epochs, loss_cp, label='cpd adam')
+    plt.title('Adam training and validation loss uncompressed vs cpd (24x compressed)')
     plt.xlabel('epochs')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
     plt.show()
+
+
+def plot_sgd_loss():
+    num_epochs = 26
+    epochs = np.arange(num_epochs)
+    loss_sgd_un = [
+    0.0732750, 0.0407066, 0.0296485, 0.0244884, 0.0216104,
+    0.0196357, 0.0182382, 0.0172183, 0.0164245, 0.0157614,
+    0.0151992, 0.0147583, 0.0143244, 0.0139463, 0.0136187,
+    0.0133186, 0.0130292, 0.0127703, 0.0125228, 0.0122977,
+    0.0122899, 0.0122647, 0.0122336, 0.0122135, 0.0122034,
+    0.0121941
+    ]
+    loss_sgd_cp = [
+            0.0213847, 0.0170526, 0.0155148, 0.0146263, 0.0139791,
+    0.0133995, 0.0129530, 0.0125421, 0.0121045, 0.0117482,
+    0.0114239, 0.0111400, 0.0108710, 0.0106306, 0.0104390,
+    0.0102340, 0.0100281, 0.0098654, 0.0097105, 0.0095532,
+    0.0095301, 0.0095284, 0.0095184, 0.0094924, 0.0094900,
+    0.0094835
+    ]
+
+    plt.plot(epochs, loss_sgd_un, label='uncompressed sgd')
+    plt.plot(epochs, loss_sgd_cp, label='cpd sgd')
+    plt.title('SGD training and validation loss uncompressed vs cpd (24x compressed)')
+    plt.xlabel('epochs')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.yscale('log')
+    plt.show()
+
+
+def sgd_vs_adam_loss():
+    num_epochs = 26
+    epochs = np.arange(num_epochs)
+    loss_sgd = [
+    0.0732750, 0.0407066, 0.0296485, 0.0244884, 0.0216104,
+    0.0196357, 0.0182382, 0.0172183, 0.0164245, 0.0157614,
+    0.0151992, 0.0147583, 0.0143244, 0.0139463, 0.0136187,
+    0.0133186, 0.0130292, 0.0127703, 0.0125228, 0.0122977,
+    0.0122899, 0.0122647, 0.0122336, 0.0122135, 0.0122034,
+    0.0121941
+    ]
+    loss_adam = [0.0238849, 0.0022764, 0.0016823, 0.0008592, 0.0006434,
+    0.0005292, 0.0004069, 0.0004447, 0.0004904, 0.0004808,
+    0.0002920, 0.0003081, 0.0003146, 0.0002733, 0.0003427,
+    0.0003022, 0.0003125, 0.0005739, 0.0003186, 0.0002659,
+    0.0002083, 0.0002131, 0.0002058, 0.0002133, 0.0002020,
+    0.0002014]
+
+    plt.plot(epochs, loss_sgd, label='SGD')
+    plt.plot(epochs, loss_adam, label='Adam')
+    plt.title('Val loss: Adam vs SGD for uncompressed model')
+    plt.xlabel('epochs')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.yscale('log')
+    plt.show()
+
 
 if __name__ == '__main__':
     # plot_compression_cp()
@@ -189,5 +249,7 @@ if __name__ == '__main__':
     # plot_compression_tucker()
     # plot_accs_tucker()
     # plot_mses_cp()
-    # plot_adam_loss()
+    plot_adam_loss()
+    plot_sgd_loss()
     classifier_adam_vs_sgd()
+    sgd_vs_adam_loss()
