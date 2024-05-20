@@ -80,7 +80,7 @@ def plot_mses_cp():
     params_cp = [12114, 21539, 30964, 40389, 49814, 70000]
     # num_params = [6290, 11235, 16180, 21125, 26070]
     # full_params = 2881921
-    mses = [0.003701, 0.002618, 0.00215, 0.002287, 0.0001, 0.00024]
+    mses = [0.003701, 0.002618, 0.00215, 0.002287, 0.0019, 0.00024]
 
     print([np.round(params_un / i, 1) for i in params_cp])
     
@@ -88,9 +88,9 @@ def plot_mses_cp():
     # a = [full_params / i for i in num_params]
 
     R = [np.round(params_un / i, 1) for i in params_cp]
-    plt.plot(R, mses, 'o-', label='Accuracies')  # 'r-' is for red solid line
+    plt.plot(R, mses, 'o-', label='MSE')  # 'r-' is for red solid line
     plt.xlabel('compression ratio')
-    plt.ylabel('Accuracies')
+    plt.ylabel('Mean Squared Error')
     plt.tick_params('y')
     plt.xlim(70, 0)
     plt.ylim(0.0000, 0.004)  # Set the range of the accuracy axis
