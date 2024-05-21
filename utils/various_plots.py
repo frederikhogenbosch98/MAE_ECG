@@ -116,10 +116,10 @@ def classifier_adam_vs_sgd():
 
 def plot_mses_cp():
     params_un = 722113
-    params_cp = [12114, 21539, 30964, 40389, 49814, 70000]
+    params_cp = [12114, 21539, 30964, 40389, 49814, 191189]
     # num_params = [6290, 11235, 16180, 21125, 26070]
     # full_params = 2881921
-    mses = [0.003701, 0.002618, 0.00215, 0.002287,0.001866, 0.00024]
+    mses = [0.003701, 0.002618, 0.00215, 0.002287, 0.001866, 0.0015]
 
     print([np.round(params_un / i, 1) for i in params_cp])
     
@@ -248,8 +248,8 @@ if __name__ == '__main__':
     # plot_accs_cp()
     # plot_compression_tucker()
     # plot_accs_tucker()
-    # plot_mses_cp()
-    plot_adam_loss()
-    plot_sgd_loss()
-    classifier_adam_vs_sgd()
-    sgd_vs_adam_loss()
+    plot_mses_cp()
+    # plot_adam_loss()
+    # plot_sgd_loss()
+    # classifier_adam_vs_sgd()
+    # sgd_vs_adam_loss()
