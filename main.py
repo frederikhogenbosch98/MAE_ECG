@@ -323,7 +323,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
 
         loss_function =  nn.CrossEntropyLoss().to(device)
 
-        early_stopper = EarlyStopper(patience=10, min_delta=0.0001)
+        # early_stopper = EarlyStopper(patience=10, min_delta=0.0001)
 
         losses = []
         val_losses = []
@@ -371,9 +371,9 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                 accuracy = correct / total * 100
 
 
-                if early_stopper.early_stop(validation_loss):             
-                    print(f"EARLY STOPPING AT EPOCH: {epoch}")
-                    break
+                # if early_stopper.early_stop(validation_loss):             
+                #     print(f"EARLY STOPPING AT EPOCH: {epoch}")
+                #     break
             else:
                 validation_loss = 0
 
