@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     # model = AutoEncoder56().to(device)
     # model = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256])).to(device)
-    model = (nn.DataParallel(AutoEncoder11(R=100, in_channels=1)).to(device))
+    model = AutoEncoder11(R=100, in_channels=1).to(device)
     # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
