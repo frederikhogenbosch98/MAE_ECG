@@ -552,6 +552,8 @@ if __name__ == "__main__":
             R_LIST = R_LIST
         print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
+            if R == 100:
+                continue
             os.makedirs(run_dir, exist_ok=True)
 
             print(f'fact: {fact}, R: {R}')
@@ -569,7 +571,7 @@ if __name__ == "__main__":
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
-                    mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1)).to(device)
+                    mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1), device_ids=[0, 1, 2]).to(device)
                 else:
                    mae = AutoEncoder11(R=R, in_channels=1).to(device)
 
