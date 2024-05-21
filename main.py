@@ -609,7 +609,7 @@ if __name__ == "__main__":
                 # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                     # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
-                classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
                 # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
 
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
