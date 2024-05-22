@@ -571,7 +571,7 @@ if __name__ == "__main__":
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
-                    mae = nn.DistributedDataParallel(AutoEncoder11(R=R, in_channels=1), device_ids=[0, 1, 2]).to(device)
+                    mae = nn.parallel.DistributedDataParallel(AutoEncoder11(R=R, in_channels=1), device_ids=[0, 1, 2]).to(device)
                 else:
                    mae = AutoEncoder11(R=R, in_channels=1).to(device)
 
