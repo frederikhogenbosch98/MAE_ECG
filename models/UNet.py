@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class AutoEncoder56Unet(nn.Module):
+class UNet(nn.Module):
     def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1]):
-        super(AutoEncoder56Unet, self).__init__()
+        super(UNet, self).__init__()
         # Encoder
         self.enc1 = nn.Sequential(
             nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3),
