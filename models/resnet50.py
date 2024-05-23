@@ -28,7 +28,7 @@ class ResidualBlock(nn.Module):
 
 class ResidualTransposeBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride = 1, downsample = None):
-        super(ResidualBlock, self).__init__()
+        super(ResidualTransposeBlock, self).__init__()
         self.conv1 = nn.Sequential(
                         nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1),
                         nn.BatchNorm2d(out_channels),
