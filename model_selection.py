@@ -149,7 +149,7 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [ResNet(), ConvNext(), UNet(), AutoEncoder11_UN()]
+    models = [ConvNext(), UNet(), AutoEncoder11_UN()]
     model_strs = ['convnext', 'unet', 'basic']
 
     now = datetime.now()
