@@ -94,7 +94,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
         criterion = nn.MSELoss() # mean square error loss
         optimizer = torch.optim.Adam(model.parameters(),
-                                    lr=1e-4, 
+                                    lr=learning_rate, 
                                     weight_decay=1e-4)
 
         # optimizer = torch.optim.SGD(model.parameters(),

@@ -151,6 +151,7 @@ if __name__ == "__main__":
 
     models = [ UNet(), AutoEncoder11_UN()] # ConvNext(),
     model_strs = ['unet', 'basic'] # 'convnext', 
+    lr = [2e-5, 1e-4]
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
@@ -160,7 +161,7 @@ if __name__ == "__main__":
         mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                     trainset=trainset_un,
                                                     valset=valset_un,
-                                                    learning_rate=args.lr_mae,
+                                                    learning_rate=lr[i],
                                                     min_lr = args.min_lr_mae,
                                                     weight_decay = args.weight_decay_mae,
                                                     num_epochs=num_epochs_mae,
