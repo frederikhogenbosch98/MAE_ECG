@@ -25,7 +25,7 @@ def main():
 
     # Initialize model
     model = YourModel().to(device)
-    model = nn.DataParallel(model)#, device_ids=[rank])
+    model = nn.DataParallel(model, device_ids=[0])
 
     # Define loss and optimizer
     criterion = nn.MSELoss()
