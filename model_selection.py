@@ -176,9 +176,18 @@ if __name__ == "__main__":
         
         mae_losses_run[i,:] = mae_losses
         mae_val_losses_run[i,:] = mae_val_losses
+        train_save_folder = f'{run_dir}/MAE_losses_{model_strs[i]}_train.npy'
+        val_save_folder = f'{run_dir}/MAE_losses_{model_strs[i]}_val.npy'
+        np.save(train_save_folder, mae_losses)
+        np.save(val_save_folder, mae_val_losses)
+
         mses.append(eval_mae(mae, testset_un, device=device))
 
-    print(mses)
+    
+    print('\n'.join([f'{model_strs[i]} mse: {mses[i]}' for i in range(4)]))
+
+    
+
 
 
 
