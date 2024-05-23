@@ -149,12 +149,13 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [ResNet(), ConvNext(), UNet(), AutoEncoder11_UN()]
-    model_strs = ['resnet', 'convnext', 'unet', 'basic']
+    model = UNet()
+    epochs = [1, 3, 5, 10, 15, 20, 25]
+
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
-    for i, model in enumerate(models):
+    for i, epoch in enumerate(epochs):
         os.makedirs(run_dir, exist_ok=True)
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mae, mae_losses, mae_val_losses = train_mae(model=model, 
@@ -163,13 +164,13 @@ if __name__ == "__main__":
                                                     learning_rate=args.lr_mae,
                                                     min_lr = args.min_lr_mae,
                                                     weight_decay = args.weight_decay_mae,
-                                                    num_epochs=num_epochs_mae,
+                                                    num_epochs=epoch,
                                                     n_warmup_epochs=num_warmup_epochs_mae,
                                                     TRAIN_MAE=args.train_mae,
                                                     SAVE_MODEL_MAE=args.save_mae,
-                                                    R=0,
+                                                    R=25,
                                                     batch_size=args.batch_size_mae,
-                                                    fact=model_strs[i],
+                                                    fact='cp',
                                                     run_dir = run_dir,
                                                     contrun = args.contrun,
                                                     device = device)

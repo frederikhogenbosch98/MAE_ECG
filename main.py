@@ -121,7 +121,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
 
             # early_stopper = EarlyStopper(patience=6)
-        scheduler = StepLR(optimizer, step_size=20, gamma=0.1)
+        scheduler = StepLR(optimizer, step_size=15, gamma=0.1)
         outputs = []
         losses = []
         val_losses = []
