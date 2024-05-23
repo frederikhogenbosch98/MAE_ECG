@@ -9,13 +9,11 @@ from datetime import datetime
 import torch, torchvision
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.distributed as dist
 
 from torchvision import datasets, transforms
 from torchvision.datasets import ImageFolder 
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
-from torch.nn.parallel import DistributedDataParallel as DDP
 
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
@@ -30,7 +28,7 @@ from models._11am_un import AutoEncoder11_UN, Classifier_UN
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+
 
 
 def get_args_parser():
@@ -573,8 +571,6 @@ if __name__ == "__main__":
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
                     mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1)).to(device)
-                    print('right condition')
-                    mae = AutoEncoder11(R=R, in_channels=1).to('cuda:0')
                 else:
                    mae = AutoEncoder11(R=R, in_channels=1).to(device)
 
