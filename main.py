@@ -32,7 +32,6 @@ from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFea
 
 
 def get_args_parser():
-    print('args got')
     parser = argparse.ArgumentParser('training', add_help=False)
 
     # Model parameters
@@ -453,6 +452,7 @@ if __name__ == "__main__":
     torch.manual_seed(42)
 
     args = get_args_parser()
+    print(type(args))
 
 
     dtype = torch.float32
