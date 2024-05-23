@@ -17,7 +17,8 @@ class YourModel(nn.Module):
         return self.fc(x)
 
 def main():
-    device = torch.device('cuda')
+    devicenum = 2
+    device = torch.device(f'cuda:{devicenum}')
 
     # Initialize dataset and dataloader
     dataset = TensorDataset(torch.randn(100, 10), torch.randn(100, 10))
@@ -25,7 +26,7 @@ def main():
 
     # Initialize model
     model = YourModel().to(device)
-    model = nn.DataParallel(model, device_ids=[2])
+    model = nn.DataParallel(model, device_ids=[devicenum])
 
     # Define loss and optimizer
     criterion = nn.MSELoss()
