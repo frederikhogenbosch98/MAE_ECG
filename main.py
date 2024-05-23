@@ -81,9 +81,6 @@ def get_args_parser():
     parser.add_argument('--no_save_mae', action='store_false',  help='Save MAE model', dest='save_mae')
     parser.add_argument('--no_save_class', action='store_false', help='Save Classifier model', dest='save_class')
 
-    
-
-
     return parser
 
 
@@ -451,7 +448,8 @@ def eval_classifier(model, testset, batch_size=128):
 if __name__ == "__main__":
     torch.manual_seed(42)
 
-    args = get_args_parser()
+    parser = get_args_parser()
+    args = parser.parse_args()
     print(args.model)
 
 
