@@ -6,11 +6,11 @@ class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride = 1, downsample = None):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Sequential(
-                        nn.Conv2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1),
+                        nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1),
                         nn.BatchNorm2d(out_channels),
                         nn.ReLU())
         self.conv2 = nn.Sequential(
-                        nn.Conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1),
+                        nn.ConvTranspose2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1),
                         nn.BatchNorm2d(out_channels))
         self.downsample = downsample
         self.relu = nn.ReLU()
@@ -79,7 +79,7 @@ class ResNet(nn.Module):
                 nn.BatchNorm2d(planes),
             )
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers.append(block(self.outplanes, planes, stride, downsample))
         self.outplanes = planes
         for i in range(1, blocks):
             layers.append(block(self.outplanes, planes))
@@ -88,17 +88,19 @@ class ResNet(nn.Module):
     
     
     def forward(self, x):
+        print(x.shape)
         x = self.conv1(x)
         x = self.maxpool(x)
         x = self.downlayer0(x)
         x = self.downlayer1(x)
         x = self.downlayer2(x)
         x = self.downlayer3(x)
+        print(x.shape)
         x = self.uplayer1(x)
         x = self.uplayer2(x)
         x = self.uplayer3(x)
         x = self.uplayer4(x)
         x = self.upsample(x)
         x = self.upconv1(x)
-
+        print(x.shape)
         return x
