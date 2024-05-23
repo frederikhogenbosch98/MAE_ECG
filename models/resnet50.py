@@ -66,10 +66,10 @@ class ResNet(nn.Module):
         self.downlayer2 = self._make_layer(ResidualBlock, 128, layers[2], stride = 1)
         self.downlayer3 = self._make_layer(ResidualBlock, 256, layers[3], stride = 1)
 
-        self.uplayer1 = self._make_uplayer(ResidualTransposeBlock, 256, layers[3], stride = 1) 
-        self.uplayer2 = self._make_uplayer(ResidualTransposeBlock, 128, layers[2], stride = 1)
-        self.uplayer3 = self._make_uplayer(ResidualTransposeBlock, 64, layers[1], stride = 1)
-        self.uplayer4 = self._make_uplayer(ResidualTransposeBlock, 32, layers[0], stride = 1) 
+        self.uplayer1 = self._make_uplayer(ResidualBlock, 256, layers[3], stride = 1) 
+        self.uplayer2 = self._make_uplayer(ResidualBlock, 128, layers[2], stride = 1)
+        self.uplayer3 = self._make_uplayer(ResidualBlock, 64, layers[1], stride = 1)
+        self.uplayer4 = self._make_uplayer(ResidualBlock, 32, layers[0], stride = 1) 
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
         self.upconv1 =  nn.Sequential(
@@ -122,6 +122,7 @@ class ResNet(nn.Module):
         print(f'latent: {x.shape}')
         x = self.uplayer1(x)
         x = self.uplayer2(x)
+        self.upsample(x)
         x = self.uplayer3(x)
         x = self.uplayer4(x)
         x = self.upsample(x)
