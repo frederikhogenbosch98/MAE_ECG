@@ -33,8 +33,8 @@ class ResNet(nn.Module):
         self.inplanes = 32
         self.outplanes = 256
         self.conv1 = nn.Sequential(
-                        nn.Conv2d(1, 64, kernel_size = 7, stride = 2, padding = 3),
-                        nn.BatchNorm2d(64),
+                        nn.Conv2d(1, 32, kernel_size = 7, stride = 2, padding = 3),
+                        nn.BatchNorm2d(32),
                         nn.ReLU())
         self.maxpool = nn.MaxPool2d(kernel_size = 3, stride = 2, padding = 1)
         self.downlayer0 = self._make_layer(ResidualBlock, 32, layers[0], stride = 1)
@@ -49,8 +49,8 @@ class ResNet(nn.Module):
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
         self.upconv1 =  nn.Sequential(
-                        nn.ConvTranspose2d(64, 1, kernel_size = 7, stride = 2, padding = 3),
-                        nn.BatchNorm2d(64),
+                        nn.ConvTranspose2d(32, 1, kernel_size = 7, stride = 2, padding = 3),
+                        nn.BatchNorm2d(32),
                         nn.ReLU()) 
         
     def _make_layer(self, block, planes, blocks, stride=1):
