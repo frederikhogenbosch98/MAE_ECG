@@ -32,6 +32,7 @@ from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFea
 
 
 def get_args_parser():
+    print('args got')
     parser = argparse.ArgumentParser('training', add_help=False)
 
     # Model parameters
