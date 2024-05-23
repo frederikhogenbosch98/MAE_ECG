@@ -149,7 +149,7 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [ConvNext(), ResNet(), AutoEncoder56Unet(), AutoEncoder11_UN()]
+    models = [ResNet(), ConvNext(), AutoEncoder56Unet(), AutoEncoder11_UN()]
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         
         mae_losses_run[i,:] = mae_losses
         mae_val_losses_run[i,:] = mae_val_losses
-        mses.append(eval_mae(mae, testset_un))
+        mses.append(eval_mae(mae, testset_un, device=device))
 
     print(mses)
 

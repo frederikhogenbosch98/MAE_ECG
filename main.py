@@ -212,7 +212,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
 
 
-def eval_mae(model, testset, batch_size=128):
+def eval_mae(model, testset, device=torch.device('cuda:0'), batch_size=128):
     model.to(device)
     model.eval()
 
