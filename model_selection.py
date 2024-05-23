@@ -150,7 +150,7 @@ if __name__ == "__main__":
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
     models = [ResNet(), ConvNext(), UNet(), AutoEncoder11_UN()]
-    model_strs = ['resnet', 'convnext', 'unet', 'basic']
+    model_strs = ['convnext', 'unet', 'basic']
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
