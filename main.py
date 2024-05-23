@@ -450,7 +450,6 @@ if __name__ == "__main__":
 
     parser = get_args_parser()
     args = parser.parse_args()
-    print(args.model)
 
 
     dtype = torch.float32
@@ -561,8 +560,8 @@ if __name__ == "__main__":
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
                     # mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
-                    # mae = nn.DataParallel(AutoEncoder11_UN()).to(device)
-                    mae = AutoEncoder11_UN().to(device)
+                    mae = nn.DataParallel(AutoEncoder11_UN()).to(device)
+                    # mae = AutoEncoder11_UN().to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder56().to(device)
