@@ -40,27 +40,21 @@ class Permute(nn.Module):
     
 
 class ConvNextBlock(nn.Module):
-
     def __init__(self, filter_dim, layer_scale=1e-6):
         super().__init__()
-
         self.block = nn.Sequential(*[
-            nn.Conv2d(filter_dim,
-                      filter_dim,
-                      kernel_size=7,
-                      padding=3,
-                      groups=filter_dim),
-            Permute([0, 2, 3, 1]),
-            LayerNorm(filter_dim, eps=1e-6),
-            nn.Linear(filter_dim, filter_dim * 4),
+            LayerNorm(filter_dim, eps=1e-6, data_format="channels_first"),
+            nn.Conv2d(filter_dim, filter_dim, kernel_size=7, padding=3, groups=filter_dim),
             nn.GELU(),
-            nn.Linear(filter_dim * 4, filter_dim),
-            Permute([0, 3, 1, 2])
+            nn.Conv2d(filter_dim, filter_dim * 4, kernel_size=1),
+            nn.GELU(),
+            nn.Conv2d(filter_dim * 4, filter_dim, kernel_size=1),
         ])
-        self.gamma = nn.Parameter(torch.ones(filter_dim, 1, 1) * layer_scale)
+        self.gamma = nn.Parameter(layer_scale * torch.ones((filter_dim, 1, 1)), requires_grad=True)
 
     def forward(self, x):
-        return self.block(x) * self.gamma
+        return x + self.block(x) * self.gamma
+
     
 
 class ConvNextLayer(nn.Module):
