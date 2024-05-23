@@ -122,7 +122,7 @@ class ResNet(nn.Module):
         print(f'latent: {x.shape}')
         x = self.uplayer1(x)
         x = self.uplayer2(x)
-        self.upsample(x)
+        x = self.upsample(x)
         x = self.uplayer3(x)
         x = self.uplayer4(x)
         x = self.upsample(x)
