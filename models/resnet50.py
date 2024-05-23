@@ -73,7 +73,8 @@ class ResNet(nn.Module):
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
         self.upconv1 =  nn.Sequential(
-                        nn.ConvTranspose2d(32, 1, kernel_size = 7, stride = 2, padding = 3),
+                        nn.Conv2d(32, 1, kernel_size = 7, stride = 1, padding = 3),
+                        nn.Upsample(scale_factor=2, mode='bilinear'),
                         nn.Sigmoid()) 
         
     def _make_layer(self, block, planes, blocks, stride=1):
@@ -113,7 +114,9 @@ class ResNet(nn.Module):
     def forward(self, x):
         print(f'in: {x.shape}')
         x = self.conv1(x)
+        print(f'conv1: {x.shape}')
         x = self.maxpool(x)
+        print(f'maxpool: {x.shape}')
         x = self.downlayer0(x)
         x = self.downlayer1(x)
         x = self.maxpool(x)
