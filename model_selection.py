@@ -150,6 +150,7 @@ if __name__ == "__main__":
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
     models = [ResNet(), ConvNext(), AutoEncoder56Unet(), AutoEncoder11_UN()]
+    model_strs = ['resnet', 'convnext', 'unet', 'basic']
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
@@ -168,7 +169,7 @@ if __name__ == "__main__":
                                                     SAVE_MODEL_MAE=args.save_mae,
                                                     R=0,
                                                     batch_size=args.batch_size_mae,
-                                                    fact='default',
+                                                    fact=model_strs[i],
                                                     run_dir = run_dir,
                                                     contrun = args.contrun,
                                                     device = device)
