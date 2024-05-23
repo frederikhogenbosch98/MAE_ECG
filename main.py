@@ -452,7 +452,7 @@ if __name__ == "__main__":
     torch.manual_seed(42)
 
     args = get_args_parser()
-    print(type(args))
+    print(args.model)
 
 
     dtype = torch.float32
