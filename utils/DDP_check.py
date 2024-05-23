@@ -21,7 +21,7 @@ def main():
     main_device = device_ids[0]
     device = torch.device(f'cuda:{main_device}' if torch.cuda.is_available() else 'cpu')
     # Initialize dataset and dataloader
-    dataset = TensorDataset(torch.randn(100, 10), torch.randn(100, 10))
+    dataset = TensorDataset(torch.randn(1000, 10), torch.randn(1000, 10))
     dataloader = DataLoader(dataset, batch_size=32, num_workers=2)
 
     # Initialize model
