@@ -17,16 +17,16 @@ class YourModel(nn.Module):
         return self.fc(x)
 
 def main():
-    devicenum = 1
-    device = torch.device(f'cuda:{devicenum}')
-
+    device_ids = [0, 2, 3]
+    main_device = device_ids[0]
+    device = torch.device(f'cuda:{main_device}' if torch.cuda.is_available() else 'cpu')
     # Initialize dataset and dataloader
     dataset = TensorDataset(torch.randn(100, 10), torch.randn(100, 10))
     dataloader = DataLoader(dataset, batch_size=32, num_workers=2)
 
     # Initialize model
     model = YourModel().to(device)
-    model = nn.DataParallel(model, device_ids=[devicenum])
+    model = nn.DataParallel(model, device_ids=device_ids)
 
     # Define loss and optimizer
     criterion = nn.MSELoss()
