@@ -156,7 +156,7 @@ if __name__ == "__main__":
     for i, model in enumerate(models):
         os.makedirs(run_dir)
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
-        mae, mae_losses, mae_val_losses = train_mae(model=mae, 
+        mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                     trainset=trainset_un,
                                                     valset=valset_un,
                                                     learning_rate=args.lr_mae,
