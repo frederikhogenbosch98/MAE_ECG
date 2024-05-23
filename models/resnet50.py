@@ -116,6 +116,7 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
         x = self.downlayer0(x)
         x = self.downlayer1(x)
+        x = self.maxpool(x)
         x = self.downlayer2(x)
         x = self.downlayer3(x)
         print(f'latent: {x.shape}')
