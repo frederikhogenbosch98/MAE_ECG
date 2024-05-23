@@ -133,7 +133,6 @@ if __name__ == "__main__":
     # valset_sup = mitbih_dataset_val
     # testset_sup = mitbih_dataset_test
 
-    channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start, 8*args.channel_start]
     mses = []
     accuracies = []
 
