@@ -154,7 +154,7 @@ if __name__ == "__main__":
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
     for i, model in enumerate(models):
-        os.makedirs(run_dir)
+        os.makedirs(run_dir, exist_ok=True)
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                     trainset=trainset_un,
