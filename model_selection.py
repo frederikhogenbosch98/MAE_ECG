@@ -149,7 +149,7 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [ConvNext, ResNet, AutoEncoder56Unet, AutoEncoder11_UN]
+    models = [ConvNext(), ResNet(), AutoEncoder56Unet(), AutoEncoder11_UN()]
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
