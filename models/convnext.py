@@ -83,7 +83,7 @@ class ConvNextEncoder(nn.Module):
                  num_channels=1,
                  patch_size=4,
                  layer_dims=[32, 64, 128, 256],
-                 depths=[3, 3, 9, 3],
+                 depths=[1, 1, 3, 1],
                  drop_rate=0.):
         super(ConvNextEncoder, self).__init__()
 
@@ -132,7 +132,7 @@ class ConvNextDecoder(nn.Module):
                  num_classes=10,
                  patch_size=4,
                  layer_dims=[32, 64, 128, 256],
-                 depths=[3, 3, 9, 3],
+                 depths=[1, 1, 3, 1],
                  drop_rate=0.):
         super(ConvNextDecoder, self).__init__()
         layer_dims = list(reversed(layer_dims))
