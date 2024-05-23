@@ -17,7 +17,7 @@ class YourModel(nn.Module):
         return self.fc(x)
 
 def main():
-    devicenum = 2
+    devicenum = 3
     device = torch.device(f'cuda:{devicenum}')
 
     # Initialize dataset and dataloader
