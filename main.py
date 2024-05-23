@@ -451,10 +451,11 @@ if __name__ == "__main__":
     parser = get_args_parser()
     args = parser.parse_args()
 
-
     dtype = torch.float32
+    device_ids = [0, 2, 3]
+    main_device = device_ids[0]
     if torch.cuda.is_available():
-        device = torch.device("cuda")
+        torch.device(f'cuda:{main_device}')
     elif torch.backends.mps.is_available():
         device = torch.device("mps")
     else:
@@ -560,14 +561,14 @@ if __name__ == "__main__":
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
                     # mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
-                    mae = nn.DataParallel(AutoEncoder11_UN()).to(device)
+                    mae = nn.DataParallel(AutoEncoder11_UN(), device_ids=device_ids).to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
                     mae = AutoEncoder11_UN().to(device)
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
-                    mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1)).to(device)
+                    mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1), device_ids=device_ids).to(device)
                 else:
                    mae = AutoEncoder11(R=R, in_channels=1).to(device)
 
