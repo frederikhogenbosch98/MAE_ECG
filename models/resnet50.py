@@ -74,8 +74,7 @@ class ResNet(nn.Module):
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
         self.upconv1 =  nn.Sequential(
                         nn.ConvTranspose2d(32, 1, kernel_size = 7, stride = 2, padding = 3),
-                        nn.BatchNorm2d(32),
-                        nn.ReLU()) 
+                        nn.Sigmoid()) 
         
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
