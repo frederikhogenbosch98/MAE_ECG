@@ -6,6 +6,30 @@ class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride = 1, downsample = None):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Sequential(
+                        nn.Conv2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1),
+                        nn.BatchNorm2d(out_channels),
+                        nn.ReLU())
+        self.conv2 = nn.Sequential(
+                        nn.Conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1),
+                        nn.BatchNorm2d(out_channels))
+        self.downsample = downsample
+        self.relu = nn.ReLU()
+        self.out_channels = out_channels
+        
+    def forward(self, x):
+        residual = x
+        out = self.conv1(x)
+        out = self.conv2(out)
+        if self.downsample:
+            residual = self.downsample(x)
+        out += residual
+        out = self.relu(out)
+        return out
+
+class ResidualTransposeBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, stride = 1, downsample = None):
+        super(ResidualBlock, self).__init__()
+        self.conv1 = nn.Sequential(
                         nn.ConvTranspose2d(in_channels, out_channels, kernel_size = 3, stride = stride, padding = 1),
                         nn.BatchNorm2d(out_channels),
                         nn.ReLU())
@@ -42,10 +66,10 @@ class ResNet(nn.Module):
         self.downlayer2 = self._make_layer(ResidualBlock, 128, layers[2], stride = 2)
         self.downlayer3 = self._make_layer(ResidualBlock, 256, layers[3], stride = 2)
 
-        self.uplayer1 = self._make_uplayer(ResidualBlock, 256, layers[3], stride = 2) 
-        self.uplayer2 = self._make_uplayer(ResidualBlock, 128, layers[2], stride = 2)
-        self.uplayer3 = self._make_uplayer(ResidualBlock, 64, layers[1], stride = 2)
-        self.uplayer4 = self._make_uplayer(ResidualBlock, 32, layers[0], stride = 1) 
+        self.uplayer1 = self._make_uplayer(ResidualTransposeBlock, 256, layers[3], stride = 2) 
+        self.uplayer2 = self._make_uplayer(ResidualTransposeBlock, 128, layers[2], stride = 2)
+        self.uplayer3 = self._make_uplayer(ResidualTransposeBlock, 64, layers[1], stride = 2)
+        self.uplayer4 = self._make_uplayer(ResidualTransposeBlock, 32, layers[0], stride = 1) 
 
         self.upsample = nn.Upsample(scale_factor=2, mode='bilinear')
         self.upconv1 =  nn.Sequential(
