@@ -31,7 +31,6 @@ from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
-dist.init_process_group(backend='nccl')
 
 
 def get_args_parser():
@@ -455,7 +454,6 @@ if __name__ == "__main__":
     torch.manual_seed(42)
 
     args = get_args_parser()
-    args = args.parse_args()
 
 
     dtype = torch.float32
@@ -577,7 +575,6 @@ if __name__ == "__main__":
                     mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1)).to(device)
                     print('right condition')
                     mae = AutoEncoder11(R=R, in_channels=1).to('cuda:0')
-                    mae = DDP(mae, device_ids=[0,1,2,3])
                 else:
                    mae = AutoEncoder11(R=R, in_channels=1).to(device)
 

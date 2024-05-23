@@ -51,7 +51,7 @@ if __name__ == "__main__":
         random_input = torch.randn(i, 64, 112, 112)
 
         un_conv = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=7, stride=1, padding=1)
-        tlconv = tltorch.FactorizedConv.from_conv(un_conv, rank=10, factorization='cp')
+        tlconv = tltorch.FactorizedConv.from_conv(un_conv, rank=10, factorization='cp', implementation='factorized')
         selfconv = CPDConvolution2D(un_conv, R=10)
 
 
