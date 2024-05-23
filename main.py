@@ -561,10 +561,9 @@ if __name__ == "__main__":
                     # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
                     # mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
                     mae = nn.DataParallel(AutoEncoder11_UN()).to(device)
-                    # mae = AutoEncoder11_UN().to(device)
                     # mae = nn.DataParallel(UNet()).to(device)
                 else:
-                    mae = AutoEncoder56().to(device)
+                    mae = AutoEncoder11_UN().to(device)
             else:
                 if args.gpu == 'all':
                     # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
