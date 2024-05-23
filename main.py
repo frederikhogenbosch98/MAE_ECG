@@ -148,8 +148,8 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
                 scheduler.step()
 
-            if (epoch + 1) % 20 == 0 and epoch != 0 and SAVE_MODEL_MAE:
-                torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
+            if (epoch + 1) % 10 == 0 and epoch != 0 and SAVE_MODEL_MAE:
+                torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch+1}.pth')
                 torch.save(model.state_dict(), 'trained_models/last/last_run.pth')
 
             if valset:
