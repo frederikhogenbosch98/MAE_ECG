@@ -455,7 +455,7 @@ if __name__ == "__main__":
     device_ids = [0, 2, 3]
     main_device = device_ids[0]
     if torch.cuda.is_available():
-        torch.device(f'cuda:{main_device}')
+        device = torch.device(f'cuda:{main_device}')
     elif torch.backends.mps.is_available():
         device = torch.device("mps")
     else:
