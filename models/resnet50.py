@@ -88,19 +88,19 @@ class ResNet(nn.Module):
     
     
     def forward(self, x):
-        print(x.shape)
+        print(f'in: {x.shape}')
         x = self.conv1(x)
         x = self.maxpool(x)
         x = self.downlayer0(x)
         x = self.downlayer1(x)
         x = self.downlayer2(x)
         x = self.downlayer3(x)
-        print(x.shape)
+        print(f'latent: {x.shape}')
         x = self.uplayer1(x)
         x = self.uplayer2(x)
         x = self.uplayer3(x)
         x = self.uplayer4(x)
         x = self.upsample(x)
         x = self.upconv1(x)
-        print(x.shape)
+        print(f'out: {x.shape}')
         return x
