@@ -51,14 +51,15 @@ def eval_mae(model, testset, batch_size=128):
     test_data_tensor = test_data_tensor.to(device)
 
 
-    x = model(test_data_tensor[0:64,:,:,:])
+    recon = model(test_data_tensor[0:64,:,:,:])
     # embedding = model.encoder(x)
-    embedding = model.module.encoder(x)
-    e1 = embedding
+    # embedding = model.module.encoder(x)
+    # e1 = embedding
     # recon = model.decoder(e1)
-    recon = model.module.decoder(e1)
+    # recon = model.module.decoder(e1)
     # print(recon.shape)
     # print(recon)
+    # recon = model(x)
     for i in range(10):
         recon_cpu = recon[i,:,:,:]#.detach().numpy()
         recon_cpu = recon_cpu.cpu()
