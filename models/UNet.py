@@ -133,9 +133,9 @@ class UNet(nn.Module):
         return x
 
 
-class Classifier56Unet(nn.Module):
+class ClassifierUnet(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
-        super(Classifier56Unet, self).__init__()
+        super(ClassifierUnet, self).__init__()
         # self.encoder = autoencoder.encoder
         self.enc1 = autoencoder.enc1
         self.pool1 = autoencoder.pool1
