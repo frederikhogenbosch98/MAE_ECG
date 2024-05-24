@@ -186,7 +186,7 @@ class ClassifierUnet(nn.Module):
         # print(x.shape)
         # print(features.shape)
         x = self.flatten(x)
-        combined_features = torch.cat((x, features), dim=1)
-        x = self.classifier(combined_features)
-        # x = self.classifier(x)
+        # combined_features = torch.cat((x, features), dim=1)
+        # x = self.classifier(combined_features)
+        x = self.classifier(x)
         return x
