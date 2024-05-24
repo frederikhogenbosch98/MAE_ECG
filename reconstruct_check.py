@@ -52,11 +52,11 @@ def eval_mae(model, testset, batch_size=128):
 
 
     x = model(test_data_tensor[0:64,:,:,:])
-    embedding = model.encoder(x)
-    # embedding = model.module.encoder(x)
+    # embedding = model.encoder(x)
+    embedding = model.module.encoder(x)
     e1 = embedding
-    recon = model.decoder(e1)
-    # recon = model.module.decoder(e1)
+    # recon = model.decoder(e1)
+    recon = model.module.decoder(e1)
     # print(recon.shape)
     # print(recon)
     for i in range(10):
