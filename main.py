@@ -18,7 +18,7 @@ from ptflops import get_model_complexity_info
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
-from models.UNet import UNet, Classifier56Unet
+from models.UNet import UNet, ClassifierUnet
 from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
 from models._11am_back import AutoEncoder11
 from models._11am_down import AutoEncoder11_DOWN
@@ -595,7 +595,8 @@ if __name__ == "__main__":
              
             num_classes = 5
             if args.model == 'default':
-                classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                # classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
                 # print('hello')
 
                 # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
