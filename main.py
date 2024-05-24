@@ -19,6 +19,7 @@ from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
 from models.UNet import UNet, ClassifierUnet
+from models.UNet_TD import UNet_TD
 from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
 from models._11am_back import AutoEncoder11
 from models._11am_down import AutoEncoder11_DOWN
@@ -550,8 +551,6 @@ if __name__ == "__main__":
             R_LIST = R_LIST
         print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
-            if R == 100:
-                continue
             os.makedirs(run_dir, exist_ok=True)
 
             print(f'fact: {fact}, R: {R}')
@@ -559,11 +558,12 @@ if __name__ == "__main__":
 
             if fact == 'default':
                 
-                mae = AutoEncoder11_UN()
+                # mae = AutoEncoder11_UN()
                 mae = UNet()
             else:
 
-                mae = AutoEncoder11(R=R, in_channels=1)
+                # mae = AutoEncoder11(R=R, in_channels=1)
+                mae = UNet_TD(R=R, factorization=fact)
 
             if args.gpu == 'all':    
                 mae = nn.DataParallel(mae, device_ids=device_ids).to(device)
@@ -602,7 +602,8 @@ if __name__ == "__main__":
                 # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                     # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
-                classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes)
+                # classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes)
+                classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
                 # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
 
             if args.gpu == 'all':

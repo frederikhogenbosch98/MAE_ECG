@@ -3,9 +3,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import tltorch
 
-class UNet(nn.Module):
-    def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1], R=None, factorization='cp'):
-        super(UNet, self).__init__()
+class UNet_TD(nn.Module):
+    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1], R=None, factorization='cp'):
+        super(UNet_TD, self).__init__()
         # Encoder
         self.enc1 = nn.Sequential(
             tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
@@ -133,60 +133,3 @@ class UNet(nn.Module):
         return x
 
 
-class Classifier56Unet(nn.Module):
-    def __init__(self, autoencoder, in_features, out_features):
-        super(Classifier56Unet, self).__init__()
-        # self.encoder = autoencoder.encoder
-        self.enc1 = autoencoder.enc1
-        self.pool1 = autoencoder.pool1
-        self.enc2 = autoencoder.enc2
-        self.pool2 = autoencoder.pool2
-        self.enc3 = autoencoder.enc3
-        self.pool3 = autoencoder.pool3
-
-        self.flatten = nn.Flatten()
-
-        self.norm = nn.LayerNorm(in_features, eps=1e-6) 
-
-        # self.classifier = nn.Sequential(
-        #         nn.Flatten(),
-        #         nn.Linear(12544, 2048),
-        #         nn.GELU(),
-        #         nn.BatchNorm1d(num_features=2048),
-        #         nn.Dropout(0.5),
-        #         nn.Linear(2048, out_features)
-        # )
-        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.classifier = nn.Sequential(
-                # nn.Flatten(),
-                # nn.Linear(50176, 256),
-                nn.Linear(50176+1, 256),
-                # nn.Linear(3136+1, 256),
-                # nn.Linear(64, 64),
-                nn.GELU(),
-                nn.BatchNorm1d(num_features=256),
-                nn.Dropout(0.5),
-                nn.Linear(256, out_features)
-        )
-
-    def forward(self, images, features):
-        # print(x.shape)
-        x = self.enc1(images)
-        # print(x.shape)
-        x = self.pool1(x)
-        # print(x.shape)
-        x = self.enc2(x)
-        # print(x.shape)
-        x = self.pool2(x)
-        x = self.enc3(x)
-        x = self.pool3(x)
-        # x = self.encoder(x)
-        # x = self.avg_pool(x)
-        # print(features)
-        # print(x.shape)
-        # print(features.shape)
-        x = self.flatten(x)
-        combined_features = torch.cat((x, features), dim=1)
-        x = self.classifier(combined_features)
-        # x = self.classifier(x)
-        return x
