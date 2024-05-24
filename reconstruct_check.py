@@ -8,6 +8,7 @@ import torch.nn as nn
 from models._11am_back import AutoEncoder11
 from models._11am_un import AutoEncoder11_UN
 from models.convnext import ConvNext
+from models.UNet import UNet
 from PIL import Image
 import numpy as np
 
@@ -70,7 +71,7 @@ def eval_mae(model, testset, batch_size=128):
 
 
 if __name__ == "__main__":
-    device = torch.device("cuda")
+    device = torch.device("cuda:0")
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((128,128)), 
@@ -82,12 +83,13 @@ if __name__ == "__main__":
 
     # model = AutoEncoder56().to(device)
     # model = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256])).to(device)
-    model = AutoEncoder11(R=100, in_channels=1).to(device)
+    # model = AutoEncoder11(R=100, in_channels=1).to(device)
+    model = UNet().to(device)
     # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/RUN_21_5_8_54/MAE_RUN_cp_R100_21_5_8_56_epoch_19.pth'))
+    model.load_state_dict(torch.load('trained_models/model_comparison/RUN_23_5_22_53/MAE_RUN_unet_R0_23_5_22_53.pth'))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
