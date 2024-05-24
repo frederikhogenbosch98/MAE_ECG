@@ -199,7 +199,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
-        model.load_state_dict(torch.load('trained_models/RUN_21_5_8_54/MAE_RUN_cp_R100_21_5_8_56_epoch_19.pth')) #uncompressed
+        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_23_5_22_53/MAE_RUN_unet_R0_23_5_22_53.pth')) #unet
         # model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth')) #R25
         # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
@@ -268,21 +268,21 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
     now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        # for param in classifier.enc1.parameters():
-        #     param.requires_grad = False
-        # for param in classifier.enc2.parameters():
-        #     param.requires_grad = False
-        # for param in classifier.enc3.parameters():
-        #     param.requires_grad = False
-        # for param in classifier.pool1.parameters():
-        #     param.requires_grad = False
-        # for param in classifier.pool2.parameters():
-        #     param.requires_grad = False
-        # for param in classifier.pool3.parameters():
-        #     param.requires_grad = False
-
-        for param in classifier.encoder.parameters():
+        for param in classifier.module.enc1.parameters():
             param.requires_grad = False
+        for param in classifier.module.enc2.parameters():
+            param.requires_grad = False
+        for param in classifier.module.enc3.parameters():
+            param.requires_grad = False
+        for param in classifier.module.pool1.parameters():
+            param.requires_grad = False
+        for param in classifier.module.pool2.parameters():
+            param.requires_grad = False
+        for param in classifier.module.pool3.parameters():
+            param.requires_grad = False
+
+        # for param in classifier.encoder.parameters():
+        #     param.requires_grad = False
 
 
         
@@ -558,25 +558,18 @@ if __name__ == "__main__":
             factorization=fact
 
             if fact == 'default':
-                if args.gpu == 'all':
-                    # mae = nn.DataParallel(AutoEncoder56Unet()).to(device)
-                    # mae = nn.DataParallel(AutoEncoder56(channels=channels)).to(device)
-                    mae = nn.DataParallel(AutoEncoder11_UN(), device_ids=device_ids).to(device)
-                    # mae = nn.DataParallel(UNet()).to(device)
-                else:
-                    mae = AutoEncoder11_UN().to(device)
-            else:
-                if args.gpu == 'all':
-                    # mae = nn.DataParallel(AutoEncoder56_TD(R=R, in_channels=1, factorization=fact)).to(device)
-                    mae = nn.DataParallel(AutoEncoder11(R=R, in_channels=1), device_ids=device_ids).to(device)
-                else:
-                   mae = AutoEncoder11(R=R, in_channels=1).to(device)
-
                 
+                mae = AutoEncoder11_UN()
+                mae = UNet()
+            else:
+
+                mae = AutoEncoder11(R=R, in_channels=1)
+
+            if args.gpu == 'all':    
+                mae = nn.DataParallel(mae, device_ids=device_ids).to(device)
 
             current_pams = count_parameters(mae)
             print(f'num params: {current_pams}')
-
 
             mae, mae_losses, mae_val_losses = train_mae(model=mae, 
                             trainset=trainset_un,
@@ -602,14 +595,17 @@ if __name__ == "__main__":
              
             num_classes = 5
             if args.model == 'default':
-                classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
                 # print('hello')
 
                 # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
                     # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
             else:
-                classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes).to(device)
+                classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes)
                 # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+
+            if args.gpu == 'all':
+               classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
 
             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
                                         trainset=trainset_sup, 

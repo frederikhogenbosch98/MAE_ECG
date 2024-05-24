@@ -144,10 +144,6 @@ if __name__ == "__main__":
     num_warmup_epochs_classifier = args.warmup_epochs_class
     num_epochs_classifier = args.epochs_class + num_warmup_epochs_classifier
 
-    mae_losses_run = np.zeros((4, num_epochs_mae))
-    mae_val_losses_run = np.zeros((4, num_epochs_mae))
-    class_losses_run = np.zeros((4, num_epochs_classifier))
-    class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
     model = UNet()
     epochs = [1, 3, 5, 10, 15, 20, 25]
@@ -174,15 +170,12 @@ if __name__ == "__main__":
                                                     run_dir = run_dir,
                                                     contrun = args.contrun,
                                                     device = device)
-        
-        mae_losses_run[i,:] = mae_losses
-        mae_val_losses_run[i,:] = mae_val_losses
-        train_save_folder = f'{run_dir}/MAE_losses_{epoch}_train.npy'
-        val_save_folder = f'{run_dir}/MAE_losses_{epoch}_val.npy'
-        np.save(train_save_folder, mae_losses)
-        np.save(val_save_folder, mae_val_losses)
+
+
 
         mses.append(eval_mae(mae, testset_un, device=device))
+
+        
 
     
     print('\n'.join([f'{epoch} mse: {mses[i]}' for i in range(4)]))
