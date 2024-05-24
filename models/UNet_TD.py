@@ -1,46 +1,46 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import tltorch
 
 class UNet(nn.Module):
-    def __init__(self, in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1], R=None, factorization='cp'):
         super(UNet, self).__init__()
         # Encoder
         self.enc1 = nn.Sequential(
-            nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(in_channels, channels[0], kernel_size=7, stride=1, padding=3), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
         )
         self.pool1 = nn.MaxPool2d(2, stride=2)
 
         self.enc2 = nn.Sequential(
-            nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
         )
         self.pool2 = nn.MaxPool2d(2, stride=2)
 
         self.enc3 = nn.Sequential(
-            nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
         )
@@ -48,13 +48,13 @@ class UNet(nn.Module):
 
 
         self.enc4 = nn.Sequential(
-            nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3], channels[3], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[3]),
             nn.GELU(),
         )
@@ -64,13 +64,13 @@ class UNet(nn.Module):
         # Decoder
         self.up4 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
         self.dec4 = nn.Sequential(
-            nn.Conv2d(channels[3] + channels[3], channels[2], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[3] + channels[3], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(), 
             
@@ -78,33 +78,33 @@ class UNet(nn.Module):
 
         self.up3 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
         self.dec3 = nn.Sequential(
-            nn.Conv2d(channels[2] + channels[2], channels[1], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2] + channels[2], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
-            nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
         )
 
         self.up2 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
         self.dec2 = nn.Sequential(
-            nn.Conv2d(channels[1] + channels[1], channels[0], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1] + channels[1], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
         )
 
         self.up1 = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False)
         self.dec1 = nn.Sequential(
-            nn.Conv2d(channels[0] + channels[0], in_channels, kernel_size=3, stride=1, padding=1),
+            tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0] + channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=True, factorization=factorization, implementation='factorized'),
             nn.Sigmoid()
         )
 

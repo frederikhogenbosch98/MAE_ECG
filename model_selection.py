@@ -150,7 +150,7 @@ if __name__ == "__main__":
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
     models = [ UNet(), AutoEncoder11_UN()] # ConvNext(),
-    model_strs = ['unet', 'basic'] # 'convnext', 
+    model_strs = ['unet_32', 'basic'] # 'convnext', 
     lr = [2e-5, 1e-4]
 
     now = datetime.now()
