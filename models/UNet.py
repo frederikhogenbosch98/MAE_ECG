@@ -116,7 +116,7 @@ class UNet(nn.Module):
         x = self.pool2(enc2)
         enc3 = self.enc3(x)
         x = self.pool3(enc3)
-
+        print(x.shape)
         # Decoder
         x = self.up3(x)
         x = torch.cat([x, enc3], dim=1)
