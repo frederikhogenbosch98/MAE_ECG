@@ -447,7 +447,10 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 if __name__ == "__main__":
+    np.random.seed(42)
     torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
+    torch.cuda.manual_seed_all(42)
 
     parser = get_args_parser()
     args = parser.parse_args()
@@ -543,7 +546,6 @@ if __name__ == "__main__":
     print(f'for R values: {R_LIST}')
 
     now = datetime.now()
-    run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
     for fact in fact_list:
         if fact == 'default':
             R_LIST = [0]
@@ -551,95 +553,102 @@ if __name__ == "__main__":
             R_LIST = R_LIST
         print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
-            os.makedirs(run_dir, exist_ok=True)
-
-            print(f'fact: {fact}, R: {R}')
-            factorization=fact
-
-            if fact == 'default':
+            running_accs = []
+            for j in range(3):
                 
-                # mae = AutoEncoder11_UN()
-                mae = UNet()
-            else:
+                run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_iter_{j}'
+                os.makedirs(run_dir, exist_ok=True)
 
-                # mae = AutoEncoder11(R=R, in_channels=1)
-                mae = UNet_TD(R=R, factorization=fact)
+                print(f'fact: {fact}, R: {R}')
+                factorization=fact
 
-            if args.gpu == 'all':    
-                mae = nn.DataParallel(mae, device_ids=device_ids).to(device)
+                if fact == 'default':
+                    
+                    # mae = AutoEncoder11_UN()
+                    mae = UNet()
+                else:
 
-            current_pams = count_parameters(mae)
-            print(f'num params: {current_pams}')
+                    # mae = AutoEncoder11(R=R, in_channels=1)
+                    mae = UNet_TD(R=R, factorization=fact)
 
-            mae, mae_losses, mae_val_losses = train_mae(model=mae, 
-                            trainset=trainset_un,
-                            valset=valset_un,
-                            learning_rate=args.lr_mae,
-                            min_lr = args.min_lr_mae,
-                            weight_decay = args.weight_decay_mae,
-                            num_epochs=num_epochs_mae,
-                            n_warmup_epochs=num_warmup_epochs_mae,
-                            TRAIN_MAE=args.train_mae,
-                            SAVE_MODEL_MAE=args.save_mae,
-                            R=R,
-                            batch_size=args.batch_size_mae,
-                            fact=fact,
-                            run_dir = run_dir,
-                            contrun = args.contrun,
-                            device = device)
+                if args.gpu == 'all':    
+                    mae = nn.DataParallel(mae, device_ids=device_ids).to(device)
+
+                current_pams = count_parameters(mae)
+                print(f'num params: {current_pams}')
+
+                mae, mae_losses, mae_val_losses = train_mae(model=mae, 
+                                trainset=trainset_un,
+                                valset=valset_un,
+                                learning_rate=args.lr_mae,
+                                min_lr = args.min_lr_mae,
+                                weight_decay = args.weight_decay_mae,
+                                num_epochs=num_epochs_mae,
+                                n_warmup_epochs=num_warmup_epochs_mae,
+                                TRAIN_MAE=args.train_mae,
+                                SAVE_MODEL_MAE=args.save_mae,
+                                R=R,
+                                batch_size=args.batch_size_mae,
+                                fact=fact,
+                                run_dir = run_dir,
+                                contrun = args.contrun,
+                                device = device)
+                
+                mae_losses_run[i,:] = mae_losses
+                mae_val_losses_run[i,:] = mae_val_losses
+
+                mses.append(eval_mae(mae, testset_un))
+                
+                num_classes = 5
+                if args.model == 'default':
+                    # classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    # print('hello')
+
+                    # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+                        # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
+                else:
+                    # classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes)
+                    classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
+
+                if args.gpu == 'all':
+                    classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
+
+                classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+                                            trainset=trainset_sup, 
+                                            valset=valset_sup, 
+                                            num_epochs=num_epochs_classifier, 
+                                            n_warmup_epochs=num_warmup_epochs_classifier, 
+                                            learning_rate=args.lr_class,
+                                            min_lr = args.min_lr_class,
+                                            weight_decay = args.weight_decay_class,
+                                            batch_size=args.batch_size_class, 
+                                            TRAIN_CLASSIFIER=args.train_class, 
+                                            SAVE_MODEL_CLASSIFIER=args.save_class,
+                                            R=R,
+                                            fact=fact,
+                                            run_dir = run_dir)
+                accuracy = eval_classifier(classifier, testset_sup)
+                accuracies.append(accuracy)
+                running_accs.append(accuracy)
+                class_losses_run[i,:] = class_losses
+                class_val_losses_run[i,:] = class_val_losses
+
+                # print(count_parameters(classifier))
+
+                mae_losses_run[i,:] = mae_losses
+                class_losses_run[i,:] = class_losses
+
+
+        
+                mae_save_folder = f'{run_dir}/MAE_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+                class_save_folder = f'{run_dir}/CLASS_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
+                np.save(mae_save_folder, mae_losses_run)
+                np.save(class_save_folder, class_losses_run)
+                np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
+                np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
+                np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
             
-            mae_losses_run[i,:] = mae_losses
-            mae_val_losses_run[i,:] = mae_val_losses
-
-            mses.append(eval_mae(mae, testset_un))
-             
-            num_classes = 5
-            if args.model == 'default':
-                # classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-                classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-                # print('hello')
-
-                # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-                    # classifier = UClassifier(autoencoder=mae.module, out_features=num_classes).to(device)
-            else:
-                # classifier = Classifier_UN(autoencoder=mae, in_features=2048, out_features=num_classes)
-                classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-                # classifier = Classifier_self_TD(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
-
-            if args.gpu == 'all':
-               classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
-
-            classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
-                                        trainset=trainset_sup, 
-                                        valset=valset_sup, 
-                                        num_epochs=num_epochs_classifier, 
-                                        n_warmup_epochs=num_warmup_epochs_classifier, 
-                                        learning_rate=args.lr_class,
-                                        min_lr = args.min_lr_class,
-                                        weight_decay = args.weight_decay_class,
-                                        batch_size=args.batch_size_class, 
-                                        TRAIN_CLASSIFIER=args.train_class, 
-                                        SAVE_MODEL_CLASSIFIER=args.save_class,
-                                        R=R,
-                                        fact=fact,
-                                        run_dir = run_dir)
-            
-            accuracies.append(eval_classifier(classifier, testset_sup))
-            class_losses_run[i,:] = class_losses
-            class_val_losses_run[i,:] = class_val_losses
-
-            # print(count_parameters(classifier))
-
-            mae_losses_run[i,:] = mae_losses
-            class_losses_run[i,:] = class_losses
-
-
-    
-            mae_save_folder = f'{run_dir}/MAE_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
-            class_save_folder = f'{run_dir}/CLASS_losses_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy'
-            np.save(mae_save_folder, mae_losses_run)
-            np.save(class_save_folder, class_losses_run)
-            np.save(f'{run_dir}/accuracies_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_{R}.npy', np.array(accuracies))
-            np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
-            np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
+            print(f'average accuracy over three runs: {np.mean(running_accs)}')
 
