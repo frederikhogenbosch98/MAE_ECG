@@ -447,10 +447,10 @@ def eval_classifier(model, testset, batch_size=128):
 
 
 if __name__ == "__main__":
-    np.random.seed(42)
+    # np.random.seed(42)
     torch.manual_seed(42)
-    torch.cuda.manual_seed(42)
-    torch.cuda.manual_seed_all(42)
+    # torch.cuda.manual_seed(42)
+    # torch.cuda.manual_seed_all(42)
 
     parser = get_args_parser()
     args = parser.parse_args()
