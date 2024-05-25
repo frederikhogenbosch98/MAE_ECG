@@ -9,6 +9,7 @@ from scipy.signal import resample, find_peaks
 from scipy.fft import fft, fftfreq
 from PIL import Image, ImageDraw
 import cv2
+import io
 
 # physio_root = 'data/physionet/files/ecg-arrhythmia/1.0.0/WFDBRecords'
 physio_root = 'data/physionet/ptbxl/records500'
@@ -90,6 +91,28 @@ def averaging(segments):
 
     return averaged_signal
 
+
+def create_img(signal, width, height):
+
+    dpi = 230 
+    fig_width_in = width / dpi
+    fig_height_in = height / dpi
+    t = np.linspace(0, 1, len(signal))  
+
+    fig, ax = plt.subplots(figsize=(fig_width_in, fig_height_in), dpi=dpi)
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
+
+
+    ax.plot(t, signal, color='black', linewidth=0.5)
+    ax.axis('off')
+    buf = io.BytesIO()
+
+    plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
+    # plt.show()
+    plt.close(fig)
+    
+    return buf
 
 def inspect_freqs(ecg_signal, fs):
 
@@ -234,6 +257,8 @@ if __name__ == "__main__":
         plt.xlabel('Samples')
         plt.ylabel('Normalized voltage')
         plt.show()
+        buf = create_img(segs[2], 224, 224)
+
     # create_img(normalized_data, width=224, height=224)
     # print(np.unique(num_segs, return_counts=True))
 
