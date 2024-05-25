@@ -129,9 +129,9 @@ def create_input_tensor():
             end_idx = strt_idx+8
             segs = segs[strt_idx:end_idx]
             del segs[0], segs[-1]
-            segs = normalize(np.array(segs))
+            # segs = normalize(np.array(segs))
 
-
+        segs = [normalize(np.array(segs[i])) for i in range(len(segs))]
         for i in range(len(segs)):
 
 
