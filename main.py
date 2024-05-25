@@ -649,6 +649,7 @@ if __name__ == "__main__":
             mean_acc = np.mean(running_accs)
             print(f'average accuracy over three runs: {mean_acc}')
             mega_accs_list.append(mean_acc)
+            print(f'mega list until now: {mega_accs_list}')
 
     print(f'R_LIST: {R_LIST}')
     print(f'averaged accuracies list: {mega_accs_list}')

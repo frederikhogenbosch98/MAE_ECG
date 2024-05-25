@@ -48,8 +48,8 @@ def get_r_idx(data):
 def extract_segments(data, r_idx):
     segments = []
     for idx in r_idx:
-        start = max(idx-140, 0)
-        end = min(idx+250, len(data))
+        start = max(idx-100, 0)
+        end = min(idx+200, len(data))
         segment = list(data[start:end])
         segments.append(segment)
         
@@ -109,7 +109,7 @@ def create_input_tensor():
 
         
         filtered_data = butter_bandpass_filter(sample_values, low_cut, high_cut, fs, order=5)
-
+        
         r_idx = get_r_idx(filtered_data)
 
         segs = extract_segments(filtered_data, r_idx)

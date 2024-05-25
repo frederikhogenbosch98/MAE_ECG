@@ -46,8 +46,8 @@ def get_r_idx(data):
 def extract_segments(data, r_idx):
     segments = []
     for idx in r_idx:
-        start = max(idx-140, 0)
-        end = min(idx+250, len(data))
+        start = max(idx-100, 0)
+        end = min(idx+200, len(data))
         segment = list(data[start:end])
         segments.append(segment)
         
