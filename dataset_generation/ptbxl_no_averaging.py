@@ -130,8 +130,6 @@ def create_input_tensor():
 
             
         for i in range(len(segs)):
-            plt.plot(segs[i])
-            plt.show()
 
             filename = '{}/{}_{}.png'.format(_dataset_dir, file[-8:-3], i)            
             buf = create_img(segs[i], 224, 224)
