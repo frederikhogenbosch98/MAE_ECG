@@ -510,6 +510,7 @@ if __name__ == "__main__":
 
     if args.model == 'cp':
         fact_list = ['cp']
+        R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200]
     elif args.model == 'tucker':
         fact_list = ['tucker']
     elif args.model == 'both':
@@ -525,9 +526,8 @@ if __name__ == "__main__":
         R_LIST = [0]
     
 
-
     channels = [args.channel_start, 2*args.channel_start, 4*args.channel_start, 8*args.channel_start]
-    print(channels)
+    # print(channels)
     mses = []
     accuracies = []
 
@@ -543,8 +543,9 @@ if __name__ == "__main__":
     mae_val_losses_run = np.zeros((len(R_LIST), num_epochs_mae))
     class_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
     class_val_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
-    print(f'for R values: {R_LIST}')
 
+    print(f'for R values: {R_LIST}')
+    mega_accs_list = []
     now = datetime.now()
     for fact in fact_list:
         if fact == 'default':
@@ -650,5 +651,10 @@ if __name__ == "__main__":
                 np.save(f'{run_dir}/MSES_RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_{fact}_R.npy', np.array(mses))
                 np.savetxt(f'{run_dir}/summary_{fact}_{R}.txt', accuracies, fmt='%f')
             
-            print(f'average accuracy over three runs: {np.mean(running_accs)}')
+            mean_acc = np.mean(running_accs)
+            print(f'average accuracy over three runs: {mean_acc}')
+            mega_accs_list.append(mean_acc)
+
+    print(f'R_LIST: {R_LIST}')
+    print(f'averaged accuracies list: {mega_accs_list}')
 
