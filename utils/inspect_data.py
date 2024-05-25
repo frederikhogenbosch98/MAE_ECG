@@ -52,20 +52,30 @@ def normalize(segment):
     segment_max = np.max(segment)
     return (segment - segment_min) / (segment_max - segment_min)
 
+def get_r_idx(data):
+    r_idx, _ = find_peaks(data, distance=120, height=0.25) 
+    return r_idx
 
-def extract_segments(data):
-    r_idx, _ = find_peaks(data, distance=350)
-    print(r_idx)
+def extract_segments(data, r_idx):
     segments = []
-
-    for idx in r_idx:
-        start = max(idx-100, 0)
-        end = min(idx+200, len(data))
+    for i, idx in enumerate(r_idx):
+        if i != 0 and i != len(r_idx)-1:
+            if r_idx[i] - r_idx[i-1] < 100:
+                start = r_idx[i-1] + 100
+            else:
+                start = max(idx-100, 0)
+            if r_idx[i+1] - r_idx[i] < 200:
+                end =  r_idx[i+1] - 100
+            else:
+                end = min(idx+200, len(data))
+        else:
+            start = max(idx-100, 0) 
+            end = min(idx+200, len(data))
+        
         segment = list(data[start:end])
         segments.append(segment)
         
-
-    return r_idx, segments
+    return segments
 
 
 def averaging(segments):
@@ -108,6 +118,7 @@ def inspect_freqs(ecg_signal, fs):
     plt.plot(freqs[:n], magnitude[:n])
     plt.title('FFT of ECG Signal')
     plt.xlabel('Frequency (Hz)')
+    plt.xlim([0,150])
     plt.ylabel('Magnitude')
     plt.grid(True)
     plt.show()
@@ -132,26 +143,29 @@ def create_img(signal, width, height):
     # plt.show()
 
 
-
-
-
 def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
     x = np.linspace(0, 10, len(sample_values[:,0]))
     plt.figure(figsize=(10, 6))
-    plt.plot(x, sample_values[:,0], label='true')
-    plt.plot(x, filtered_data, label='filtered')
+    plt.plot(x, sample_values[:,0], label='Unfiltered signal')
+    plt.plot(x, filtered_data, label='Filtered signal')
+    plt.plot(x, np.zeros_like(filtered_data), "--", color="gray")
     plt.title(f'Bandpass filter (cutoff low: {low_cut}Hz, cutoff high: {high_cut}Hz)')
-    plt.xlabel('time (s)')
-    plt.ylabel('voltage (mV)')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Voltage (mV)')
     plt.legend()
     plt.show()
 
 
-def plot_peaks(resampled_data):
+def plot_peaks(resampled_data, r_idx):
+    x = np.linspace(0, 10, len(resampled_data))
     plt.figure(figsize=(10, 6))
-    plt.plot(resampled_data)
-    plt.plot(extracted_segments, resampled_data[extracted_segments], "x")
-    plt.plot(np.zeros_like(resampled_data), "--", color="gray")
+    plt.plot(x, resampled_data, label='Resampled Data')
+    plt.plot(x[r_idx], resampled_data[r_idx], "x", label='Detected Peaks')
+    plt.plot(x, np.zeros_like(resampled_data), "--", color="gray")
+    plt.title('Peak Detection')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Voltage (mV)')
+    plt.legend()
     plt.show()
 
 
@@ -176,46 +190,51 @@ if __name__ == "__main__":
     # plot_ecg(27)
     # true_data, filtered_data, low_cut, high_cut = filter_signal(47, 1)
     num_segs = []
-    for lead in range(0,12):
-        # print(lead)
-        try:
-            true_data, filtered_data, low_cut, high_cut = filter_signal(27, lead)
-            # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
-            # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
-            # resampled_data = filtered_data
-            resampled_data = resample(filtered_data, num=3600)
-            # inspect_freqs(resampled_data, 500)
-            # plt.plot(filtered_data)
-            # plt.plot(resampled_data)
-            # plt.show()
+    # print(lead)
+    for i in range(500,800):
+        true_data, filtered_data, low_cut, high_cut = filter_signal(i,0)
+        # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
+        plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
+        # resampled_data = filtered_data
+        resampled_data = resample(filtered_data, num=3600)
+        # inspect_freqs(resampled_data, 360)
+        # plt.plot(filtered_data)
+        # plt.plot(resampled_data)
+        # plt.show()
 
 
-            r_idx, extracted_segments = extract_segments(filtered_data)
-            r_idx_re, extracted_segments_re = extract_segments(resampled_data)
-            # plot_peaks(resampled_data)
-            # plt.plot(resampled_data)
-            # plt.plot(r_idx, resampled_data[r_idx], "x")
-            # plt.plot(np.zeros_like(resampled_data), "--", color="gray")
-            # plt.show()
-            del extracted_segments[0], extracted_segments[-1]
-            # plot_segments(extracted_segments)
+        r_idx = get_r_idx(resampled_data)
+        print(r_idx)
+        segs = extract_segments(data=resampled_data, r_idx=r_idx)
+        plot_peaks(resampled_data, r_idx)
 
-            # averaged_signal = averaging(extracted_segments)
-            # averaged_signal = np.mean(np.array(extracted_segments), axis=0)
-            # averaged_signal = np.array(extracted_segments)
-            # num_segs.append(averaged_signal.shape[0])
-            # normalized_data = np.zeros((averaged_signal.shape))
-            # for j in range(averaged_signal.shape[0]):
-                # normalized_data[j,:] = normalize(averaged_signal[j,:])
-            normalized_data = normalize(extracted_segments[0])
-            normalized_data_re =normalize(extracted_segments_re[0])
-            plt.plot(normalized_data)
-            plt.plot(normalized_data_re)
-            plt.show()
-            # create_img(normalized_data, width=224, height=224)
-        except FileNotFoundError:
-            continue
-        
+        if segs and len(segs) > 7:
+            mid_idx = len(segs) // 2
+            strt_idx = max(0, mid_idx-4)
+            end_idx = strt_idx+8
+            segs = segs[strt_idx:end_idx]
+            del segs[0], segs[-1]
+        # plt.plot(resampled_data)
+        # plt.plot(r_idx, resampled_data[r_idx], "x")
+        # plt.plot(np.zeros_like(resampled_data), "--", color="gray")
+        # plt.show()
+        # plot_segments(extracted_segments)
+
+        # averaged_signal = averaging(extracted_segments)
+        # averaged_signal = np.mean(np.array(extracted_segments), axis=0)
+        # averaged_signal = np.array(extracted_segments)
+        # num_segs.append(averaged_signal.shape[0])
+        # normalized_data = np.zeros((averaged_signal.shape))
+        # for j in range(averaged_signal.shape[0]):
+            # normalized_data[j,:] = normalize(averaged_signal[j,:])
+        normalized_data = normalize(segs[2])
+        plt.figure(figsize=(10,6))
+        plt.plot(normalized_data)
+        plt.title('Normalized segment')
+        plt.xlabel('Samples')
+        plt.ylabel('Normalized voltage')
+        plt.show()
+    # create_img(normalized_data, width=224, height=224)
     # print(np.unique(num_segs, return_counts=True))
 
     # train_tensor = torch.load('data/datasets/train_dataset.pt')

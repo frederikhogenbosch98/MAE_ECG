@@ -40,9 +40,8 @@ def normalize(segment):
     segment_max = np.max(segment)
     return (segment - segment_min) / (segment_max - segment_min)
 
-
 def get_r_idx(data):
-    r_idx, _ = find_peaks(data, distance=250) 
+    r_idx, _ = find_peaks(data, distance=120, height=0.3) 
     return r_idx
 
 def extract_segments(data, r_idx):
