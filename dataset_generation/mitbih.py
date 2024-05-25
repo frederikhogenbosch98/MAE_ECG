@@ -178,7 +178,7 @@ def create_img(signal, width, height):
     buf = io.BytesIO()
 
     plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
-    # plt.show()
+    plt.show()
     plt.close(fig)
     
     return buf
