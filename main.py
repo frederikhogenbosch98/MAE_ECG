@@ -485,7 +485,7 @@ if __name__ == "__main__":
     print(len(combined_unsupervised_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [10000, 4000, 2926])
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17076])
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17077])
 
     mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
     mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
