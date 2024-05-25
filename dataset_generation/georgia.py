@@ -130,6 +130,10 @@ def create_input_tensor():
             segs = segs[strt_idx:end_idx]
             del segs[0], segs[-1]
             # segs = normalize(np.array(segs))
+        else:
+            print('no peaks')
+            continue
+            
 
         segs = [normalize(np.array(segs[i])) for i in range(len(segs))]
         for i in range(len(segs)):

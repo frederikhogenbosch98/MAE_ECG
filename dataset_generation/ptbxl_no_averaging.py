@@ -20,6 +20,18 @@ physio_root = 'data/physionet/ptbxl/records500'
 _directory = '../../extra_reps/data/mitbih/'
 _dataset_dir = 'data/physionet/ptbxl_full_224/class'
 
+def plot_peaks(resampled_data, r_idx):
+    x = np.linspace(0, 10, len(resampled_data))
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, resampled_data, label='Resampled Data')
+    plt.plot(x[r_idx], resampled_data[r_idx], "x", label='Detected Peaks')
+    plt.plot(x, np.zeros_like(resampled_data), "--", color="gray")
+    plt.title('Peak Detection')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Voltage (mV)')
+    plt.legend()
+    plt.show()
+
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
@@ -40,7 +52,7 @@ def normalize(segment):
 
 
 def get_r_idx(data):
-    r_idx, _ = find_peaks(data, distance=120, height=0.3) 
+    r_idx, _ = find_peaks(data, distance=140, height=0.25) 
     return r_idx
 
 def extract_segments(data, r_idx):
@@ -116,7 +128,9 @@ def create_input_tensor():
         
         filtered_data = butter_bandpass_filter(sample_values, low_cut, high_cut, fs, order=5)
         resampled_data = resample(filtered_data, num=3600)
+
         r_idx = get_r_idx(resampled_data)
+        plot_peaks(resampled_data=resampled_data, r_idx=r_idx)
 
         segs = extract_segments(resampled_data, r_idx)
         if segs and len(segs) > 7:
@@ -130,7 +144,6 @@ def create_input_tensor():
 
             
         for i in range(len(segs)):
-
             filename = '{}/{}_{}.png'.format(_dataset_dir, file[-8:-3], i)            
             buf = create_img(segs[i], 224, 224)
             image_pil = Image.open(buf)
