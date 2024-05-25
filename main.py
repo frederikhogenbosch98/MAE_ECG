@@ -548,11 +548,6 @@ if __name__ == "__main__":
     mega_accs_list = []
     now = datetime.now()
     for fact in fact_list:
-        if fact == 'default':
-            R_LIST = [0]
-        elif fact == 'cp':
-            R_LIST = R_LIST
-        print(f'for R values: {R_LIST}')
         for i, R in enumerate(R_LIST):
             running_accs = []
             for j in range(3):

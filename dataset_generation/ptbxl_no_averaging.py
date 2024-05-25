@@ -104,8 +104,8 @@ def create_input_tensor():
 
         
         filtered_data = butter_bandpass_filter(sample_values, low_cut, high_cut, fs, order=5)
-
-        r_idx = get_r_idx(filtered_data)
+        resampled_data = resample(filtered_data, num=3600)
+        r_idx = get_r_idx(resampled_data)
 
         segs = extract_segments(filtered_data, r_idx)
         if segs and len(segs) > 7:

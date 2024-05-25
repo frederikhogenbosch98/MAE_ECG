@@ -54,7 +54,8 @@ def normalize(segment):
 
 
 def extract_segments(data):
-    r_idx, _ = find_peaks(data, distance=250)
+    r_idx, _ = find_peaks(data, distance=350)
+    print(r_idx)
     segments = []
 
     for idx in r_idx:
@@ -135,18 +136,19 @@ def create_img(signal, width, height):
 
 
 def plot_filtered_signal(sample_values, filtered_data, low_cut, high_cut):
-    x = np.linspace(0,2000, len(sample_values[:,0]))
+    x = np.linspace(0, 10, len(sample_values[:,0]))
+    plt.figure(figsize=(10, 6))
     plt.plot(x, sample_values[:,0], label='true')
     plt.plot(x, filtered_data, label='filtered')
     plt.title(f'Bandpass filter (cutoff low: {low_cut}Hz, cutoff high: {high_cut}Hz)')
-    plt.xlabel('time (ms)')
+    plt.xlabel('time (s)')
     plt.ylabel('voltage (mV)')
     plt.legend()
     plt.show()
 
 
 def plot_peaks(resampled_data):
-
+    plt.figure(figsize=(10, 6))
     plt.plot(resampled_data)
     plt.plot(extracted_segments, resampled_data[extracted_segments], "x")
     plt.plot(np.zeros_like(resampled_data), "--", color="gray")
@@ -154,11 +156,13 @@ def plot_peaks(resampled_data):
 
 
 def plot_segments(segments):
+    plt.figure(figsize=(10, 6))
     for i in range(len(segments)):
         plt.plot(segments[i],label = 'id %s'%i)
     plt.show()
 
 def plot_resulting_tensors(tensor):
+    plt.figure(figsize=(10, 6))
     plt.plot(tensor[0,0,:,0])
     plt.plot(tensor[0,1,:,0])
     plt.plot(tensor[0,2,:,0])
@@ -170,23 +174,24 @@ def plot_resulting_tensors(tensor):
 
 if __name__ == "__main__":
     # plot_ecg(27)
-    true_data, filtered_data, low_cut, high_cut = filter_signal(47, 1)
+    # true_data, filtered_data, low_cut, high_cut = filter_signal(47, 1)
     num_segs = []
     for lead in range(0,12):
         # print(lead)
         try:
             true_data, filtered_data, low_cut, high_cut = filter_signal(27, lead)
             # true_data, filtered_data, low_cut, high_cut = filter_signal(37) 
-            plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
-
+            # plot_filtered_signal(true_data, filtered_data, low_cut, high_cut)
+            # resampled_data = filtered_data
             resampled_data = resample(filtered_data, num=3600)
-            # inspect_freqs(resampled_data, 360)
+            # inspect_freqs(resampled_data, 500)
             # plt.plot(filtered_data)
             # plt.plot(resampled_data)
             # plt.show()
 
 
-            r_idx, extracted_segments = extract_segments(resampled_data)
+            r_idx, extracted_segments = extract_segments(filtered_data)
+            r_idx_re, extracted_segments_re = extract_segments(resampled_data)
             # plot_peaks(resampled_data)
             # plt.plot(resampled_data)
             # plt.plot(r_idx, resampled_data[r_idx], "x")
@@ -196,14 +201,18 @@ if __name__ == "__main__":
             # plot_segments(extracted_segments)
 
             # averaged_signal = averaging(extracted_segments)
-            averaged_signal = np.mean(np.array(extracted_segments), axis=0)
+            # averaged_signal = np.mean(np.array(extracted_segments), axis=0)
             # averaged_signal = np.array(extracted_segments)
-            num_segs.append(averaged_signal.shape[0])
+            # num_segs.append(averaged_signal.shape[0])
             # normalized_data = np.zeros((averaged_signal.shape))
             # for j in range(averaged_signal.shape[0]):
                 # normalized_data[j,:] = normalize(averaged_signal[j,:])
-            normalized_data = normalize(averaged_signal)
-            create_img(normalized_data, width=224, height=224)
+            normalized_data = normalize(extracted_segments[0])
+            normalized_data_re =normalize(extracted_segments_re[0])
+            plt.plot(normalized_data)
+            plt.plot(normalized_data_re)
+            plt.show()
+            # create_img(normalized_data, width=224, height=224)
         except FileNotFoundError:
             continue
         
