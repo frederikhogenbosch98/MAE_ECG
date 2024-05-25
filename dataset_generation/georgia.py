@@ -42,29 +42,19 @@ def normalize(segment):
 
 
 def get_r_idx(data):
-    r_idx, _ = find_peaks(data, distance=120, height=0.3) 
+    r_idx, _ = find_peaks(data, distance=250) 
     return r_idx
 
 def extract_segments(data, r_idx):
     segments = []
-    for i, idx in enumerate(r_idx):
-        if i != 0 and i != len(r_idx)-1:
-            if r_idx[i] - r_idx[i-1] < 100:
-                start = r_idx[i-1] + 100
-            else:
-                start = max(idx-100, 0)
-            if r_idx[i+1] - r_idx[i] < 200:
-                end =  r_idx[i+1] - 100
-            else:
-                end = min(idx+200, len(data))
-        else:
-            start = max(idx-100, 0) 
-            end = min(idx+200, len(data))
-        
+    for idx in r_idx:
+        start = max(idx-100, 0)
+        end = min(idx+200, len(data))
         segment = list(data[start:end])
         segments.append(segment)
         
     return segments
+
 
 def averaging(segments):
     averaged_signal = []
@@ -116,12 +106,11 @@ def create_input_tensor():
         sample_values = np.array(sample_values)
         filtered_data = []
         segs = []
-        segs_norm = []
 
         
         filtered_data = butter_bandpass_filter(sample_values, low_cut, high_cut, fs, order=5)
-        resampled_data = resample(filtered_data, num=3600)
-        r_idx = get_r_idx(resampled_data)
+
+        r_idx = get_r_idx(filtered_data)
 
         segs = extract_segments(filtered_data, r_idx)
         if segs and len(segs) > 7:
@@ -130,18 +119,14 @@ def create_input_tensor():
             end_idx = strt_idx+8
             segs = segs[strt_idx:end_idx]
             del segs[0], segs[-1]
-            # segs = normalize(np.array(segs))
+            segs = normalize(np.array(segs))
+
 
         for i in range(len(segs)):
-            if segs[i]:
-                segs_norm.append(normalize(np.array(segs[i])))
-            else:
-                print('empty seg')
-                continue
 
-        for i in range(len(segs_norm)):
+
             filename = '{}/{}_{}.png'.format(_dataset_dir, str(file)[-8:-3], i)            
-            buf = create_img(segs_norm[i], 224, 224)
+            buf = create_img(segs[i], 224, 224)
             image_pil = Image.open(buf)
             image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
             cv2.imwrite(filename, image_cv)
