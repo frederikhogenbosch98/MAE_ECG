@@ -18,7 +18,7 @@ import numpy as np
 from PIL import Image
 import io
 
-_range_to_ignore = 20
+_range_to_ignore = 30
 _directory = '../../extra_reps/data/mitbih/'
 # _directory = 'data/physionet/mitbih_raw/'
 _dataset_dir = '../data/physionet/mitbih_224/'
