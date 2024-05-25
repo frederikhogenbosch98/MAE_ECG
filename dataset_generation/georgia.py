@@ -20,7 +20,7 @@ from scipy.io import loadmat
 # physio_root = 'data/physionet/georgia_raw/'
 physio_root = '../datasets/WFDB/'
 _directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = 'data/physionet/georgia/class'
+_dataset_dir = 'data/physionet/georgia_test/class'
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
