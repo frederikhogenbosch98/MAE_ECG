@@ -47,9 +47,20 @@ def get_r_idx(data):
 
 def extract_segments(data, r_idx):
     segments = []
-    for idx in r_idx:
-        start = max(idx-100, 0)
-        end = min(idx+200, len(data))
+    for i, idx in enumerate(r_idx):
+        if i != 0 and i != len(r_idx)-1:
+            if r_idx[i] - r_idx[i-1] < 100:
+                start = r_idx[i-1] + 100
+            else:
+                start = max(idx-100, 0)
+            if r_idx[i+1] - r_idx[i] < 200:
+                end =  r_idx[i+1] - 100
+            else:
+                end = min(idx+200, len(data))
+        else:
+            start = max(idx-100, 0) 
+            end = min(idx+200, len(data))
+        
         segment = list(data[start:end])
         segments.append(segment)
         
