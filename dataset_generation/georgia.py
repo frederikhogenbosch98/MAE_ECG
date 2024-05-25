@@ -20,7 +20,7 @@ from scipy.io import loadmat
 # physio_root = 'data/physionet/georgia_raw/'
 physio_root = '../datasets/WFDB/'
 _directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = 'data/physionet/georgia_test/class'
+_dataset_dir = 'data/physionet/georgia/class'
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -48,8 +48,8 @@ def get_r_idx(data):
 def extract_segments(data, r_idx):
     segments = []
     for idx in r_idx:
-        start = max(idx-100, 0)
-        end = min(idx+200, len(data))
+        start = max(idx-140, 0)
+        end = min(idx+250, len(data))
         segment = list(data[start:end])
         segments.append(segment)
         
@@ -125,7 +125,7 @@ def create_input_tensor():
         for i in range(len(segs)):
 
 
-            filename = '{}/{}_{}.png'.format(_dataset_dir, str(file)[-8:-3], i)            
+            filename = '{}/{}_{}.png'.format(_dataset_dir, str(file)[-8:-4], i)            
             buf = create_img(segs[i], 224, 224)
             image_pil = Image.open(buf)
             image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
