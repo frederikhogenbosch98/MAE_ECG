@@ -116,6 +116,7 @@ def create_input_tensor():
         sample_values = np.array(sample_values)
         filtered_data = []
         segs = []
+        segs_norm = []
 
         
         filtered_data = butter_bandpass_filter(sample_values, low_cut, high_cut, fs, order=5)
@@ -130,17 +131,17 @@ def create_input_tensor():
             segs = segs[strt_idx:end_idx]
             del segs[0], segs[-1]
             # segs = normalize(np.array(segs))
-        else:
-            print('no peaks')
-            continue
-            
 
-        segs = [normalize(np.array(segs[i])) for i in range(len(segs))]
         for i in range(len(segs)):
+            if segs[i]:
+                segs_norm.append(normalize(np.array(segs[i])))
+            else:
+                print('empty seg')
+                continue
 
-
+        for i in range(len(segs_norm)):
             filename = '{}/{}_{}.png'.format(_dataset_dir, str(file)[-8:-3], i)            
-            buf = create_img(segs[i], 224, 224)
+            buf = create_img(segs_norm[i], 224, 224)
             image_pil = Image.open(buf)
             image_cv = cv2.cvtColor(np.array(image_pil), cv2.COLOR_RGB2GRAY)
             cv2.imwrite(filename, image_cv)
