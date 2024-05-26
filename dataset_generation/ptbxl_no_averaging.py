@@ -18,7 +18,7 @@ import tqdm
 
 physio_root = 'data/physionet/ptbxl/records500'
 _directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = 'data/physionet/ptbxl_full_224/class'
+_dataset_dir = 'data/physionet/ptbxl_wide/class'
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -46,7 +46,7 @@ def get_r_idx(data):
 def extract_segments(data, r_idx):
     segments = []
     for idx in r_idx:
-        start = max(idx-100, 0)
+        start = max(idx-150, 0)
         end = min(idx+200, len(data))
         segment = list(data[start:end])
         segments.append(segment)
@@ -149,7 +149,7 @@ def create_img(signal, width, height):
     buf = io.BytesIO()
 
     plt.savefig(buf, dpi=300, bbox_inches='tight', pad_inches=0)
-    # plt.show()
+    plt.show()
     plt.close(fig)
     
     return buf

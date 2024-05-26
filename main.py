@@ -301,7 +301,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
                                     lr=1e-4, 
                                     weight_decay=1e-4)
-        
+        scheduler = StepLR(optimizer, step_size=5, gamma=0.1) 
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
@@ -344,7 +344,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                     optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
-            # scheduler.step()
+            scheduler.step()
 
             if epoch % 20 == 0 and epoch != 0:
                 torch.save(classifier.state_dict(), f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')

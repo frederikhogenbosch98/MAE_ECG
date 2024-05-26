@@ -20,7 +20,7 @@ from scipy.io import loadmat
 # physio_root = 'data/physionet/china_raw/'
 physio_root = '../datasets/china_raw/'
 _directory = '../../extra_reps/data/mitbih/'
-_dataset_dir = 'data/physionet/china/class'
+_dataset_dir = 'data/physionet/china_wide/class'
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -48,7 +48,7 @@ def get_r_idx(data):
 def extract_segments(data, r_idx):
     segments = []
     for idx in r_idx:
-        start = max(idx-100, 0)
+        start = max(idx-150, 0)
         end = min(idx+200, len(data))
         segment = list(data[start:end])
         segments.append(segment)
