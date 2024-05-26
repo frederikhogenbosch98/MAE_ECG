@@ -175,7 +175,8 @@ if __name__ == "__main__":
                                                         fact=model_strs[i],
                                                         run_dir = run_dir,
                                                         contrun = args.contrun,
-                                                        device = device)
+                                                        device = device,
+                                                        step_size=15)
             
             mae_losses_run[i,:] = mae_losses
             mae_val_losses_run[i,:] = mae_val_losses
