@@ -112,18 +112,18 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
 
-        scheduler = CosineAnnealingwithWarmUp(optimizer, 
-                                            n_warmup_epochs=n_warmup_epochs,
-                                            warmup_lr=5e-5,
-                                            start_lr=5e-5,
-                                            lower_lr=5e-6,
-                                            alpha=0.1,
-                                            epoch_int=20,
-                                            num_epochs=num_epochs)
+        # scheduler = CosineAnnealingwithWarmUp(optimizer, 
+        #                                     n_warmup_epochs=n_warmup_epochs,
+        #                                     warmup_lr=5e-5,
+        #                                     start_lr=5e-5,
+        #                                     lower_lr=5e-6,
+        #                                     alpha=0.1,
+        #                                     epoch_int=20,
+        #                                     num_epochs=num_epochs)
 
 
             # early_stopper = EarlyStopper(patience=6)
-        # scheduler = StepLR(optimizer, step_size=step_size, gamma=0.1)
+        scheduler = StepLR(optimizer, step_size=step_size, gamma=0.25)
         outputs = []
         losses = []
         val_losses = []
@@ -313,7 +313,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
                                     lr=1e-4, 
                                     weight_decay=1e-4)
-        scheduler = StepLR(optimizer, step_size=5, gamma=0.1) 
+        scheduler = StepLR(optimizer, step_size=5, gamma=0.2) 
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
@@ -589,7 +589,7 @@ if __name__ == "__main__":
                     
                     # mae = AutoEncoder11_UN()
                     mae = UNet()
-                    lr_step_size = 10
+                    lr_step_size = 15
                 else:
                     # mae = AutoEncoder11(R=R, in_channels=1)
                     mae = UNet_TD(R=R, factorization=fact)
