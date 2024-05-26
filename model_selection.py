@@ -158,7 +158,7 @@ if __name__ == "__main__":
     for i, model in enumerate(models):
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
-        for j in range(1):
+        for j in range(3):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                         trainset=trainset_un,
