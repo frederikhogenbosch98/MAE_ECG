@@ -113,7 +113,7 @@ if __name__ == "__main__":
     china_dir = 'data/physionet/china/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
-    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17076])
+    trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17077])
 
     # LABELED
     # mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
