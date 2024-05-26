@@ -154,7 +154,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                     # loss.backward()
                     # optimizer.step()
                     running_loss += loss.item()
-                    tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
+                    tepoch.set_postfix(lr=optimizer.param_groups[0]['lr'])
                 scheduler.step()
 
             if (epoch + 1) % 10 == 0 and epoch != 0 and SAVE_MODEL_MAE:
