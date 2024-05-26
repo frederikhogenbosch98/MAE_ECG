@@ -588,7 +588,8 @@ if __name__ == "__main__":
                 if fact == 'default':
                     
                     # mae = AutoEncoder11_UN()
-                    mae = UNet()
+                    # mae = UNet()
+                    mae = ConvNext()
                     lr_step_size = 15
                 else:
                     # mae = AutoEncoder11(R=R, in_channels=1)
