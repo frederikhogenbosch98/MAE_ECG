@@ -499,14 +499,14 @@ if __name__ == "__main__":
         ])
 
 
-    # ptbxl_dir = 'data/physionet/ptbxl_full_224/'
-    ptbxl_dir = 'data/physionet/ptbxl_wide/'
+    ptbxl_dir = 'data/physionet/ptbxl_full_224/'
+    # ptbxl_dir = 'data/physionet/ptbxl_wide/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
-    # georgia_dir = 'data/physionet/georgia/'
-    georgia_dir = 'data/physionet/georgia_wide/'
+    georgia_dir = 'data/physionet/georgia/'
+    # georgia_dir = 'data/physionet/georgia_wide/'
     georgia_dataset = datasets.ImageFolder(root=georgia_dir, transform=transform)
-    # china_dir = 'data/physionet/china/'
-    china_dir = 'data/physionet/china_wide/'
+    china_dir = 'data/physionet/china/'
+    # china_dir = 'data/physionet/china_wide/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
     print(len(combined_unsupervised_train))
