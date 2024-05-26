@@ -154,7 +154,7 @@ if __name__ == "__main__":
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_testrun'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_exprun'
     for i, model in enumerate(models):
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
