@@ -14,6 +14,7 @@ from torchvision import datasets, transforms
 from torchvision.datasets import ImageFolder 
 from torch.optim.lr_scheduler import StepLR
 from ptflops import get_model_complexity_info
+from torch.cuda.amp import GradScaler, autocast
 
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
@@ -85,7 +86,7 @@ def get_args_parser():
     return parser
 
 
-def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, gamma=15):
+def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, step_size=15):
     now = datetime.now()
 
     if TRAIN_MAE:
@@ -122,10 +123,12 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
 
             # early_stopper = EarlyStopper(patience=6)
-        scheduler = StepLR(optimizer, step_size=15, gamma=0.1)
+        scheduler = StepLR(optimizer, step_size=step_size, gamma=0.1)
         outputs = []
         losses = []
         val_losses = []
+
+        scaler = GradScaler()
 
         print(f"Start MAE training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")
         t_start = time.time()
@@ -139,12 +142,17 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                     img, _ = data
                     img = img.to(device)
                     unmasked_img = img
-                    img = img.to(device)
-                    recon = model(img)
+                    # img = img.to(device)
                     optimizer.zero_grad()
-                    loss = criterion(recon, unmasked_img)
-                    loss.backward()
-                    optimizer.step()
+                    with autocast():
+                        recon = model(img)
+                        loss = criterion(recon, unmasked_img)
+
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                    # loss.backward()
+                    # optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
                 scheduler.step()
@@ -161,8 +169,11 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                     for data in val_loader:
                         imgs, _  = data
                         imgs = imgs.to(device)
-                        outputs = model(imgs)
-                        loss = criterion(outputs, imgs)
+                        with autocast():
+                            outputs = model(imgs)
+                            loss = criterion(outputs, imgs)
+                        # outputs = model(imgs)
+                        # loss = criterion(outputs, imgs)
                         validation_loss += loss.item() * imgs.size(0)
 
                 validation_loss /= len(val_loader.dataset)
@@ -221,15 +232,16 @@ def eval_mae(model, testset, device=torch.device('cuda:0'), batch_size=128):
                                             batch_size=batch_size, 
                                             shuffle=True)
 
-    mse_loss = nn.MSELoss(reduction='mean')
+    criterion = nn.MSELoss(reduction='mean')
     total_loss = 0.0
     count = 0
 
     with torch.no_grad():  
         for inputs, _ in test_loader:
-            inputs = inputs.to(device)  
-            reconstructed = model(inputs)  
-            loss = mse_loss(reconstructed, inputs)  
+            inputs = inputs.to(device) 
+            with autocast():
+                outputs = model(inputs)
+                loss = criterion(outputs, inputs)
             total_loss += loss.item() 
             count += 1
 
@@ -319,10 +331,10 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
 
 
 
-        loss_function =  nn.CrossEntropyLoss().to(device)
+        criterion =  nn.CrossEntropyLoss().to(device)
 
         # early_stopper = EarlyStopper(patience=10, min_delta=0.0001)
-
+        scaler = GradScaler()
         losses = []
         val_losses = []
         print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")        
@@ -337,11 +349,19 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                     inputs = inputs.to(device)
                     features = features.to(device)
                     labels = labels.to(device)
-                    outputs = classifier(inputs, features)
-                    loss = loss_function(outputs, labels)
                     optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                    with autocast():
+                        outputs = classifier(inputs, features)
+                        loss = criterion(outputs, labels)
+
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                    # outputs = classifier(inputs, features)
+                    # loss = criterion(outputs, labels)
+                    # optimizer.zero_grad()
+                    # loss.backward()
+                    # optimizer.step()
                     running_loss += loss.item()
                     tepoch.set_postfix(loss=running_loss / (batch_size*(epoch+1)))
             scheduler.step()
@@ -358,8 +378,11 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                 with torch.no_grad():  
                     for data, features, target in val_loader:
                         data, features, target = data.to(device), features.to(device), target.to(device)
-                        output = classifier(data, features)
-                        loss = loss_function(output, target)
+                        with autocast():
+                            output = classifier(data, features)
+                            loss = criterion(output, labels)
+                        # output = classifier(data, features)
+                        # loss = criterion(output, target)
                         validation_loss += loss.item() * data.size(0)
                         _, predicted = torch.max(output.data, 1)
                         total += target.size(0)
@@ -419,9 +442,11 @@ def eval_classifier(model, testset, batch_size=128):
     with torch.no_grad():
         for images, features, labels in test_loader:
             images, features, labels = images.to(device), features.to(device), labels.to(device)
-            outputs = model(images, features)
+            with autocast():
+                output = classifier(images, features)
+            # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
-            _, predicted = torch.max(outputs.data, 1)
+            _, predicted = torch.max(output.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
@@ -565,11 +590,11 @@ if __name__ == "__main__":
                     
                     # mae = AutoEncoder11_UN()
                     mae = UNet()
-                    gamma = 10
+                    lr_step_size = 10
                 else:
                     # mae = AutoEncoder11(R=R, in_channels=1)
                     mae = UNet_TD(R=R, factorization=fact)
-                    gamma = 15
+                    lr_step_size = 15
 
                 if args.gpu == 'all':    
                     mae = nn.DataParallel(mae, device_ids=device_ids).to(device)
@@ -593,7 +618,7 @@ if __name__ == "__main__":
                                 run_dir = run_dir,
                                 contrun = args.contrun,
                                 device = device,
-                                gamma=gamma)
+                                step_size=lr_step_size)
                 
                 mae_losses_run[i,:] = mae_losses
                 mae_val_losses_run[i,:] = mae_val_losses
