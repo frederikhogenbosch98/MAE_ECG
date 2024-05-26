@@ -154,11 +154,11 @@ if __name__ == "__main__":
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_exprun'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_testrun'
     for i, model in enumerate(models):
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
-        for j in range(3):
+        for j in range(1):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                         trainset=trainset_un,
