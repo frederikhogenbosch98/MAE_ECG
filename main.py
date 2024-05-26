@@ -85,7 +85,7 @@ def get_args_parser():
     return parser
 
 
-def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False):
+def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, gamma=15):
     now = datetime.now()
 
     if TRAIN_MAE:
@@ -475,11 +475,14 @@ if __name__ == "__main__":
         ])
 
 
-    ptbxl_dir = 'data/physionet/ptbxl_full_224/'
+    # ptbxl_dir = 'data/physionet/ptbxl_full_224/'
+    ptbxl_dir = 'data/physionet/ptbxl_wide/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
-    georgia_dir = 'data/physionet/georgia/'
+    # georgia_dir = 'data/physionet/georgia/'
+    georgia_dir = 'data/physionet/georgia_wide/'
     georgia_dataset = datasets.ImageFolder(root=georgia_dir, transform=transform)
-    china_dir = 'data/physionet/china/'
+    # china_dir = 'data/physionet/china/'
+    china_dir = 'data/physionet/china_wide/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
     print(len(combined_unsupervised_train))
@@ -562,10 +565,11 @@ if __name__ == "__main__":
                     
                     # mae = AutoEncoder11_UN()
                     mae = UNet()
+                    gamma = 10
                 else:
-
                     # mae = AutoEncoder11(R=R, in_channels=1)
                     mae = UNet_TD(R=R, factorization=fact)
+                    gamma = 15
 
                 if args.gpu == 'all':    
                     mae = nn.DataParallel(mae, device_ids=device_ids).to(device)
@@ -588,7 +592,8 @@ if __name__ == "__main__":
                                 fact=fact,
                                 run_dir = run_dir,
                                 contrun = args.contrun,
-                                device = device)
+                                device = device,
+                                gamma=gamma)
                 
                 mae_losses_run[i,:] = mae_losses
                 mae_val_losses_run[i,:] = mae_val_losses
