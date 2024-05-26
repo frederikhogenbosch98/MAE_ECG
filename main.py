@@ -480,7 +480,6 @@ if __name__ == "__main__":
     parser = get_args_parser()
     args = parser.parse_args()
 
-    dtype = torch.float32
     device_ids = [0, 2, 3]
     main_device = device_ids[0]
     if torch.cuda.is_available():
