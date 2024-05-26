@@ -133,7 +133,7 @@ if __name__ == "__main__":
     # valset_sup = mitbih_dataset_val
     # testset_sup = mitbih_dataset_test
 
-    mses = []
+    mega_mses = []
     accuracies = []
 
     # MAE
@@ -151,41 +151,44 @@ if __name__ == "__main__":
 
     models = [UNet(), AutoEncoder11_UN(), ResNet(), ConvNext()] # ConvNext(),
     model_strs = ['unet_32', 'basic', 'resnet', 'convnext'] # 'convnext', 
-    lr = [5e-5, 1e-4]
+    lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_testrun'
     for i, model in enumerate(models):
-        os.makedirs(run_dir, exist_ok=True)
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
-        mae, mae_losses, mae_val_losses = train_mae(model=model, 
-                                                    trainset=trainset_un,
-                                                    valset=valset_un,
-                                                    learning_rate=lr[i],
-                                                    min_lr = args.min_lr_mae,
-                                                    weight_decay = args.weight_decay_mae,
-                                                    num_epochs=num_epochs_mae,
-                                                    n_warmup_epochs=num_warmup_epochs_mae,
-                                                    TRAIN_MAE=args.train_mae,
-                                                    SAVE_MODEL_MAE=args.save_mae,
-                                                    R=0,
-                                                    batch_size=args.batch_size_mae,
-                                                    fact=model_strs[i],
-                                                    run_dir = run_dir,
-                                                    contrun = args.contrun,
-                                                    device = device)
-        
-        mae_losses_run[i,:] = mae_losses
-        mae_val_losses_run[i,:] = mae_val_losses
-        train_save_folder = f'{run_dir}/MAE_losses_{model_strs[i]}_train.npy'
-        val_save_folder = f'{run_dir}/MAE_losses_{model_strs[i]}_val.npy'
-        np.save(train_save_folder, mae_losses)
-        np.save(val_save_folder, mae_val_losses)
+        mses = []
+        for j in range(3):
+            os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
+            mae, mae_losses, mae_val_losses = train_mae(model=model, 
+                                                        trainset=trainset_un,
+                                                        valset=valset_un,
+                                                        learning_rate=lr[i],
+                                                        min_lr = args.min_lr_mae,
+                                                        weight_decay = args.weight_decay_mae,
+                                                        num_epochs=num_epochs_mae,
+                                                        n_warmup_epochs=num_warmup_epochs_mae,
+                                                        TRAIN_MAE=args.train_mae,
+                                                        SAVE_MODEL_MAE=args.save_mae,
+                                                        R=0,
+                                                        batch_size=args.batch_size_mae,
+                                                        fact=model_strs[i],
+                                                        run_dir = run_dir,
+                                                        contrun = args.contrun,
+                                                        device = device)
+            
+            mae_losses_run[i,:] = mae_losses
+            mae_val_losses_run[i,:] = mae_val_losses
+            train_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_train.npy'
+            val_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_{model_strs[i]}_val.npy'
+            np.save(train_save_folder, mae_losses)
+            np.save(val_save_folder, mae_val_losses)
 
-        mses.append(eval_mae(mae, testset_un, device=device))
+            mses.append(eval_mae(mae, testset_un, device=device))
+        mega_mses.append(np.mean(mses))
 
-    
-    print('\n'.join([f'{model_strs[i]} mse: {mses[i]}' for i in range(4)]))
+
+    print(mega_mses)
 
     
 
