@@ -112,18 +112,18 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
                                         batch_size=batch_size, 
                                         shuffle=False)#, num_workers=2)
 
-        # scheduler = CosineAnnealingwithWarmUp(optimizer, 
-        #                                     n_warmup_epochs=n_warmup_epochs,
-        #                                     warmup_lr=5e-5,
-        #                                     start_lr=5e-4,
-        #                                     lower_lr=2e-5,
-        #                                     alpha=0.85,
-        #                                     epoch_int=20,
-        #                                     num_epochs=num_epochs)
+        scheduler = CosineAnnealingwithWarmUp(optimizer, 
+                                            n_warmup_epochs=n_warmup_epochs,
+                                            warmup_lr=5e-5,
+                                            start_lr=1e-4,
+                                            lower_lr=5e-6,
+                                            alpha=0.6,
+                                            epoch_int=15,
+                                            num_epochs=num_epochs)
 
 
             # early_stopper = EarlyStopper(patience=6)
-        scheduler = StepLR(optimizer, step_size=step_size, gamma=0.1)
+        # scheduler = StepLR(optimizer, step_size=step_size, gamma=0.1)
         outputs = []
         losses = []
         val_losses = []
