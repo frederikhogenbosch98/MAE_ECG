@@ -18,7 +18,7 @@ from ptflops import get_model_complexity_info
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
 from models.resnet50 import ResNet
-from models.UNet import UNet, Classifier56Unet
+from models.UNet import UNet 
 from models.model_self_TD import AutoEncoder_self_TD, Classifier_self_TD
 from models._11am_back import AutoEncoder11
 from models._11am_down import AutoEncoder11_DOWN
