@@ -90,7 +90,7 @@ class ConvNextEncoder(nn.Module):
         # init downsample layers with stem
         self.downsample_layers = nn.ModuleList(
             [nn.Sequential(
-                nn.Conv2d(num_channels, layer_dims[0], kernel_size=patch_size, stride=patch_size),
+                nn.Conv2d(num_channels, layer_dims[0], kernel_size=1, stride=1),
                 LayerNorm(layer_dims[0],
                               eps=1e-6,
                               data_format="channels_first")
@@ -160,7 +160,7 @@ class ConvNextDecoder(nn.Module):
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
         self.upsamples.append(nn.Upsample(scale_factor=2, mode='bilinear'))
-        self.upsamples.append(nn.Upsample(scale_factor=4, mode='bilinear'))
+        # self.upsamples.append(nn.Upsample(scale_factor=4, mode='bilinear'))
 
     def forward(self, x):
         all_layers = list(zip(self.upsamples, self.upsample_layers, self.stage_layers))
