@@ -11,7 +11,7 @@ class FCMAE(nn.Module):
     """
     def __init__(
                 self,
-                img_size=128,
+                img_size=224,
                 in_chans=1,
                 depths=[1, 1, 3, 1],
                 dims=[32, 64, 128, 256],
