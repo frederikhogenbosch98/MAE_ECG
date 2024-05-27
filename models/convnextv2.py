@@ -53,7 +53,7 @@ class ConvNeXtV2(nn.Module):
         drop_path_rate (float): Stochastic depth rate. Default: 0.
         head_init_scale (float): Init scaling value for classifier weights and biases. Default: 1.
     """
-    def __init__(self, in_chans=3, num_classes=1000, 
+    def __init__(self, in_chans=1, num_classes=1000, 
                  depths=[3, 3, 9, 3], dims=[96, 192, 384, 768], 
                  drop_path_rate=0., head_init_scale=1.
                  ):
@@ -61,7 +61,7 @@ class ConvNeXtV2(nn.Module):
         self.depths = depths
         self.downsample_layers = nn.ModuleList() # stem and 3 intermediate downsampling conv layers
         stem = nn.Sequential(
-            nn.Conv2d(in_chans, dims[0], kernel_size=4, stride=4),
+            nn.Conv2d(in_chans, dims[0], kernel_size=4, stride=2),
             LayerNorm(dims[0], eps=1e-6, data_format="channels_first")
         )
         self.downsample_layers.append(stem)
@@ -85,8 +85,7 @@ class ConvNeXtV2(nn.Module):
         self.norm = nn.LayerNorm(dims[-1], eps=1e-6) # final norm layer
 
         self.apply(self._init_weights)
-        self.head.weight.data.mul_(head_init_scale)
-        self.head.bias.data.mul_(head_init_scale)
+
 
     def _init_weights(self, m):
         if isinstance(m, (nn.Conv2d, nn.Linear)):
@@ -95,10 +94,10 @@ class ConvNeXtV2(nn.Module):
 
     def forward_features(self, x):
         for i in range(4):
-            x = self.downsample_layers[i](x) if i > 0 else x
+            x = self.downsample_layers[i](x) 
             x = self.stages[i](x)
-        
-        x = x.dense()[0]
+        # print(x.shape) 
+        # x = x.dense()[0]
 
         return x
 
