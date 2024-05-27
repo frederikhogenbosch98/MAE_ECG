@@ -281,21 +281,21 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
     now = datetime.now()
     classifier.to(device)
     if TRAIN_CLASSIFIER:
-        for param in classifier.module.enc1.parameters():
-            param.requires_grad = False
-        for param in classifier.module.enc2.parameters():
-            param.requires_grad = False
-        for param in classifier.module.enc3.parameters():
-            param.requires_grad = False
-        for param in classifier.module.pool1.parameters():
-            param.requires_grad = False
-        for param in classifier.module.pool2.parameters():
-            param.requires_grad = False
-        for param in classifier.module.pool3.parameters():
-            param.requires_grad = False
-
-        # for param in classifier.encoder.parameters():
+        # for param in classifier.module.enc1.parameters():
         #     param.requires_grad = False
+        # for param in classifier.module.enc2.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.enc3.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.pool1.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.pool2.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.pool3.parameters():
+        #     param.requires_grad = False
+
+        for param in classifier.module.encoder.parameters():
+            param.requires_grad = False
 
 
         
@@ -627,8 +627,8 @@ if __name__ == "__main__":
                 
                 num_classes = 5
                 if args.model == 'default':
-                    # classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-                    classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    # classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
                     # print('hello')
 
                     # classifier = Classifier56Unet(autoencoder=mae.module, in_features=2048, out_features=num_classes).to(device)
