@@ -313,7 +313,7 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
                                     lr=1e-4, 
                                     weight_decay=1e-4)
-        scheduler = StepLR(optimizer, step_size=5, gamma=0.2) 
+        scheduler = StepLR(optimizer, step_size=10, gamma=0.5) 
         if valset:
             val_loader = torch.utils.data.DataLoader(valset, 
                                 batch_size=batch_size, 
@@ -590,7 +590,7 @@ if __name__ == "__main__":
                     mae = AutoEncoder11_UN()
                     # mae = UNet()
                     # mae = ConvNext()
-                    lr_step_size = 15
+                    lr_step_size = 25
                 else:
                     # mae = AutoEncoder11(R=R, in_channels=1)
                     mae = UNet_TD(R=R, factorization=fact)

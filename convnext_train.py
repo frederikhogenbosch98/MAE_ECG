@@ -142,10 +142,10 @@ if __name__ == "__main__":
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
     model = FCMAE() # ConvNext(),
-    lr = 2.5e-4
+    lr = 5e-4
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_exprun'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_convnextrun'
     model = nn.DataParallel(model, device_ids=device_ids).to(device)
     os.makedirs(run_dir, exist_ok=True)
     mses = []
@@ -165,7 +165,7 @@ if __name__ == "__main__":
                                                 run_dir = run_dir,
                                                 contrun = args.contrun,
                                                 device = device,
-                                                step_size=15)
+                                                step_size=25)
         
 
     print(eval_mae(mae, testset_un, device=device))
