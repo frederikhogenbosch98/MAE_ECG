@@ -210,8 +210,8 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
-        # model.load_state_dict(torch.load('trained_models/model_comparison/RUN_24_5_8_4/MAE_RUN_unet_32_R0_24_5_8_4.pth')) #unet
+        # model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
+        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_26_5_23_0/MAE_RUN_basic_R0_27_5_9_3.pth')) #unet
         # model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth')) #R25
         # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
@@ -509,7 +509,7 @@ if __name__ == "__main__":
     # china_dir = 'data/physionet/china_wide/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
-    print(len(combined_unsupervised_train))
+    # print(len(combined_unsupervised_train))
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(ptbxl_dataset, [40000, 10000, 2656])    
     # trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [10000, 4000, 2926])
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17077])
