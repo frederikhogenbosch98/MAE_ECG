@@ -63,23 +63,23 @@ if __name__ == "__main__":
         ret_tl = tlconv(random_input)
         time_stop_tlconv = time.time()
 
-        time_start_self = time.time()
-        ret_self = selfconv(random_input)
-        time_stop_self = time.time()
+        # time_start_self = time.time()
+        # ret_self = selfconv(random_input)
+        # time_stop_self = time.time()
 
         elapsed_time_un = time_end_un - time_start_un
         elapsed_time_tlconv = time_stop_tlconv - time_start_tlconv
-        elapsed_time_self = time_stop_self - time_start_self
+        # elapsed_time_self = time_stop_self - time_start_self
         # print(f"Elapsed time for un_conv: {elapsed_time_un:.6f} seconds")
         # print(f"Elapsed time for tlconv: {elapsed_time_tlconv:.6f} seconds")
         # print(f"Elapsed time for selfconv: {elapsed_time_self:.6f} seconds")
         times_un.append(elapsed_time_un)
         times_tl.append(elapsed_time_tlconv)
-        times_self.append(elapsed_time_self)
+        # times_self.append(elapsed_time_self)
     
     plt.plot(batches, times_un, 'o-',label='uncompresssed')
     plt.plot(batches, times_tl,'o-', label='tensorly')
-    plt.plot(batches, times_self, 'o-',label='self')
+    # plt.plot(batches, times_self, 'o-',label='self')
     plt.xlabel('batch size')
     plt.ylabel('seconds')
     plt.yscale('log')
