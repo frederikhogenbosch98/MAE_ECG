@@ -459,10 +459,10 @@ def eval_classifier(model, testset, batch_size=128):
             y_true.extend(labels.tolist())
             with autocast():
                 output = classifier(images, features)
-                y_pred.extend(output.tolist())
             # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
+            y_pred.extend(predicted.tolist())
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
@@ -483,7 +483,7 @@ def eval_classifier(model, testset, batch_size=128):
     #     if idx == 10:
     #         break
 
-    print(y_true, y_pred)
+    
 
     conf_matrix(y_true, y_pred)
 
