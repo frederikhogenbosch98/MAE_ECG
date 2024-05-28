@@ -99,16 +99,47 @@ class AutoEncoder11_UN(nn.Module):
         return x
 
 
+# class Classifier_UN(nn.Module):
+#     def __init__(self, autoencoder, in_features, out_features):
+#         super(Classifier_UN, self).__init__()
+#         self.encoder = autoencoder.encoder
+#         self.flatten = nn.Flatten()
+#         self.classifier = nn.Sequential(
+#                 # nn.Linear(50176+1, 256),
+#                 # nn.Linear(6272, 256), #16
+#                 # nn.Linear(32768, 256), #32
+#                 nn.Linear(16384, 256), #32
+#                 # nn.Linear(25088, 256), #32
+#                 nn.GELU(),
+#                 nn.BatchNorm1d(num_features=256),
+#                 nn.Dropout(0.5),
+#                 nn.Linear(256, out_features)
+#         )
+
+#     def forward(self, images, features):
+#         x = self.encoder(images)
+#         x = self.flatten(x)
+#         # combined_features = torch.cat((x, features), dim=1)
+#         # x = self.classifier(combined_features)
+#         x = self.classifier(x)
+#         return x
+
+
 class Classifier_UN(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier_UN, self).__init__()
-        self.encoder = autoencoder.encoder
+        self.conv1 = autoencoder.conv1
+        self.downlayer0 = autoencoder.downlayer0
+        self.downlayer1 = autoencoder.downlayer1
+        self.maxpool = autoencoder.maxpool
+        self.downlayer2 = autoencoder.downlayer2
+        self.condownlayer3v1 = autoencoder.downlayer3
         self.flatten = nn.Flatten()
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
                 # nn.Linear(6272, 256), #16
-                # nn.Linear(32768, 256), #32
-                nn.Linear(16384, 256), #32
+                nn.Linear(65536, 256), #32
+                # nn.Linear(16384, 256), #32
                 # nn.Linear(25088, 256), #32
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
@@ -117,10 +148,13 @@ class Classifier_UN(nn.Module):
         )
 
     def forward(self, images, features):
-        x = self.encoder(images)
+        x = self.conv1(images)
+        x = self.maxpool(x)
+        x = self.downlayer0(x)
+        x = self.downlayer1(x)
+        x = self.maxpool(x)
+        x = self.downlayer2(x)
+        x = self.downlayer3(x)
         x = self.flatten(x)
-        # combined_features = torch.cat((x, features), dim=1)
-        # x = self.classifier(combined_features)
         x = self.classifier(x)
         return x
-

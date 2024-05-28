@@ -294,8 +294,20 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
         # for param in classifier.module.pool3.parameters():
         #     param.requires_grad = False
 
-        for param in classifier.module.encoder.parameters():
+        for param in classifier.module.conv1.parameters():
             param.requires_grad = False
+        for param in classifier.module.downlayer0.parameters():
+            param.requires_grad = False
+        for param in classifier.module.downlayer1.parameters():
+            param.requires_grad = False
+        for param in classifier.module.downlayer2.parameters():
+            param.requires_grad = False
+        for param in classifier.module.downlayer3.parameters():
+            param.requires_grad = False
+
+
+        # for param in classifier.module.encoder.parameters():
+        #     param.requires_grad = False
 
 
         

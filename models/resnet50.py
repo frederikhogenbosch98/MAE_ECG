@@ -86,7 +86,7 @@ class ResNet(nn.Module):
             layers.append(block(self.outplanes, planes))
 
         return nn.Sequential(*layers) 
-    
+
     
     def forward(self, x):
         # print(f'in: {x.shape}')
@@ -109,3 +109,5 @@ class ResNet(nn.Module):
         x = self.upconv1(x)
         # print(f'out: {x.shape}')
         return x
+    
+        
