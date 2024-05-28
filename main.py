@@ -211,7 +211,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
-        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_28_5_8_18_exprun/MAE_RUN_unet_32_R0_28_5_8_18_epoch_40.pth')) #unet
+        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_25_5_23_0_exprun/MAE_RUN_resnet_R0_27_5_15_14.pth')) #unet
         # model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth')) #R25
         # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
@@ -595,9 +595,10 @@ if __name__ == "__main__":
 
                 if fact == 'default':
                     
-                    mae = AutoEncoder11_UN()
+                    # mae = AutoEncoder11_UN()
                     # mae = UNet()
                     # mae = ConvNext()
+                    mae = ResNet()
                     lr_step_size = 25
                 else:
                     # mae = AutoEncoder11(R=R, in_channels=1)
