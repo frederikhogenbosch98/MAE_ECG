@@ -9,6 +9,9 @@ import time
 import numpy as np
 import os
 from PIL import Image
+from sklearn.metrics import confusion_matrix
+import pandas as pd
+import seaborn as sn
 
 class CosineAnnealingwithWarmUp():
 
@@ -379,3 +382,14 @@ class SupervisedDataset(torch.utils.data.Dataset):
         label_item = self.labels[index]
         return data_item, label_item
 
+
+def conf_matrix(y_true, y_pred):
+    classes = ('N', 'S', 'V', "F", 'Q')
+
+    # Build confusion matrix
+    cf_matrix = confusion_matrix(y_true, y_pred)
+    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index = [i for i in classes],
+                        columns = [i for i in classes])
+    plt.figure(figsize = (12,7))
+    sn.heatmap(df_cm, annot=True)
+    plt.savefig('imgs/conf_matrix.png')

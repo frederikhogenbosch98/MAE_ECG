@@ -28,7 +28,7 @@ from models.convnext import ConvNext
 from models._11am_un import AutoEncoder11_UN, Classifier_UN
 
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
-from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
+from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset, conf_matrix
 
 
 
@@ -211,7 +211,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
         # model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
-        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_26_5_23_0_exprun/MAE_RUN_basic_R0_27_5_9_3.pth')) #unet
+        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_28_5_8_18_exprun/MAE_RUN_unet_32_R0_28_5_8_18_epoch_40.pth')) #unet
         # model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth')) #R25
         # model.load_state_dict(torch.load('trained_models/RUN_14_5_22_16/MAE_RUN_default_R0_14_5_22_16.pth'))
         # model.load_state_dict(torch.load('trained_models/tranpose_02_05_10am.pth', map_location=torch.device('cpu')))
@@ -436,14 +436,18 @@ def eval_classifier(model, testset, batch_size=128):
     test_loader = torch.utils.data.DataLoader(testset, 
                                             batch_size=batch_size, 
                                             shuffle=True)
+    y_pred = []
+    y_true = []
     correct = 0
     total = 0
     test_accuracy = []
     with torch.no_grad():
         for images, features, labels in test_loader:
             images, features, labels = images.to(device), features.to(device), labels.to(device)
+            y_true.extend(labels.tolist())
             with autocast():
                 output = classifier(images, features)
+                y_pred.extend(output.tolist())
             # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
@@ -466,6 +470,8 @@ def eval_classifier(model, testset, batch_size=128):
     #     print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
     #     if idx == 10:
     #         break
+
+    conf_matrix(y_true, y_pred)
 
     return np.mean(test_accuracy)
 

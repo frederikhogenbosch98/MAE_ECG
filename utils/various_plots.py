@@ -267,12 +267,21 @@ def exp1_val_comp():
             0.00169515, 0.00167654, 0.00167611, 0.00173861, 0.00169013, 0.00165769,
             0.00180312, 0.00170194, 0.00179243, 0.00166265, 0.00165337, 0.00169349]
 
+    convnext = [
+            0.4180935, 0.1561054, 0.0555688, 0.0301291, 0.0268757, 0.0267306, 0.0267293,
+            0.0267294, 0.0267293, 0.0267293, 0.0267293, 0.0267293, 0.0267295, 0.0267293,
+            0.0267293, 0.0267295, 0.0267301, 0.0267293, 0.0267294, 0.0267298, 0.0267294,
+            0.0267294, 0.0267297, 0.0267293, 0.0267295, 0.0267294, 0.0267295, 0.0267293,
+            0.0267295, 0.0267295
+    ]
+
     
 
     plt.figure(figsize=(10,6))
     plt.plot(epochs, basic, label='Basic')
-    plt.plot(epochs, unet_32, label='U-Net')
     plt.plot(epochs, resnet, label='ResNet')
+    plt.plot(epochs, convnext, label='ConvNeXt v2')
+    plt.plot(epochs, unet_32, label='U-Net')
     plt.title('Validation loss comparison for best run of all models')
     plt.xlabel('epoch')
     plt.ylabel('loss')
