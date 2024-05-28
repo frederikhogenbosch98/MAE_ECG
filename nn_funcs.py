@@ -229,7 +229,7 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         # if not isinstance(label_idx, torch.Tensor):
         #     label_idx = transforms.ToTensor()(label_idx)
 
-        return image,  label_idx
+        return image, feature,  label_idx
 
 class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
     def __init__(self, root_dir, transform=None, scale_method='normalize'):
@@ -312,7 +312,7 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
             feature = (feature - self.feature_mean) / self.feature_std
 
         # Convert feature to tensor
-        # feature = torch.tensor([feature], dtype=torch.float32)
+        feature = torch.tensor([feature], dtype=torch.float32)
 
 
         # Extract label from the path (assuming the structure is root/class_name/filename)
@@ -321,7 +321,7 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
         # if not isinstance(label_idx, torch.Tensor):
         #     label_idx = transforms.ToTensor()(label_idx)
 
-        return image, label_idx
+        return image, feature, label_idx
 
 class UnsupervisedDataset(torch.utils.data.Dataset):
     def __init__(self, data_path, resize_shape=(112,112)):

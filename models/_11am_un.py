@@ -107,8 +107,8 @@ class Classifier_UN(nn.Module):
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
                 # nn.Linear(6272, 256), #16
-                # nn.Linear(32768, 256), #32
-                nn.Linear(16384, 256), #32
+                nn.Linear(32768, 256), #32
+                # nn.Linear(16384+1, 256), #32
                 # nn.Linear(25088, 256), #32
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
@@ -116,7 +116,7 @@ class Classifier_UN(nn.Module):
                 nn.Linear(256, out_features)
         )
 
-    def forward(self, images):
+    def forward(self, images, features):
         x = self.encoder(images)
         x = self.flatten(x)
         # combined_features = torch.cat((x, features), dim=1)

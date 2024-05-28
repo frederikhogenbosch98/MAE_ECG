@@ -360,14 +360,14 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
             classifier.train()
             t_epoch_start = time.time()
             with tqdm.tqdm(train_loader, unit="batch", leave=False) as tepoch:
-                for inputs, labels in tepoch: 
+                for inputs, features, labels in tepoch: 
                     tepoch.set_description(f"epoch {epoch+1}")
                     inputs = inputs.to(device)
-                    # features = features.to(device)
+                    features = features.to(device)
                     labels = labels.to(device)
                     optimizer.zero_grad()
                     with autocast():
-                        outputs = classifier(inputs)
+                        outputs = classifier(inputs, features)
                         loss = criterion(outputs, labels)
 
                     scaler.scale(loss).backward()
@@ -392,10 +392,10 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                 correct = 0
                 total = 0
                 with torch.no_grad():  
-                    for data,  target in val_loader:
-                        data,  target = data.to(device),  target.to(device)
+                    for data, features, target in val_loader:
+                        data, features, target = data.to(device), features.to(device), target.to(device)
                         with autocast():
-                            output = classifier(data)
+                            output = classifier(data, features)
                             loss = criterion(output, target)
                         # output = classifier(data, features)
                         # loss = criterion(output, target)
@@ -458,10 +458,10 @@ def eval_classifier(model, testset, batch_size=128):
     total = 0
     test_accuracy = []
     with torch.no_grad():
-        for images, labels in test_loader:
-            images, labels = images.to(device), labels.to(device)
+        for images, features, labels in test_loader:
+            images, features, labels = images.to(device), features.to(device), labels.to(device)
             with autocast():
-                output = classifier(images)
+                output = classifier(images, features)
             # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
