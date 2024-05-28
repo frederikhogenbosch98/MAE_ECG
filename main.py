@@ -553,7 +553,7 @@ if __name__ == "__main__":
     # print(len(mitbih_dataset_test))
     incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
-    print(f'incartdb num beats: {len(incartdb_dataset)}')
+    # print(f'incartdb num beats: {len(incartdb_dataset)}')
 
 
     trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
@@ -599,13 +599,14 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
     class_val_losses_run = np.zeros((len(R_LIST), num_epochs_classifier))
 
+    TRAINING_ITERATIONS = 1
     print(f'for R values: {R_LIST}')
     mega_accs_list = []
     now = datetime.now()
     for fact in fact_list:
         for i, R in enumerate(R_LIST):
             running_accs = []
-            for j in range(3):
+            for j in range(TRAINING_ITERATIONS):
                 
                 run_dir = f'trained_models/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_iter_{j}'
                 os.makedirs(run_dir, exist_ok=True)
