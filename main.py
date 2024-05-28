@@ -461,7 +461,7 @@ def eval_classifier(model, testset, batch_size=128):
             # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
-            for i in range(batch_size):
+            for i in range(len(labels)):
                 y_true.append(labels[i])
                 y_pred.append(predicted[i])
             total += labels.size(0)
