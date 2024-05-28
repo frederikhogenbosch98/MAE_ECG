@@ -219,7 +219,8 @@ if __name__ == "__main__":
                                             SAVE_MODEL_CLASSIFIER=args.save_class,
                                             R=0,
                                             fact=model_strs[i],
-                                            run_dir = run_dir)
+                                            run_dir = run_dir,
+                                            device = device)
                 accuracy = eval_classifier(classifier, testset_sup)
         mega_mses.append(np.mean(mses))
 
