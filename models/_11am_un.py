@@ -9,35 +9,34 @@ class AutoEncoder11_UN(nn.Module):
         super(AutoEncoder11_UN, self).__init__()
         print(channels)
         self.encoder = nn.Sequential(
+
             # LAYER 1
             nn.Conv2d(in_channels, channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            # LAYER 2
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            # LAYER 3
             nn.MaxPool2d(2, stride=2),
-            # LAYER 4
+
+            # LAYER 2
             nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
-            # LAYER 5
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
-            # LAYER 6
             nn.MaxPool2d(2, stride=2),
-            # LAYER 4
+
+            # LAYER 3
             nn.Conv2d(channels[1], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            # LAYER 5
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(channels[2])
+            nn.BatchNorm2d(channels[2]),
             nn.GELU(),
-            # LAYER 6
+
+            # LAYER 4
             # nn.MaxPool2d(2, stride=2),
             # nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm2d(channels[3]),
