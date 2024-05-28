@@ -147,7 +147,7 @@ class Classifier_UN(nn.Module):
                 nn.Linear(256, out_features)
         )
 
-    def forward(self, images, features):
+    def forward(self, images):
         x = self.conv1(images)
         x = self.maxpool(x)
         x = self.downlayer0(x)
