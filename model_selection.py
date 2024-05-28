@@ -154,7 +154,7 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [AutoEncoder11_UN(),UNet(), ResNet(), ConvNext()] # ConvNext(),
+    models = [AutoEncoder11(), AutoEncoder11_UN(),UNet(), ResNet(), ConvNext()] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [1e-4, 1e-4, 1e-4, 1e-4]
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         mses = []
         current_pams = count_parameters(model)
         print(f'num params: {current_pams}')
-        for j in range(1):
+        for j in range(2):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                         trainset=trainset_un,
