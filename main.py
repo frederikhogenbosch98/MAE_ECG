@@ -471,6 +471,8 @@ def eval_classifier(model, testset, batch_size=128):
     #     if idx == 10:
     #         break
 
+    print(y_true, y_pred)
+
     conf_matrix(y_true, y_pred)
 
     return np.mean(test_accuracy)

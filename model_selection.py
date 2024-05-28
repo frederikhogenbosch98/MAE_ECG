@@ -149,8 +149,8 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [ AutoEncoder11_UN(),UNet(), ResNet(), ConvNext()] # ConvNext(),
-    model_strs = ['unet_32', 'basic', 'resnet', 'convnext'] # 'convnext', 
+    models = [AutoEncoder11_UN(),UNet(), ResNet(), ConvNext()] # ConvNext(),
+    model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
     now = datetime.now()
@@ -158,7 +158,9 @@ if __name__ == "__main__":
     for i, model in enumerate(models):
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
-        for j in range(3):
+        current_pams = count_parameters(model)
+        print(f'num params: {current_pams}')
+        for j in range(1):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses = train_mae(model=model, 
                                                         trainset=trainset_un,

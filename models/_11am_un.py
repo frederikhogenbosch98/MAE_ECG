@@ -95,7 +95,7 @@ class AutoEncoder11_UN(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
-        # print(x.shape)
+        print(x.shape)
         x = self.decoder(x)
         return x
 
