@@ -156,6 +156,8 @@ if __name__ == "__main__":
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
+    CLASSIFY = True
+
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_exprun'
     for i, model in enumerate(models):
@@ -192,30 +194,30 @@ if __name__ == "__main__":
 
             mses.append(eval_mae(mae, testset_un, device=device))
 
+            if CLASSIFY:
+                num_classes = 5
+                if args.model == 'default':
+                    classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
 
-            num_classes = 5
-            if args.model == 'default':
-                classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
 
+                if args.gpu == 'all':
+                    classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
 
-            if args.gpu == 'all':
-                classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
-
-            classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
-                                        trainset=trainset_sup, 
-                                        valset=valset_sup, 
-                                        num_epochs=num_epochs_classifier, 
-                                        n_warmup_epochs=num_warmup_epochs_classifier, 
-                                        learning_rate=args.lr_class,
-                                        min_lr = args.min_lr_class,
-                                        weight_decay = args.weight_decay_class,
-                                        batch_size=args.batch_size_class, 
-                                        TRAIN_CLASSIFIER=args.train_class, 
-                                        SAVE_MODEL_CLASSIFIER=args.save_class,
-                                        R=0,
-                                        fact=model_strs[i],
-                                        run_dir = run_dir)
-            accuracy = eval_classifier(classifier, testset_sup)
+                classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+                                            trainset=trainset_sup, 
+                                            valset=valset_sup, 
+                                            num_epochs=num_epochs_classifier, 
+                                            n_warmup_epochs=num_warmup_epochs_classifier, 
+                                            learning_rate=args.lr_class,
+                                            min_lr = args.min_lr_class,
+                                            weight_decay = args.weight_decay_class,
+                                            batch_size=args.batch_size_class, 
+                                            TRAIN_CLASSIFIER=args.train_class, 
+                                            SAVE_MODEL_CLASSIFIER=args.save_class,
+                                            R=0,
+                                            fact=model_strs[i],
+                                            run_dir = run_dir)
+                accuracy = eval_classifier(classifier, testset_sup)
         mega_mses.append(np.mean(mses))
 
 
