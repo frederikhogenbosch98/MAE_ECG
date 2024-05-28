@@ -486,7 +486,8 @@ def eval_classifier(model, testset, batch_size=128):
         if idx == 10:
             break
 
-    
+    print(y_true[10:30])
+    print(y_pred[10:30])
 
     conf_matrix(y_true, y_pred)
 
