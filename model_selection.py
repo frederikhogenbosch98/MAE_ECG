@@ -116,22 +116,24 @@ if __name__ == "__main__":
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17077])
 
     # LABELED
-    # mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
-    # mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
-    # mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
-    # mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
-    # mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
-    # mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
-    # # print(len(mitbih_dataset_train))
-    # # print(len(mitbih_dataset_val))
-    # # print(len(mitbih_dataset_test))
-    # incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
-    # incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
+    mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
+    mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
+    mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
+    mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
+    mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
+    mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
+    # print(len(mitbih_dataset_train))
+    # print(len(mitbih_dataset_val))
+    # print(len(mitbih_dataset_test))
+    incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
+    incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
+    # print(f'incartdb num beats: {len(incartdb_dataset)}')
 
 
-    # trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
-    # valset_sup = mitbih_dataset_val
-    # testset_sup = mitbih_dataset_test
+    trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    # trainset_sup = mitbih_dataset_train 
+    valset_sup = mitbih_dataset_val
+    testset_sup = mitbih_dataset_test
 
     mega_mses = []
     accuracies = []
@@ -189,6 +191,31 @@ if __name__ == "__main__":
             np.save(val_save_folder, mae_val_losses)
 
             mses.append(eval_mae(mae, testset_un, device=device))
+
+
+            num_classes = 5
+            if args.model == 'default':
+                classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+
+
+            if args.gpu == 'all':
+                classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
+
+            classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+                                        trainset=trainset_sup, 
+                                        valset=valset_sup, 
+                                        num_epochs=num_epochs_classifier, 
+                                        n_warmup_epochs=num_warmup_epochs_classifier, 
+                                        learning_rate=args.lr_class,
+                                        min_lr = args.min_lr_class,
+                                        weight_decay = args.weight_decay_class,
+                                        batch_size=args.batch_size_class, 
+                                        TRAIN_CLASSIFIER=args.train_class, 
+                                        SAVE_MODEL_CLASSIFIER=args.save_class,
+                                        R=0,
+                                        fact=model_strs[i],
+                                        run_dir = run_dir)
+            accuracy = eval_classifier(classifier, testset_sup)
         mega_mses.append(np.mean(mses))
 
 
