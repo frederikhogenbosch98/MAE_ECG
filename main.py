@@ -478,9 +478,10 @@ def eval_classifier(model, testset, batch_size=128):
 
     accuracy = 100 * correct / total
     print(f'Accuracy: {np.round(accuracy,3)}%')
+    conf_matrix(y_true, y_pred)
 
     ## MNIST
-    for idx, (images, labels) in enumerate(test_loader):
+    for idx, (images, features, labels) in enumerate(test_loader):
         images, labels = images.to(device), labels.to(device)
         x = model(images)
         _, predicted = torch.max(x.data, 1)
@@ -490,10 +491,9 @@ def eval_classifier(model, testset, batch_size=128):
         if idx == 10:
             break
 
-    print(y_true[10:30])
-    print(y_pred[10:30])
+    # print(y_true[10:30])
+    # print(y_pred[10:30])
 
-    conf_matrix(y_true, y_pred)
 
     return np.mean(test_accuracy)
 
@@ -527,14 +527,14 @@ if __name__ == "__main__":
         ])
 
 
-    ptbxl_dir = 'data/physionet/ptbxl_full_224/'
-    # ptbxl_dir = 'data/physionet/ptbxl_wide/'
+    # ptbxl_dir = 'data/physionet/ptbxl_full_224/'
+    ptbxl_dir = 'data/physionet/ptbxl_wide/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
-    georgia_dir = 'data/physionet/georgia/'
-    # georgia_dir = 'data/physionet/georgia_wide/'
+    # georgia_dir = 'data/physionet/georgia/'
+    georgia_dir = 'data/physionet/georgia_wide/'
     georgia_dataset = datasets.ImageFolder(root=georgia_dir, transform=transform)
-    china_dir = 'data/physionet/china/'
-    # china_dir = 'data/physionet/china_wide/'
+    # china_dir = 'data/physionet/china/'
+    china_dir = 'data/physionet/china_wide/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
     # print(len(combined_unsupervised_train))
