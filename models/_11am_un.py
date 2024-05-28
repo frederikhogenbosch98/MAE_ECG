@@ -133,7 +133,7 @@ class Classifier_UN(nn.Module):
         self.downlayer1 = autoencoder.downlayer1
         self.maxpool = autoencoder.maxpool
         self.downlayer2 = autoencoder.downlayer2
-        self.condownlayer3v1 = autoencoder.downlayer3
+        self.downlayer3 = autoencoder.downlayer3
         self.flatten = nn.Flatten()
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
