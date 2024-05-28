@@ -13,7 +13,7 @@ from _11am_un import AutoEncoder11_UN
 input_tensor = torch.randn(256, 1, 128, 128)
 
 # Initialize FlopCountAnalysis with the model and the input tensor
-flops = FlopCountAnalysis(ConvNext(), input_tensor)
+flops = FlopCountAnalysis(AutoEncoder11_UN(), input_tensor)
 
 # Print the total FLOPs
 print(f"FLOPs: {flops.total()}")
