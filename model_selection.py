@@ -183,7 +183,7 @@ if __name__ == "__main__":
                                                         run_dir = run_dir,
                                                         contrun = args.contrun,
                                                         device = device,
-                                                        step_size=15)
+                                                        step_size=10)
             
             mae_losses_run[i,:] = mae_losses
             mae_val_losses_run[i,:] = mae_val_losses
