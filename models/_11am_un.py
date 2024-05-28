@@ -116,7 +116,7 @@ class Classifier_UN(nn.Module):
                 nn.Linear(256, out_features)
         )
 
-    def forward(self, images, features):
+    def forward(self, images):
         x = self.encoder(images)
         x = self.flatten(x)
         # combined_features = torch.cat((x, features), dim=1)
