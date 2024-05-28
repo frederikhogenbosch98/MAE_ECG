@@ -464,8 +464,8 @@ def eval_classifier(model, testset, batch_size=128):
             for i in range(len(labels)):
                 labels_cpu = labels.cpu()
                 preds_cpu = predicted.cpu()
-                y_true.append(labels_cpu[i][0])
-                y_pred.append(preds_cpu[i][0])
+                y_true.append(labels_cpu[i].item())
+                y_pred.append(preds_cpu[i].item())
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
