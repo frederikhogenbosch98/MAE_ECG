@@ -106,11 +106,14 @@ if __name__ == "__main__":
 
 
     # UNLABELED
-    ptbxl_dir = 'data/physionet/ptbxl_full_224/'
+    # ptbxl_dir = 'data/physionet/ptbxl_full_224/'
+    ptbxl_dir = 'data/physionet/ptbxl_wide/'
     ptbxl_dataset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
-    georgia_dir = 'data/physionet/georgia/'
+    # georgia_dir = 'data/physionet/georgia/'
+    georgia_dir = 'data/physionet/georgia_wide/'
     georgia_dataset = datasets.ImageFolder(root=georgia_dir, transform=transform)
-    china_dir = 'data/physionet/china/'
+    # china_dir = 'data/physionet/china/'
+    china_dir = 'data/physionet/china_wide/'
     china_dataset = datasets.ImageFolder(root=china_dir, transform=transform)
     combined_unsupervised_train = torch.utils.data.ConcatDataset([ptbxl_dataset, georgia_dataset, china_dataset])
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17077])
