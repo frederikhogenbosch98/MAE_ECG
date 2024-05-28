@@ -154,7 +154,7 @@ if __name__ == "__main__":
     models = [AutoEncoder11_UN(),UNet(), ResNet(), ConvNext()] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
-    lr = [5e-5, 1e-4, 1e-4, 1e-4]
+    lr = [1e-4, 1e-4, 1e-4, 1e-4]
 
     CLASSIFY = True
 
