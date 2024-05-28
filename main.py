@@ -472,16 +472,16 @@ def eval_classifier(model, testset, batch_size=128):
     accuracy = 100 * correct / total
     print(f'Accuracy: {np.round(accuracy,3)}%')
 
-    # ## MNIST
-    # for idx, (images, labels) in enumerate(test_loader):
-    #     images, labels = images.to(device), labels.to(device)
-    #     x = model(images)
-    #     _, predicted = torch.max(x.data, 1)
-    #     images = images.cpu()
-    #     plot_single_img(images, 0)
-    #     print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
-    #     if idx == 10:
-    #         break
+    ## MNIST
+    for idx, (images, labels) in enumerate(test_loader):
+        images, labels = images.to(device), labels.to(device)
+        x = model(images)
+        _, predicted = torch.max(x.data, 1)
+        images = images.cpu()
+        # plot_single_img(images, 0)
+        print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
+        if idx == 50:
+            break
 
     
 
