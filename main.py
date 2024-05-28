@@ -474,7 +474,7 @@ def eval_classifier(model, testset, batch_size=128):
     print(f'Accuracy: {np.round(accuracy,3)}%')
 
     ## MNIST
-    for idx, (images, labels) in enumerate(test_loader):
+    for idx, (images, labels, features) in enumerate(test_loader):
         images, labels = images.to(device), labels.to(device)
         x = model(images)
         _, predicted = torch.max(x.data, 1)
