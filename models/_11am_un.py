@@ -35,9 +35,9 @@ class AutoEncoder11_UN(nn.Module):
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
+            nn.MaxPool2d(2, stride=2),
 
             # LAYER 4
-            # nn.MaxPool2d(2, stride=2),
             # nn.Conv2d(channels[2], channels[3], kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm2d(channels[3]),
             # nn.GELU(),
