@@ -221,7 +221,7 @@ if __name__ == "__main__":
                                             fact=model_strs[i],
                                             run_dir = run_dir,
                                             device = device)
-                accuracy = eval_classifier(classifier, testset_sup)
+                accuracy = eval_classifier(classifier, testset_sup, device=device)
         mega_mses.append(np.mean(mses))
 
 

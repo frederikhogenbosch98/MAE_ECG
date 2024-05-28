@@ -444,7 +444,7 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
     return classifier, losses, val_losses
 
 
-def eval_classifier(model, testset, batch_size=128):
+def eval_classifier(model, testset, device, batch_size=128):
 
     model.to(device)
     model.eval()
