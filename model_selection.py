@@ -150,7 +150,7 @@ if __name__ == "__main__":
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
     models = [AutoEncoder11_UN(),UNet(), ResNet(), ConvNext()] # ConvNext(),
-    models = [ResNet()]
+    models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
