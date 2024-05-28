@@ -461,7 +461,7 @@ def eval_classifier(model, testset, device, batch_size=128):
         for images, features, labels in test_loader:
             images, features, labels = images.to(device), features.to(device), labels.to(device)
             with autocast():
-                output = classifier(images, features)
+                output = model(images, features)
             # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
