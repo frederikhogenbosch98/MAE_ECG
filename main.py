@@ -462,8 +462,10 @@ def eval_classifier(model, testset, batch_size=128):
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
             for i in range(len(labels)):
-                y_true.append(labels[i])
-                y_pred.append(predicted[i])
+                labels_cpu = labels.cpu()
+                preds_cpu = predicted.cpu()
+                y_true.append(labels_cpu[i])
+                y_pred.append(preds_cpu[i])
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
@@ -481,7 +483,7 @@ def eval_classifier(model, testset, batch_size=128):
         images = images.cpu()
         # plot_single_img(images, 0)
         print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
-        if idx == 50:
+        if idx == 10:
             break
 
     
