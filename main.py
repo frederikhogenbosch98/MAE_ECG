@@ -388,10 +388,10 @@ def train_classifier(classifier, trainset, run_dir, weight_decay = 1e-4, min_lr=
                 correct = 0
                 total = 0
                 with torch.no_grad():  
-                    for data, features, target in val_loader:
-                        data, features, target = data.to(device), features.to(device), target.to(device)
+                    for data,  target in val_loader:
+                        data,  target = data.to(device),  target.to(device)
                         with autocast():
-                            output = classifier(data, features)
+                            output = classifier(data)
                             loss = criterion(output, target)
                         # output = classifier(data, features)
                         # loss = criterion(output, target)
