@@ -13,6 +13,7 @@ from PIL import Image
 import numpy as np
 from models.resnet50 import ResNet
 from models.convnext import ConvNext
+from models.convnext_ae import FCMAE
 
 def save_image(tensor, filename):
     # Convert the tensor to a NumPy array and move channels to the last dimension
@@ -88,12 +89,12 @@ if __name__ == "__main__":
     # model = AutoEncoder56().to(device)
     # model = nn.DataParallel(AutoEncoder11_UN(channels=[32, 64, 128, 256])).to(device)
     # model = AutoEncoder11(R=100, in_channels=1).to(device)
-    model = nn.DataParallel(ConvNext(), device_ids=device_ids).to(device)
+    model = nn.DataParallel(FCMAE(), device_ids=device_ids).to(device)
     # model = nn.DataParallel(ConvNext())
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/model_comparison/RUN_26_5_23_0_exprun/MAE_RUN_convnext_R0_27_5_17_21_epoch_20.pth'))
+    model.load_state_dict(torch.load('trained_models/model_comparison/RUN_27_5_23_50_convnextrun/MAE_RUN_convnextv2_R0_27_5_23_50.pth'))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
