@@ -55,11 +55,11 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         os.makedirs(_directory)
 
     files = [f[:-4] for f in listdir(_directory) if isfile(join(_directory, f)) if (f.find('.dat') != -1)]
-    to_remove = ['104', '102', '107', '217']
-    for fl in to_remove:
-        files.remove(fl)
-    files = sorted(files)
-    print(files)
+    # to_remove = ['104', '102', '107', '217']
+    # for fl in to_remove:
+    #     files.remove(fl)
+    # files = sorted(files)
+    # print(files)
 
     # random.shuffle(files)
     # ds1 = files[: int(len(files) * _split_percentage)]
@@ -94,15 +94,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
                 continue
             label = lboriginal_labels[ann.symbol[i]]
 
-            if file in ds11:
-                dir = '{}DS11/{}'.format(_dataset_dir, label)
-            elif file in ds12:
-                dir = '{}DS12/{}'.format(_dataset_dir, label) 
-            else:
-                dir = '{}DS2/{}'.format(_dataset_dir, label)
 
-            if not os.path.exists(dir):
-                os.makedirs(dir)
 
             # if label == 'S':
             # print(f'--------{i}---------')
