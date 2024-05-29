@@ -168,7 +168,7 @@ if __name__ == "__main__":
         mses = []
         current_pams = count_parameters(model)
         print(f'num params: {current_pams}')
-        for j in range(2):
+        for j in range(3):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                         trainset=trainset_un,
