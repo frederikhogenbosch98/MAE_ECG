@@ -86,7 +86,6 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             rr_intervals.append((ann.sample[k] - ann.sample[k-1])/360)
          
         rr_mean = np.mean(rr_intervals)
-        print(np.std(rr_mean))
 
         for i in tqdm.tqdm(range(2, len_sample - 2)):
             if ann.symbol[i] not in lboriginal_labels:
