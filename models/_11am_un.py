@@ -105,7 +105,7 @@ class Classifier_UN(nn.Module):
         self.flatten = nn.Flatten(start_dim=1)
         self.classifier = nn.Sequential(
                 # nn.Linear(16384+1, 512),
-                nn.Linear(4096+1, 512),
+                nn.Linear(4096, 512),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=512),
                 nn.Dropout(0.5),
@@ -120,8 +120,8 @@ class Classifier_UN(nn.Module):
         x = self.encoder(images)
         # x = self.avgpool(x)
         x = self.flatten(x) 
-        combined_features = torch.cat((x, features), dim=1)
-        x = self.classifier(combined_features)
+        # combined_features = torch.cat((x, features), dim=1)
+        x = self.classifier(x)
         # x = self.lastlin(x)
         
         return x
