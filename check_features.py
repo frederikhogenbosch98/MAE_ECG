@@ -41,20 +41,17 @@ if __name__ == "__main__":
 
     for images, features, labels in test_loader:
         for i in range(len(labels)):
-            print(labels[i])
-            print(features[i])
-            print(labels[i].item())
-            print(features[i].item())
-            if labels[i] == 1:
-                Nl.append(features[i])
-            elif labels[i] == "3":
-                Sl.append(features[i])
-            elif labels[i] == "4":
-                Vl.append(features[i])
-            elif labels[i] == "0":
-                Fl.append(features[i])
-            elif labels[i] == "2":
-                Ql.append(features[i])
+
+            if labels[i].item() == 1:
+                Nl.append(features[i].item())
+            elif labels[i].item() == "3":
+                Sl.append(features[i].item())
+            elif labels[i].item() == "4":
+                Vl.append(features[i].item())
+            elif labels[i].item() == "0":
+                Fl.append(features[i].item())
+            elif labels[i].item() == "2":
+                Ql.append(features[i].item())
     
 
     print(f'N: {np.mean(Nl)}')
