@@ -277,7 +277,7 @@ def eval_mae(model, testset, device=torch.device('cuda:0'), batch_size=128):
 
     return average_loss
 
-def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4, min_lr=1e-6, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=5e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
+def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4, min_lr=1e-6, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
 
     now = datetime.now()
     classifier.to(device)
@@ -328,7 +328,7 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
 
 
         optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, classifier.parameters()),
-                                    lr=1e-4, 
+                                    lr=learning_rate, 
                                     weight_decay=1e-4)
         scheduler = StepLR(optimizer, step_size=10, gamma=0.5) 
         if valset:
