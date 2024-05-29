@@ -110,15 +110,18 @@ class Classifier_UN(nn.Module):
                 nn.Dropout(0.4)
                 # nn.Linear(512, out_features)
         )
-        self.lastlin = nn.Linear(512+1, out_features)
+        
+        self.lastlin = nn.Linear(512, 64)
+        self.reallylastlin == nn.Linaer(64+1, out_features)
 
 
     def forward(self, images, features):
         x = self.encoder(images)
         x = self.flatten(x) 
         x = self.classifier(x)
+        x = self.lastlin(x)
         combined_features = torch.cat((x, features), dim=1)
-        x = self.lastlin(combined_features)
+        x = self.reallylastlin(combined_features)
         
         return x
 
