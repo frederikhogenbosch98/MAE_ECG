@@ -107,9 +107,9 @@ class Classifier_UN(nn.Module):
                 # nn.Linear(8*8*256, 512),
                 nn.Linear(4*4*256, 512),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=256),
+                nn.BatchNorm1d(num_features=512),
                 nn.Dropout(0.5),
-                nn.Linear(256, out_features)
+                nn.Linear(512, out_features)
         )
         
         self.lastlin = nn.Linear(256, out_features)
