@@ -10,7 +10,7 @@ def plot_losses(NUM_EPOCHS, losses):
     plt.show()
 
 
-def plotimg(test_tensor, recon):
+def plotimg(test_tensor, recon, R, run_dir, i):
     test_tensor = test_tensor.cpu()#.detach().numpy()
     # print(test_tensor[0,:,:])
     plt.subplot(2, 2, 1)
@@ -20,6 +20,7 @@ def plotimg(test_tensor, recon):
     # print(recon)
     # plt.imshow(unnormalize(recon))#,cmap="gray")
     plt.imshow(recon.permute(1,2,0).detach().numpy(), cmap="gray")
+    plt.savefig(f'reconstructed_imgs/{run_dir}/rank_{R}_{i}.png')
     plt.show()
 
 

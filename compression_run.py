@@ -25,7 +25,7 @@ from models._11am_down import AutoEncoder11_DOWN
 from models.convnext import ConvNext
 from models._11am_un import AutoEncoder11_UN, Classifier_UN
 
-from main import train_mae, train_classifier, eval_mae, eval_classifier
+from main import train_mae, train_classifier, eval_mae, eval_classifier, reconstruct_img
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 from nn_funcs import CosineAnnealingwithWarmUp, EarlyStopper, MITBIHImageWithFeatureDataset, INCARTDBImageWithFeatureDataset
 
@@ -195,6 +195,9 @@ if __name__ == "__main__":
             np.save(val_save_folder, mae_val_losses)
 
             mses.append(eval_mae(mae, testset_un, device=device))
+
+            if j == 0:
+                reconstruct_img(mae, R=R, run_dir=run_dir)
 
             if CLASSIFY:
                 num_classes = 5
