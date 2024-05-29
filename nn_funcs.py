@@ -226,7 +226,6 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         # Extract label from the path (assuming the structure is root/class_name/filename)
         label = os.path.basename(os.path.dirname(image_path))
         label_idx = self.label_to_index[label]
-        print(f'label: {label}, feature: {feature}')
         # if not isinstance(label_idx, torch.Tensor):
         #     label_idx = transforms.ToTensor()(label_idx)
 
@@ -319,7 +318,6 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
         # Extract label from the path (assuming the structure is root/class_name/filename)
         label = os.path.basename(os.path.dirname(image_path))
         label_idx = self.label_to_index[label]
-        print(f'label: {label}, feature: {feature}')
         # if not isinstance(label_idx, torch.Tensor):
         #     label_idx = transforms.ToTensor()(label_idx)
 
