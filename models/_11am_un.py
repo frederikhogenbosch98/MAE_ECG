@@ -99,16 +99,25 @@ class AutoEncoder11_UN(nn.Module):
         return x
 
 class Attention(nn.Module):
-    def __init__(self, feature_dim, numerical_feature_dim):
+    def __init__(self, feature_dim):
         super(Attention, self).__init__()
-        self.attn = nn.Linear(feature_dim + numerical_feature_dim, feature_dim)
+        self.attn = nn.Linear(feature_dim, 1)  # Single output to produce attention score for each feature
 
     def forward(self, encoded_features, numerical_feature):
-        numerical_feature = numerical_feature.unsqueeze(1).repeat(1, encoded_features.size(1), 1)
-        combined_features = torch.cat((encoded_features.unsqueeze(1), numerical_feature), dim=2)
-        attn_scores = torch.tanh(self.attn(combined_features))
+        # Compute raw attention scores using a linear layer
+        attn_scores = self.attn(encoded_features)
+        
+        # Incorporate the numerical feature into the attention score
+        attn_scores = attn_scores + numerical_feature.unsqueeze(1)
+        
+        # Apply the tanh activation function
+        attn_scores = torch.tanh(attn_scores)
+        
+        # Compute attention weights using softmax
         attn_weights = F.softmax(attn_scores, dim=1)
-        weighted_features = (encoded_features.unsqueeze(1) * attn_weights).sum(dim=1)
+        
+        # Compute the weighted sum of the encoded features
+        weighted_features = (encoded_features * attn_weights).sum(dim=1)
         
         return weighted_features
 
@@ -119,20 +128,26 @@ class Classifier_UN(nn.Module):
         self.flatten = nn.Flatten(start_dim=1)
         self.attention = Attention(feature_dim=16384, numerical_feature_dim=1)
         self.classifier = nn.Sequential(
-                nn.Linear(16384+1, 2048),
+                nn.Linear(16384+1, 512),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=2048),
-                nn.Dropout(0.5),
-                nn.Linear(2048, out_features)
+                nn.BatchNorm1d(num_features=512),
+                nn.Dropout(0.4),
+                nn.Linear(512, out_features)
         )
 
+
     def forward(self, images, features):
+        # Encode the images using the autoencoder's encoder
         x = self.encoder(images)
         x = self.flatten(x)  # Flatten the encoded features
-        x = x.unsqueeze(1)  # Add an extra dimension for the sequence length
         
+        # Apply the attention mechanism
         weighted_features = self.attention(x, features)
+        
+        # Concatenate the weighted features with the numerical feature
         combined_features = torch.cat((weighted_features, features), dim=1)
+        
+        # Pass the combined features through the classifier
         x = self.classifier(combined_features)
         
         return x
