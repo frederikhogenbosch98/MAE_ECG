@@ -133,7 +133,7 @@ if __name__ == "__main__":
     # print(f'incartdb num beats: {len(incartdb_dataset)}')
 
 
-    trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    trainset_sup = mitbih_dataset_train#torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
     # trainset_sup = mitbih_dataset_train 
     valset_sup = mitbih_dataset_val
     testset_sup = mitbih_dataset_test
