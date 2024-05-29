@@ -112,7 +112,7 @@ class Classifier_UN(nn.Module):
         )
         
         self.lastlin = nn.Linear(512, 64)
-        self.reallylastlin == nn.Linaer(64+1, out_features)
+        self.reallylastlin = nn.Linaer(64+1, out_features)
 
 
     def forward(self, images, features):
