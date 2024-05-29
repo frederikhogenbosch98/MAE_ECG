@@ -102,7 +102,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
 
             sdnn = rr_mean - rr_interval 
-            if sdnn > 0.2:
+            if sdnn > 0.05:
                 sdnn = sdnn
             else:
                 sdnn = 0
