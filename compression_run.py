@@ -149,6 +149,8 @@ if __name__ == "__main__":
     num_warmup_epochs_classifier = args.warmup_epochs_class
     num_epochs_classifier = args.epochs_class + num_warmup_epochs_classifier
 
+    num_params_uncompressed = 2355745
+
     
     R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200]
 
@@ -157,16 +159,19 @@ if __name__ == "__main__":
     fact = 'cp'
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_exprun'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_comprun'
+    os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         model = AutoEncoder11(R=R, fact='cp')
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
         current_pams = count_parameters(model)
         print(f'num params: {current_pams}')
+        comp_ratio = num_params_uncompressed/current_pams
+        print(f'compression ratio: {comp_ratio}')
         for j in range(NUM_RUNS):
             os.makedirs(f'{run_dir}/R_{R}/{j}', exist_ok=True)
-            mae, mae_losses, mae_val_losses = train_mae(model=model, 
+            mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                         trainset=trainset_un,
                                                         valset=valset_un,
                                                         learning_rate=args.lr_mae,
@@ -176,7 +181,7 @@ if __name__ == "__main__":
                                                         n_warmup_epochs=num_warmup_epochs_mae,
                                                         TRAIN_MAE=args.train_mae,
                                                         SAVE_MODEL_MAE=args.save_mae,
-                                                        R=0,
+                                                        R=R,
                                                         batch_size=args.batch_size_mae,
                                                         fact=fact,
                                                         run_dir = run_dir,
@@ -217,9 +222,16 @@ if __name__ == "__main__":
                                             run_dir = run_dir,
                                             device = device)
                 accuracy = eval_classifier(classifier, testset_sup, device=device)
+                accuracies.append(accuracy)
+
 
         mega_mses.append(np.mean(mses))
 
+        save_str = f'''compression ratio: {comp_ratio} | num_params: {current_pams} | R: {R} |
+                    fact: {fact} | avg accuracy: {np.mean(accuracies)} | avg test mse: {np.mean(mses)} 
+                    (last) epoch time: {epoch_time}'''
+        with open(f"{run_dir}/run_info_{R}.txt", "w") as file:
+            file.write(save_str)
 
     print(mega_mses)
 

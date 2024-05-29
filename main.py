@@ -221,7 +221,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
         val_losses = np.zeros(num_epochs)
 
 
-    return model, losses, val_losses 
+    return model, losses, val_losses, (t_epoch_end - t_epoch_start )
 
 
 
