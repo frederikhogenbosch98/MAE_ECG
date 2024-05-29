@@ -27,6 +27,8 @@ _dataset_ann_dir = '../extra_reps/data/dataset_ann/'
 _split_percentage = .50
 _split_validation_percentage = 0.3
 _split_test_percentage = 0.50
+_directory = '../datasets/physionet.org/files/files/'
+_dataset_dir = 'data/physionet/incartdb_rr/'
 
 
 def nearest_integers(lst, index, num_neighbors=4):
