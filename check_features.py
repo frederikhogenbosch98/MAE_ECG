@@ -44,13 +44,13 @@ if __name__ == "__main__":
 
             if labels[i].item() == 1:
                 Nl.append(features[i].item())
-            elif labels[i].item() == "3":
+            elif labels[i].item() == 3:
                 Sl.append(features[i].item())
-            elif labels[i].item() == "4":
+            elif labels[i].item() == 4:
                 Vl.append(features[i].item())
-            elif labels[i].item() == "0":
+            elif labels[i].item() == 0:
                 Fl.append(features[i].item())
-            elif labels[i].item() == "2":
+            elif labels[i].item() == 2:
                 Ql.append(features[i].item())
     
 
