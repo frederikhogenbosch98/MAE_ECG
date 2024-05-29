@@ -170,7 +170,7 @@ if __name__ == "__main__":
         print(f'num params: {current_pams}')
         for j in range(1):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
-            mae, mae_losses, mae_val_losses = train_mae(model=model, 
+            mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                         trainset=trainset_un,
                                                         valset=valset_un,
                                                         learning_rate=lr[i],
