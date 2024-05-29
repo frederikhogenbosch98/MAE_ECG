@@ -107,10 +107,7 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
 
             rr_interval = (ann.sample[i] - ann.sample[i-1])/360
             sdnn = rr_mean - rr_interval 
-            if sdnn > 0.05:
-                sdnn = sdnn
-            else:
-                sdnn = 0
+
 
             if label == "N":
                 N_std.append(sdnn)
