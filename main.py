@@ -200,7 +200,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
             # save_folder = 'trained_models/tranpose_02_05_10am.pth'
             # save_folder = 'data/models_/MAE_TESTRUN.pth'
             torch.save(model.state_dict(), save_folder)
-            torch.save(model.state_dict(), 'trained_models/last/last_run.pth')
+            torch.save(model.state_dict(), 'trained_models/basic_model.pth')
             print(f'MAE model saved to {save_folder}')
 
         # plot_losses(epoch+1, losses)        
