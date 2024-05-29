@@ -269,7 +269,8 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
         # Convert features to tensor
         # print(len(self.features))
         self.features = torch.tensor(self.features, dtype=torch.float16)
-        print((self.features > 0.04).sum().item())
+        # print((self.features > 0.04).sum().item())
+        self.features = torch.where(self.features > 0.04, torch.tensor(1), torch.tensor(0))
         # print(self.features.shape)
         # print(len(self.image_paths))
         
@@ -307,10 +308,10 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
             feature = float(f.read().strip())
 
         # Scale feature
-        if self.scale_method == 'normalize':
-            feature = (feature - self.feature_min) / (self.feature_max - self.feature_min)
-        elif self.scale_method == 'standardize':
-            feature = (feature - self.feature_mean) / self.feature_std
+        # if self.scale_method == 'normalize':
+        #     feature = (feature - self.feature_min) / (self.feature_max - self.feature_min)
+        # elif self.scale_method == 'standardize':
+        #     feature = (feature - self.feature_mean) / self.feature_std
 
         # Convert feature to tensor
         feature = torch.tensor([feature], dtype=torch.float32)
