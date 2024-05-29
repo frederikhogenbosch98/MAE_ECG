@@ -53,9 +53,15 @@ if __name__ == "__main__":
             elif labels[i].item() == 2:
                 Ql.append(features[i].item())
     
-
+    
     print(f'N: {np.mean(Nl)}')
     print(f'S: {np.mean(Sl)}')
     print(f'V: {np.mean(Vl)}')
     print(f'F: {np.mean(Fl)}')
     print(f'Q: {np.mean(Ql)}')
+
+    print(f'N: {np.max(Nl)}')
+    print(f'S: {np.max(Sl)}')
+    print(f'V: {np.max(Vl)}')
+    print(f'F: {np.max(Fl)}')
+    print(f'Q: {np.max(Ql)}')
