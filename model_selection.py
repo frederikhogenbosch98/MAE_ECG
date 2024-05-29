@@ -200,8 +200,8 @@ if __name__ == "__main__":
             if CLASSIFY:
                 num_classes = 5
                 if args.model == 'default':
-                    # classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-                    classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    # classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
 
 
                 if args.gpu == 'all':
