@@ -162,13 +162,13 @@ if __name__ == "__main__":
     CLASSIFY = True
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_exprun'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_uncompressed_baseline'
     for i, model in enumerate(models):
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
         current_pams = count_parameters(model)
         print(f'num params: {current_pams}')
-        for j in range(1):
+        for j in range(2):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                         trainset=trainset_un,
