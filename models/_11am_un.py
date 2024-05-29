@@ -106,7 +106,7 @@ class Classifier_UN(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((2, 2))
         self.classifier = nn.Sequential(
                 # nn.Linear(16384+1, 512),
-                nn.Linear(4096+1, 512),
+                nn.Linear(1025+1, 512),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=512),
                 nn.Dropout(0.4)
