@@ -19,7 +19,7 @@ from PIL import Image
 import io
 
 _range_to_ignore = 30
-_directory = '../../extra_reps/data/mitbih/'
+# _directory = '../../extra_reps/data/mitbih/'
 # _directory = 'data/physionet/mitbih_raw/'
 _dataset_dir = '../data/physionet/mitbih_224/'
 # _dataset_dir = 'data/physionet/mitbih/'
@@ -55,11 +55,12 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
         os.makedirs(_directory)
 
     files = [f[:-4] for f in listdir(_directory) if isfile(join(_directory, f)) if (f.find('.dat') != -1)]
+
     # to_remove = ['104', '102', '107', '217']
     # for fl in to_remove:
     #     files.remove(fl)
-    # files = sorted(files)
-    # print(files)
+    files = sorted(files)
+    print(len(files))
 
     # random.shuffle(files)
     # ds1 = files[: int(len(files) * _split_percentage)]
@@ -70,9 +71,6 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
     ds12 = ['118', '201', '207', '230']
     ds2 = ['100', '103', '105', '111', '113', '117', '121', '123', '200', '202', '210', '212', '213',\
            '214', '219', '221', '222', '228', '231', '232', '233', '234']
-    print(f'ds11 files: {ds11}')
-    print(f'ds12 files: {ds12}')
-    print(f'ds2 files: {ds2}')
     N_std = []
     S_std = []
     F_std = []
