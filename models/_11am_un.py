@@ -120,7 +120,7 @@ class Classifier_UN(nn.Module):
         x = self.flatten(x) 
         combined_features = torch.cat((x, features), dim=1)
         x = self.classifier(combined_features)
-        x = self.lastlin(combined_features)
+        x = self.lastlin(x)
         
         return x
 
