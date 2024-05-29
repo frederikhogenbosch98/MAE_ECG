@@ -105,9 +105,9 @@ class Classifier_UN(nn.Module):
         self.flatten = nn.Flatten(start_dim=1)
         self.classifier = nn.Sequential(
                 # nn.Linear(16384+1, 512),
-                nn.Linear(4096+1, out_features),
+                nn.Linear(4096+1, 512),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=256),
+                nn.BatchNorm1d(num_features=512),
                 nn.Dropout(0.4),
                 nn.Linear(512, out_features)
         )

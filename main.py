@@ -225,7 +225,7 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
 
 
 
-def eval_mae(model, testset, device=torch.device('cuda:0'), batch_size=128):
+def eval_mae(model, testset, R, device=torch.device('cuda:0'), batch_size=128):
     model.to(device)
     model.eval()
 
@@ -250,32 +250,36 @@ def eval_mae(model, testset, device=torch.device('cuda:0'), batch_size=128):
 
     print(f'Average MSE Loss on Test Set: {average_loss}')
 
-    # data_list = []
-    # target_list = []
 
-    # for data, _ in testset:
-    #     data_list.append(data.unsqueeze(0))
-
-    # test_data_tensor = torch.cat(data_list, dim=0)
-
-    # test_data_tensor = test_data_tensor.to(device)
-
-
-    # x = model(test_data_tensor[0:64,:,:,:])
-    # embedding = model.encoder(x)
-    # e1 = embedding
-    # recon = model.decoder(e1)
-    # # print(recon.shape)
-    # # print(recon)
-    # for i in range(10):
-    #     recon_cpu = recon[i,:,:,:]#.detach().numpy()
-    #     recon_cpu = recon_cpu.cpu()
-    #     print(test_data_tensor[i,:,:,:].shape)
-    #     print(recon_cpu.shape)
-    #     plotimg(test_data_tensor[i,:,:,:], recon_cpu)
-        
 
     return average_loss
+
+
+def reconstruct_img(model, testset, R, run_dir):
+    data_list = []
+    target_list = []
+
+    for data, _ in testset:
+        data_list.append(data.unsqueeze(0))
+
+    test_data_tensor = torch.cat(data_list, dim=0)
+
+    test_data_tensor = test_data_tensor.to(device)
+
+
+    x = model(test_data_tensor[0:64,:,:,:])
+    embedding = model.encoder(x)
+    e1 = embedding
+    recon = model.decoder(e1)
+    # print(recon.shape)
+    # print(recon)
+    for i in range(10):
+        recon_cpu = recon[i,:,:,:]#.detach().numpy()
+        recon_cpu = recon_cpu.cpu()
+        print(test_data_tensor[i,:,:,:].shape)
+        print(recon_cpu.shape)
+        plotimg(test_data_tensor[i,:,:,:], recon_cpu, R, run_dir)
+        
 
 def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4, min_lr=1e-6, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
 
