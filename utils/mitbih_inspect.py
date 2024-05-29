@@ -108,29 +108,29 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             # print(f'--------{label}---------')
 
             rr_interval = (ann.sample[i] - ann.sample[i-1])/360
-
-            if (rr_mean - rr_interval) > (30*0.001):
-                print(label)
+            sdnn = rr_mean - rr_interval 
+            # if (rr_mean - rr_interval) > (30*0.001):
+            #     print(label)
                 
 
 
-    #         if label == "N":
-    #             N_std.append(sdnn)
-    #         elif label == "S":
-    #             S_std.append(sdnn)
-    #         elif label == "V":
-    #             V_std.append(sdnn)
-    #         elif label == "F":
-    #             F_std.append(sdnn)
-    #         elif label == "Q":
-    #             Q_std.append(sdnn)
+            if label == "N":
+                N_std.append(sdnn)
+            elif label == "S":
+                S_std.append(sdnn)
+            elif label == "V":
+                V_std.append(sdnn)
+            elif label == "F":
+                F_std.append(sdnn)
+            elif label == "Q":
+                Q_std.append(sdnn)
 
 
-    # print(f'N: {np.mean(N_std)}')
-    # print(f'S: {np.mean(S_std)}')
-    # print(f'V: {np.mean(V_std)}')
-    # print(f'F: {np.mean(F_std)}')
-    # print(f'Q: {np.mean(Q_std)}')
+    print(f'N: {np.mean(N_std)}')
+    print(f'S: {np.mean(S_std)}')
+    print(f'V: {np.mean(V_std)}')
+    print(f'F: {np.mean(F_std)}')
+    print(f'Q: {np.mean(Q_std)}')
 
 
 
