@@ -99,7 +99,13 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
             # print(f'--------{label}---------')
 
             rr_interval = (ann.sample[i] - ann.sample[i-1])/360
+
+
             sdnn = rr_mean - rr_interval 
+            if sdnn > 0.2:
+                sdnn = sdnn
+            else:
+                sdnn = 0
             # if (rr_mean - rr_interval) > (30*0.001):
             #     print(label)
                 
