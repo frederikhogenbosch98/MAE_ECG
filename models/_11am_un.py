@@ -98,18 +98,28 @@ class AutoEncoder11_UN(nn.Module):
         x = self.decoder(x)
         return x
 
+class Attention(nn.Module):
+    def __init__(self, feature_dim, numerical_feature_dim):
+        super(Attention, self).__init__()
+        self.attn = nn.Linear(feature_dim + numerical_feature_dim, feature_dim)
+
+    def forward(self, encoded_features, numerical_feature):
+        numerical_feature = numerical_feature.unsqueeze(1).repeat(1, encoded_features.size(1), 1)
+        combined_features = torch.cat((encoded_features.unsqueeze(1), numerical_feature), dim=2)
+        attn_scores = torch.tanh(self.attn(combined_features))
+        attn_weights = F.softmax(attn_scores, dim=1)
+        weighted_features = (encoded_features.unsqueeze(1) * attn_weights).sum(dim=1)
+        
+        return weighted_features
 
 class Classifier_UN(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier_UN, self).__init__()
         self.encoder = autoencoder.encoder
-        self.flatten = nn.Flatten()
+        self.flatten = nn.Flatten(start_dim=1)
+        self.attention = Attention(feature_dim=16384, numerical_feature_dim=1)
         self.classifier = nn.Sequential(
-                # nn.Linear(50176+1, 256),
-                # nn.Linear(6272, 256), #16
-                # nn.Linear(32768+1, 256), #32
-                nn.Linear(16384+1, 2048), #32
-                # nn.Linear(16*16*256, 256), #32
+                nn.Linear(16384+1, 2048),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=2048),
                 nn.Dropout(0.5),
@@ -118,11 +128,40 @@ class Classifier_UN(nn.Module):
 
     def forward(self, images, features):
         x = self.encoder(images)
-        x = self.flatten(x)
-        combined_features = torch.cat((x, features), dim=1)
+        x = self.flatten(x)  # Flatten the encoded features
+        x = x.unsqueeze(1)  # Add an extra dimension for the sequence length
+        
+        weighted_features = self.attention(x, features)
+        combined_features = torch.cat((weighted_features, features), dim=1)
         x = self.classifier(combined_features)
-        # x = self.classifier(x)
+        
         return x
+
+
+# class Classifier_UN(nn.Module):
+#     def __init__(self, autoencoder, in_features, out_features):
+#         super(Classifier_UN, self).__init__()
+#         self.encoder = autoencoder.encoder
+#         self.flatten = nn.Flatten()
+#         self.classifier = nn.Sequential(
+#                 # nn.Linear(50176+1, 256),
+#                 # nn.Linear(6272, 256), #16
+#                 # nn.Linear(32768+1, 256), #32
+#                 nn.Linear(16384+1, 512), #32
+#                 # nn.Linear(16*16*256, 256), #32
+#                 nn.GELU(),
+#                 nn.BatchNorm1d(num_features=512),
+#                 nn.Dropout(0.5),
+#                 nn.Linear(512, out_features)
+#         )
+
+#     def forward(self, images, features):
+#         x = self.encoder(images)
+#         x = self.flatten(x)
+#         combined_features = torch.cat((x, features), dim=1)
+#         x = self.classifier(combined_features)
+#         # x = self.classifier(x)
+#         return x
 
 
 # class Classifier_UN(nn.Module):

@@ -119,16 +119,16 @@ if __name__ == "__main__":
     trainset_un, testset_un, valset_un = torch.utils.data.random_split(combined_unsupervised_train, [190000, 25000, 17077])
 
     # LABELED
-    mitbih_ds11_dir = 'data/physionet/mitbih_224/DS11/'
-    mitbih_ds12_dir = 'data/physionet/mitbih_224/DS12/'
-    mitbih_ds2_dir = 'data/physionet/mitbih_224/DS2/'
+    mitbih_ds11_dir = 'data/physionet/mitbih_rr/DS11/'
+    mitbih_ds12_dir = 'data/physionet/mitbih_rr/DS12/'
+    mitbih_ds2_dir = 'data/physionet/mitbih_rr/DS2/'
     mitbih_dataset_train = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds11_dir, transform=transform)
     mitbih_dataset_val = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds12_dir, transform=transform)
     mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
     # print(len(mitbih_dataset_train))
     # print(len(mitbih_dataset_val))
     # print(len(mitbih_dataset_test))
-    incartdb_dir = 'data/physionet/incartdb_224/render/imgs/'
+    incartdb_dir = 'data/physionet/incartdb_rr/'
     incartdb_dataset = INCARTDBImageWithFeatureDataset(root_dir=incartdb_dir, transform=transform)
     # print(f'incartdb num beats: {len(incartdb_dataset)}')
 
