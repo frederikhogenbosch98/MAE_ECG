@@ -269,6 +269,7 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
         # Convert features to tensor
         # print(len(self.features))
         self.features = torch.tensor(self.features, dtype=torch.float32)
+        print((self.features > 1).sum().item())
         # print(self.features.shape)
         # print(len(self.image_paths))
         

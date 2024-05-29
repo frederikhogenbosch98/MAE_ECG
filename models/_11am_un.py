@@ -104,14 +104,14 @@ class Classifier_UN(nn.Module):
         self.encoder = autoencoder.encoder
         self.flatten = nn.Flatten(start_dim=1)
         self.classifier = nn.Sequential(
-                nn.Linear(16384, 16),
+                nn.Linear(16384, 512),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=16),
+                nn.BatchNorm1d(num_features=512),
                 nn.Dropout(0.4)
                 # nn.Linear(512, out_features)
         )
         
-        self.lastlin = nn.Linear(16+1, out_features)
+        self.lastlin = nn.Linear(512+1, out_features)
         self.reallylastlin = nn.Linear(64+1, out_features)
 
 
