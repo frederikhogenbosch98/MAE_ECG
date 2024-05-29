@@ -284,18 +284,18 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
     if TRAIN_CLASSIFIER:
 
         ### U-Net
-        for param in classifier.module.enc1.parameters():
-            param.requires_grad = False
-        for param in classifier.module.enc2.parameters():
-            param.requires_grad = False
-        for param in classifier.module.enc3.parameters():
-            param.requires_grad = False
-        for param in classifier.module.pool1.parameters():
-            param.requires_grad = False
-        for param in classifier.module.pool2.parameters():
-            param.requires_grad = False
-        for param in classifier.module.pool3.parameters():
-            param.requires_grad = False
+        # for param in classifier.module.enc1.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.enc2.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.enc3.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.pool1.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.pool2.parameters():
+        #     param.requires_grad = False
+        # for param in classifier.module.pool3.parameters():
+        #     param.requires_grad = False
 
 
         ### ResNet
@@ -311,8 +311,8 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
         #     param.requires_grad = False
 
 
-        # for param in classifier.module.encoder.parameters():
-        #     param.requires_grad = False
+        for param in classifier.module.encoder.parameters():
+            param.requires_grad = False
 
 
         
@@ -368,8 +368,8 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
                     labels = labels.to(device)
                     optimizer.zero_grad()
                     with autocast():
-                        # outputs = classifier(inputs, features)
-                        outputs = classifier(inputs)
+                        outputs = classifier(inputs, features)
+                        # outputs = classifier(inputs)
                         loss = criterion(outputs, labels)
 
                     scaler.scale(loss).backward()
@@ -397,8 +397,8 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
                     for data, features, target in val_loader:
                         data, features, target = data.to(device), features.to(device), target.to(device)
                         with autocast():
-                            # output = classifier(data, features)
-                            output = classifier(data)
+                            output = classifier(data, features)
+                            # output = classifier(data)
                             loss = criterion(output, target)
                         # output = classifier(data, features)
                         # loss = criterion(output, target)
@@ -464,8 +464,8 @@ def eval_classifier(model, testset, device, batch_size=128):
         for images, features, labels in test_loader:
             images, features, labels = images.to(device), features.to(device), labels.to(device)
             with autocast():
-                # output = model(images, features)
-                output = model(images)
+                output = model(images, features)
+                # output = model(images)
             # outputs = model(images, features)
             # _, predicted = torch.max(F.softmax(outputs, dim=1).data, 1)
             _, predicted = torch.max(output.data, 1)
@@ -487,8 +487,8 @@ def eval_classifier(model, testset, device, batch_size=128):
     ## MNIST
     for idx, (images, features, labels) in enumerate(test_loader):
         images, labels = images.to(device), labels.to(device)
-        # x = model(images, features)
-        x = model(images)
+        x = model(images, features)
+        # x = model(images)
         _, predicted = torch.max(x.data, 1)
         images = images.cpu()
         # plot_single_img(images, 0)

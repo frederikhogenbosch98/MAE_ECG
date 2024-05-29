@@ -108,8 +108,8 @@ class Classifier_UN(nn.Module):
                 # nn.Linear(50176+1, 256),
                 # nn.Linear(6272, 256), #16
                 # nn.Linear(32768+1, 256), #32
-                nn.Linear(16384+1, 256), #32
-                # nn.Linear(25088, 256), #32
+                # nn.Linear(16384+1, 256), #32
+                nn.Linear(16*16*256, 256), #32
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
@@ -119,9 +119,9 @@ class Classifier_UN(nn.Module):
     def forward(self, images, features):
         x = self.encoder(images)
         x = self.flatten(x)
-        combined_features = torch.cat((x, features), dim=1)
-        x = self.classifier(combined_features)
-        # x = self.classifier(x)
+        # combined_features = torch.cat((x, features), dim=1)
+        # x = self.classifier(combined_features)
+        x = self.classifier(x)
         return x
 
 
