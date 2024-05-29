@@ -113,7 +113,7 @@ class Classifier_UN(nn.Module):
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=1028),
                 nn.Dropout(0.5),
-                nn.Linear(512, out_features)
+                nn.Linear(1028, out_features)
         )
 
     def forward(self, images, features):
