@@ -108,12 +108,12 @@ class Classifier_UN(nn.Module):
                 # nn.Linear(50176+1, 256),
                 # nn.Linear(6272, 256), #16
                 # nn.Linear(32768+1, 256), #32
-                nn.Linear(16384+1, 512), #32
+                nn.Linear(16384+1, 2048), #32
                 # nn.Linear(16*16*256, 256), #32
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=512),
+                nn.BatchNorm1d(num_features=2048),
                 nn.Dropout(0.5),
-                nn.Linear(512, out_features)
+                nn.Linear(2048, out_features)
         )
 
     def forward(self, images, features):
