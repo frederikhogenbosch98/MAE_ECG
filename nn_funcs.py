@@ -232,7 +232,7 @@ class MITBIHImageWithFeatureDataset(torch.utils.data.Dataset):
         return image, feature,  label_idx
 
 class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
-    def __init__(self, root_dir, transform=None, scale_method='normalize'):
+    def __init__(self, root_dir, transform=None, scale_method='standardize'):
         self.root_dir = root_dir
         self.transform = transform
         self.scale_method = scale_method
@@ -308,7 +308,6 @@ class INCARTDBImageWithFeatureDataset(torch.utils.data.Dataset):
         # Scale feature
         if self.scale_method == 'normalize':
             feature = (feature - self.feature_min) / (self.feature_max - self.feature_min)
-            print(feature)
         elif self.scale_method == 'standardize':
             feature = (feature - self.feature_mean) / self.feature_std
 
