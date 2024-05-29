@@ -43,7 +43,6 @@ if __name__ == "__main__":
         for i in range(len(labels)):
 
             if labels[i].item() == 1:
-                print(features[i].item())
                 Nl.append(features[i].item())
             elif labels[i].item() == 3:
                 Sl.append(features[i].item())
