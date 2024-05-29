@@ -103,7 +103,6 @@ class Classifier_UN(nn.Module):
         super(Classifier_UN, self).__init__()
         self.encoder = autoencoder.encoder
         self.flatten = nn.Flatten(start_dim=1)
-        self.attention = Attention(feature_dim=16384)
         self.classifier = nn.Sequential(
                 nn.Linear(16384+1, 512),
                 nn.GELU(),
