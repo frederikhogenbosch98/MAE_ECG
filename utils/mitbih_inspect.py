@@ -87,40 +87,31 @@ def create_img_from_sign(lblabels, lbrevert_labels, lboriginal_labels, size=(224
          
         rr_mean = np.mean(rr_intervals)
 
-        print(rr_mean)
+        for i in tqdm.tqdm(range(2, len_sample - 2)):
+            if ann.symbol[i] not in lboriginal_labels:
+                continue
+            label = lboriginal_labels[ann.symbol[i]]
 
+            if file in ds11:
+                dir = '{}DS11/{}'.format(_dataset_dir, label)
+            elif file in ds12:
+                dir = '{}DS12/{}'.format(_dataset_dir, label) 
+            else:
+                dir = '{}DS2/{}'.format(_dataset_dir, label)
 
+            if not os.path.exists(dir):
+                os.makedirs(dir)
 
-    #     for i in tqdm.tqdm(range(2, len_sample - 2)):
-    #         if ann.symbol[i] not in lboriginal_labels:
-    #             continue
-    #         label = lboriginal_labels[ann.symbol[i]]
+            # if label == 'S':
+            # print(f'--------{i}---------')
+            # print(f'--------{label}---------')
 
-    #         if file in ds11:
-    #             dir = '{}DS11/{}'.format(_dataset_dir, label)
-    #         elif file in ds12:
-    #             dir = '{}DS12/{}'.format(_dataset_dir, label) 
-    #         else:
-    #             dir = '{}DS2/{}'.format(_dataset_dir, label)
+            rr_interval = (ann.sample[i] - ann.sample[i-1])/360
 
-    #         if not os.path.exists(dir):
-    #             os.makedirs(dir)
+            if (rr_mean - rr_interval) > (30*0.001):
+                print(label)
+                
 
-    #         # if label == 'S':
-    #         # print(f'--------{i}---------')
-    #         # print(f'--------{label}---------')
-
-
-    #         rr_intervals = []
-    #         for j in nearest_integers(np.arange(2, len_sample-2), i):
-    #             rr_intervals.append((ann.sample[j] - ann.sample[j-1])/360)
-    #             if i == len_sample -2:
-    #                 print(i)
-    #                 print(nearest_integers(np.arange(2, len_sample-2), i))
-
-    #         mean_RR = np.mean(rr_intervals)
-    #         sdnn = np.std(rr_intervals, ddof=1)
-    #         # print(sdnn)
 
     #         if label == "N":
     #             N_std.append(sdnn)
