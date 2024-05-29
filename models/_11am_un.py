@@ -17,7 +17,7 @@ class AutoEncoder11_UN(nn.Module):
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            nn.MaxPool2d(2, stride=2),
+            nn.MaxPool2d(4, stride=4),
 
             # LAYER 2
             nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
@@ -78,7 +78,7 @@ class AutoEncoder11_UN(nn.Module):
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=2, mode='bilinear'),
+            nn.Upsample(scale_factor=4, mode='bilinear'),
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
@@ -103,14 +103,13 @@ class Classifier_UN(nn.Module):
         super(Classifier_UN, self).__init__()
         self.encoder = autoencoder.encoder
         self.flatten = nn.Flatten(start_dim=1)
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 # nn.Linear(16384+1, 512),
-                nn.Linear(256+1, 256),
+                nn.Linear(4096+1, out_features),
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
-                nn.Dropout(0.4)
-                # nn.Linear(512, out_features)
+                nn.Dropout(0.4),
+                nn.Linear(512, out_features)
         )
         
         self.lastlin = nn.Linear(256, out_features)
@@ -119,11 +118,11 @@ class Classifier_UN(nn.Module):
 
     def forward(self, images, features):
         x = self.encoder(images)
-        x = self.avgpool(x)
+        # x = self.avgpool(x)
         x = self.flatten(x) 
         combined_features = torch.cat((x, features), dim=1)
         x = self.classifier(combined_features)
-        x = self.lastlin(x)
+        # x = self.lastlin(x)
         
         return x
 
