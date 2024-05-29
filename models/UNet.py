@@ -169,7 +169,7 @@ class ClassifierUnet(nn.Module):
                 nn.Linear(256, out_features)
         )
 
-    def forward(self, images, features):
+    def forward(self, images):
         # print(x.shape)
         x = self.enc1(images)
         # print(x.shape)
