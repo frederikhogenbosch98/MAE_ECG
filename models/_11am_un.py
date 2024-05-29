@@ -107,8 +107,8 @@ class Classifier_UN(nn.Module):
         self.classifier = nn.Sequential(
                 # nn.Linear(50176+1, 256),
                 # nn.Linear(6272, 256), #16
-                nn.Linear(32768+1, 256), #32
-                # nn.Linear(16384+1, 256), #32
+                # nn.Linear(32768+1, 256), #32
+                nn.Linear(16384+1, 256), #32
                 # nn.Linear(25088, 256), #32
                 nn.GELU(),
                 nn.BatchNorm1d(num_features=256),
