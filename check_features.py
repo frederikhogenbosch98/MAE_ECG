@@ -41,6 +41,10 @@ if __name__ == "__main__":
 
     for images, features, labels in test_loader:
         for i in range(len(labels)):
+            print(labels[i])
+            print(features[i])
+            print(labels[i].item())
+            print(features[i].item())
             if labels[i] == 1:
                 Nl.append(features[i])
             elif labels[i] == "3":
