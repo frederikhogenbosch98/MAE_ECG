@@ -103,17 +103,17 @@ class Classifier_UN(nn.Module):
         super(Classifier_UN, self).__init__()
         self.encoder = autoencoder.encoder
         self.flatten = nn.Flatten(start_dim=1)
-        self.avgpool = nn.AdaptiveAvgPool2d((2, 2))
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
                 # nn.Linear(16384+1, 512),
-                nn.Linear(1024+1, 512),
+                nn.Linear(256+1, 256),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=512),
+                nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.4)
                 # nn.Linear(512, out_features)
         )
         
-        self.lastlin = nn.Linear(512, out_features)
+        self.lastlin = nn.Linear(256, out_features)
         self.reallylastlin = nn.Linear(64+1, out_features)
 
 
