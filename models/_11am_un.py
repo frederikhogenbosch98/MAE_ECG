@@ -119,6 +119,8 @@ class Classifier_UN(nn.Module):
         x = self.encoder(images)
         x = self.flatten(x) 
         x = self.classifier(x)
+        print(x.shape)
+        print(features.shape)
         combined_features = torch.cat((x, features), dim=1)
         x = self.lastlin(combined_features)
         
