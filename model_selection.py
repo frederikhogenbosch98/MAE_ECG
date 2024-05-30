@@ -42,7 +42,8 @@ def get_args_parser():
     parser.add_argument('--epochs_mae', default=50, type=int)
     parser.add_argument('--warmup_epochs_mae', type=int, default=0,
                         help='epochs to warmup LR')
-
+    parser.add_argument('--num_runs', type=int, default=3,
+                        help='Number of repeat runs')
 
     parser.add_argument('--batch_size_class', default=256, type=int,
                         help='Per GPU batch size')
@@ -160,6 +161,7 @@ if __name__ == "__main__":
     lr = [1e-4, 1e-4, 1e-4, 1e-4]
 
     CLASSIFY = True
+    NUM_RUNS = args.num_runs
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_uncompressed_baseline'
@@ -168,7 +170,7 @@ if __name__ == "__main__":
         mses = []
         current_pams = count_parameters(model)
         print(f'num params: {current_pams}')
-        for j in range(3):
+        for j in range(NUM_RUNS):
             os.makedirs(f'{run_dir}/{model_strs[i]}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                         trainset=trainset_un,
