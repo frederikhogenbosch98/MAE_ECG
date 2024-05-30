@@ -210,8 +210,8 @@ def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight
     else:
         # model.load_state_dict(torch.load('data/models_mnist/MAE_TESTRUN.pth'))
         # model.load_state_dict(torch.load('trained_models/MAE_RUN_cp_R0_8_5_4_38.pth', map_location=torch.device('cpu')))
-        model.load_state_dict(torch.load('trained_models/model_comparison/RUN_30_5_11_35_uncompressed_baseline/MAE_RUN_basic_R0_30_5_11_35.pth'))
-        # model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
+        # model.load_state_dict(torch.load('trained_models/model_comparison/RUN_30_5_11_35_uncompressed_baseline/MAE_RUN_basic_R0_30_5_11_35.pth'))
+        model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
         # model.load_state_dict(torch.load('trained_models/model_comparison/RUN_26_5_23_0_exprun/MAE_RUN_convnext_R0_27_5_17_21_epoch_20.pth')) #unet
         # model.load_state_dict(torch.load('trained_models/model_comparison/RUN_26_5_23_0_exprun/MAE_RUN_unet_32_R0_26_5_23_0.pth')) #convnext
         # model.load_state_dict(torch.load('trained_models/RUN_19_5_23_14/MAE_RUN_cp_R25_20_5_11_41.pth')) #R25
@@ -353,6 +353,7 @@ def train_classifier(classifier, trainset, run_dir, device, testset, weight_deca
         scaler = GradScaler()
         losses = []
         val_losses = []
+        run_accs = []
         print(f"Start CLASSIFIER training for {n_warmup_epochs} warm-up epochs and {num_epochs-n_warmup_epochs} training epochs")        
         t_start = time.time()
         for epoch in range(num_epochs):
@@ -387,7 +388,8 @@ def train_classifier(classifier, trainset, run_dir, device, testset, weight_deca
                 torch.save(classifier.state_dict(), f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
 
 
-            print(eval_classifier(classifier, testset, device=device))
+            acc = eval_classifier(classifier, testset, device=device)
+            run_accs.append(acc)
 
             if valset:
                 classifier.eval()  
@@ -445,8 +447,18 @@ def train_classifier(classifier, trainset, run_dir, device, testset, weight_deca
         losses = np.zeros(num_epochs)
         val_losses = np.zeros(num_epochs)
 
+    print(np.mean(run_accs))
+    print(np.max(run_accs))
+    print(average_of_top_three(run_accs))
     return classifier, losses, val_losses
 
+def average_of_top_three(lst):
+    if len(lst) < 3:
+        raise ValueError("The list must contain at least three elements.")
+    sorted_lst = sorted(lst, reverse=True)
+    top_three = sorted_lst[:3]
+    average = sum(top_three) / 3
+    return average
 
 def eval_classifier(model, testset, device, batch_size=128):
 

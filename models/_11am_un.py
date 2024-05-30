@@ -5,7 +5,7 @@ import tltorch
 
 ### TEST RUN 11 AM
 class AutoEncoder11_UN(nn.Module):
-    def __init__(self, R=20, factorization='cp', in_channels=1, channels=[32, 64, 128, 256], depths=[1, 1, 1]):
+    def __init__(self, R=20, factorization='cp', in_channels=1, channels=[64, 128, 256, 512], depths=[1, 1, 1]):
         super(AutoEncoder11_UN, self).__init__()
         print(channels)
         self.encoder = nn.Sequential(
@@ -104,12 +104,12 @@ class Classifier_UN(nn.Module):
         self.encoder = autoencoder.encoder
         self.flatten = nn.Flatten(start_dim=1)
         self.classifier = nn.Sequential(
-                # nn.Linear(8*8*512, 256),
-                nn.Linear(4*4*256, 512),
+                nn.Linear(8*8*512, 256),
+                # nn.Linear(4*4*256, 512),
                 nn.GELU(),
-                nn.BatchNorm1d(num_features=512),
+                nn.BatchNorm1d(num_features=256),
                 nn.Dropout(0.5),
-                nn.Linear(512, out_features)
+                nn.Linear(256, out_features)
         )
         
         self.lastlin = nn.Linear(256, out_features)
