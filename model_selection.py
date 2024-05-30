@@ -197,7 +197,7 @@ if __name__ == "__main__":
             np.save(train_save_folder, mae_losses)
             np.save(val_save_folder, mae_val_losses)
 
-            # mses.append(eval_mae(mae, testset_un, device=device))
+            mses.append(eval_mae(mae, testset_un, device=device))
 
             if CLASSIFY:
                 num_classes = 5
@@ -223,7 +223,9 @@ if __name__ == "__main__":
                                             R=0,
                                             fact=model_strs[i],
                                             run_dir = run_dir,
-                                            device = device)
+                                            device = device
+                                            testset=testset_sup)
+                                            
                 accuracy = eval_classifier(classifier, testset_sup, device=device)
         mega_mses.append(np.mean(mses))
 

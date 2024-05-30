@@ -276,7 +276,7 @@ def reconstruct_img(model, testset, R, run_dir):
     print(f'10 reconstructed images saved to {run_dir}')
         
 
-def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4, min_lr=1e-6, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
+def train_classifier(classifier, trainset, run_dir, device, testset, weight_decay = 1e-4, min_lr=1e-6, valset=None, num_epochs=25, n_warmup_epochs=5, learning_rate=1e-4, batch_size=128, TRAIN_CLASSIFIER=True, SAVE_MODEL_CLASSIFIER=True, R=None, fact=None):
 
     now = datetime.now()
     classifier.to(device)
@@ -386,6 +386,8 @@ def train_classifier(classifier, trainset, run_dir, device, weight_decay = 1e-4,
             if epoch % 20 == 0 and epoch != 0:
                 torch.save(classifier.state_dict(), f'{run_dir}/CLASSIFIER_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch}.pth')
 
+
+            print(eval_classifier(classifier, testset, device=device))
 
             if valset:
                 classifier.eval()  
