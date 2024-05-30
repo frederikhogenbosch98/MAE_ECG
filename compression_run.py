@@ -164,7 +164,7 @@ if __name__ == "__main__":
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
-        model = AutoEncoder11(R=R, fact='cp')
+        model = AutoEncoder11(R=R, factorization='cp')
     #     model = nn.DataParallel(model, device_ids=device_ids).to(device)
     #     mses = []
     #     current_pams = count_parameters(model)
