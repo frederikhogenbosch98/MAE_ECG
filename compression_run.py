@@ -226,7 +226,9 @@ if __name__ == "__main__":
                                             R=R,
                                             fact='cp',
                                             run_dir = run_dir,
-                                            device = device)
+                                            device = device,
+                                            testset=testset_sup)
+
                 accuracy = eval_classifier(classifier, testset_sup, device=device)
                 accuracies.append(accuracy)
 
