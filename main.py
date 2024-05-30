@@ -454,7 +454,7 @@ def train_classifier(classifier, trainset, run_dir, device, testset, weight_deca
 
 def average_of_top_three(lst):
     if len(lst) < 3:
-        raise ValueError("The list must contain at least three elements.")
+        return lst[0]
     sorted_lst = sorted(lst, reverse=True)
     top_three = sorted_lst[:3]
     average = sum(top_three) / 3
