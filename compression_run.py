@@ -197,7 +197,7 @@ if __name__ == "__main__":
             np.save(train_save_folder, mae_losses)
             np.save(val_save_folder, mae_val_losses)
 
-            mses.append(eval_mae(mae, testset_un, device=device))
+            mses.append(eval_mae(mae, testset_un,R,device=device))
 
             # if j == 0:
             #     reconstruct_img(mae, R=R, run_dir=run_dir)
