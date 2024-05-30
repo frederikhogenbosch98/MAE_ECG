@@ -485,17 +485,17 @@ def eval_classifier(model, testset, device, batch_size=128):
     print(f'Accuracy: {np.round(accuracy,3)}%')
     conf_matrix(y_true, y_pred)
 
-    ## MNIST
-    for idx, (images, features, labels) in enumerate(test_loader):
-        images, labels = images.to(device), labels.to(device)
-        x = model(images, features)
-        # x = model(images)
-        _, predicted = torch.max(x.data, 1)
-        images = images.cpu()
-        # plot_single_img(images, 0)
-        print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
-        if idx == 10:
-            break
+    # ## MNIST
+    # for idx, (images, features, labels) in enumerate(test_loader):
+    #     images, labels = images.to(device), labels.to(device)
+    #     x = model(images, features)
+    #     # x = model(images)
+    #     _, predicted = torch.max(x.data, 1)
+    #     images = images.cpu()
+    #     # plot_single_img(images, 0)
+    #     print(f'prediction: {predicted[0].item()} ----- label: {labels[0].item()}')
+    #     if idx == 10:
+    #         break
 
     # print(y_true[10:30])
     # print(y_pred[10:30])
