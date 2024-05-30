@@ -42,6 +42,8 @@ def get_args_parser():
     parser.add_argument('--epochs_mae', default=50, type=int)
     parser.add_argument('--warmup_epochs_mae', type=int, default=0,
                         help='epochs to warmup LR')
+    parser.add_argument('--num_runs', type=int, default=3,
+                        help='Number of repeat runs')
 
 
     parser.add_argument('--batch_size_class', default=256, type=int,
@@ -86,7 +88,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dtype = torch.float32
-    device_ids = [0, 2, 3]
+    device_ids = [0, 1, 2, 3]
     main_device = device_ids[0]
     if torch.cuda.is_available():
         device = torch.device(f'cuda:{main_device}')
@@ -155,7 +157,6 @@ if __name__ == "__main__":
     R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200]
 
     CLASSIFY = True
-    NUM_RUNS = 3
     fact = 'cp'
 
     now = datetime.now()
@@ -169,7 +170,8 @@ if __name__ == "__main__":
         print(f'num params: {current_pams}')
         comp_ratio = num_params_uncompressed/current_pams
         print(f'compression ratio: {comp_ratio}')
-        for j in range(NUM_RUNS):
+
+        for j in range(args.num_runs):
             os.makedirs(f'{run_dir}/R_{R}/{j}', exist_ok=True)
             mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                         trainset=trainset_un,
