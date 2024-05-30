@@ -197,7 +197,7 @@ if __name__ == "__main__":
             np.save(train_save_folder, mae_losses)
             np.save(val_save_folder, mae_val_losses)
 
-            mses.append(eval_mae(mae, testset_un, device=device))
+            mses.append(eval_mae(mae, testset_un, R=0, device=device))
 
             if CLASSIFY:
                 num_classes = 5
