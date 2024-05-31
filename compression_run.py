@@ -151,7 +151,7 @@ if __name__ == "__main__":
     num_warmup_epochs_classifier = args.warmup_epochs_class
     num_epochs_classifier = args.epochs_class + num_warmup_epochs_classifier
 
-    num_params_uncompressed = 2355745
+    num_params_uncompressed = 9411649#2355745
 
     
     R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 200]
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     fact = 'cp'
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_long_epochcomprun'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_comp_run'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
