@@ -156,7 +156,7 @@ if __name__ == "__main__":
     CLASSIFY = True
     fact = 'cp'
     R_LIST = [0, 100]
-    ratios = [0.25, 0.5, 0.75]
+    ratios = [0.10, 0.25, 0.5, 0.75]
 
     now = datetime.now()
     run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_test_training_runn'
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         print(f'RUN R: {R}')
         for r in ratios:
             trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [int(r*190000), 25000, 17077, int((1-r)*190000)])
-            # trainset_sup, _ = torch.utils.data.random_split(trainset_sup, [int(r*190000), int((1-r)*190000)])
+            trainset_sup, _ = torch.utils.data.random_split(trainset_sup, [int(r*218192), int((1-r)*218192)])
             current_pams = count_parameters(model)
             print(f'num params: {current_pams}')
             comp_ratio = num_params_uncompressed/current_pams
