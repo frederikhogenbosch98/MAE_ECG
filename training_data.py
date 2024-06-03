@@ -135,6 +135,7 @@ if __name__ == "__main__":
 
 
     trainset_sup = torch.utils.data.ConcatDataset([mitbih_dataset_train, incartdb_dataset])
+    print(len(trainset_sup))
     # trainset_sup = mitbih_dataset_train 
     valset_sup = mitbih_dataset_val
     testset_sup = mitbih_dataset_test
@@ -169,7 +170,7 @@ if __name__ == "__main__":
         print(f'RUN R: {R}')
         for r in ratios:
             trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [int(r*190000), 25000, 17077, int((1-r)*190000)])
-
+            # trainset_sup, _ = torch.utils.data.random_split(trainset_sup, [int(r*190000), int((1-r)*190000)])
             current_pams = count_parameters(model)
             print(f'num params: {current_pams}')
             comp_ratio = num_params_uncompressed/current_pams
