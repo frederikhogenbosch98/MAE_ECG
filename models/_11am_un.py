@@ -17,7 +17,7 @@ class AutoEncoder11_UN(nn.Module):
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
-            nn.MaxPool2d(4, stride=4),
+            nn.MaxPool2d(2, stride=2),
 
             # LAYER 2
             nn.Conv2d(channels[0], channels[1], kernel_size=3, stride=1, padding=1),
@@ -78,7 +78,7 @@ class AutoEncoder11_UN(nn.Module):
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
-            nn.Upsample(scale_factor=4, mode='bilinear'),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
