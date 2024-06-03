@@ -168,7 +168,7 @@ if __name__ == "__main__":
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         print(f'RUN R: {R}')
         for r in ratios:
-            trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [int(r)*190000, 25000, 17077, int(1-r)*190000])
+            trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [int(r*190000), 25000, 17077, int((1-r)*190000)])
 
             current_pams = count_parameters(model)
             print(f'num params: {current_pams}')
