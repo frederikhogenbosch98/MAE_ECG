@@ -14,27 +14,30 @@ def plot_compression_cp():
     plt.show()
 
 def plot_accs_cp():
-    R = [15, 20, 25]
-    # num_params = [6290, 11235, 16180, 21125, 26070]
-    # full_params = 2881921
-    accuracies = [90.0821, 90.0894, 94.213]
+    R_LIST = [5, 10, 15, 35, 50, 75, 100, 125, 150]#, 25, 35, 50, 75, 100, 125, 150, 200]
+    num_params = [47198, 94355, 125000, 250000, 375203, 557428, 739653, 921878, 1104103]
+    full_params = 9411649
+    accuracies = [94.28, 94.21, 94.35, 94.35, 94.4, 94.4, 94.48, 94.46, 94.53]
 
-    # Calculate compression ratios
-    # a = [full_params / i for i in num_params]
+    c_ratios = [np.round(full_params / i,1) for i in num_params]
+    ticks = list(reversed(c_ratios))
+    a = np.arange(len(c_ratios))
+    fig, ax = plt.subplots(1, 1,figsize=(10,6))
+    # ax.figure() 
+    ax.plot(a, accuracies, 'o-', label='Accuracies')  
+    ax.set_xlabel('Compression ratio')
+    ax.set_ylabel('Accuracies')
+    ax.tick_params('y')
+    ax.set_ylim(93.5, 95.5) 
 
-    
-    plt.plot(R, accuracies, 'o-', label='Accuracies')  # 'r-' is for red solid line
-    plt.xlabel('rank')
-    plt.ylabel('Accuracies')
-    plt.tick_params('y')
-    plt.ylim(90, 100)  # Set the range of the accuracy axis
-    
-    # Add horizontal lines for literature and 250 epochs benchmarks
-    # plt.axhline(0.9439, color='gray', linestyle='-', label='Literature (0.9439)')
-    plt.axhline(94.211, color='red', linestyle='-', label='uncompressed')
-    plt.title('Tucker accuracies with 50 MAE epoch and 25 CLASSIFIER epochs')
-    plt.xticks(R)
-    plt.legend() 
+    ax.axhline(94.41, color='red', linestyle='-', label='uncompressed')
+    ax.set_title('Accuracies at various compression ratios')
+    # plt.xticks(c_ratios)
+    # ax.set_xlim([205, 1])
+    ax.set_xticks(a)
+    ax.set_xticklabels(c_ratios)
+
+    ax.legend() 
     plt.show()
 
 def plot_compression_tucker():
@@ -368,7 +371,7 @@ def train_val_loss(model_name):
 
 if __name__ == '__main__':
     # plot_compression_cp()
-    # plot_accs_cp()
+    plot_accs_cp()
     # plot_compression_tucker()
     # plot_accs_tucker()
     # plot_mses_cp()
@@ -377,4 +380,4 @@ if __name__ == '__main__':
     # classifier_adam_vs_sgd()
     # sgd_vs_adam_loss()
     # exp1_val_comp()
-    train_val_loss('Basic')
+    # train_val_loss('Basic')
