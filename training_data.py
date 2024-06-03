@@ -172,7 +172,7 @@ if __name__ == "__main__":
             un_vals = int(r*190000)
             un_vals_other = 190000 - un_vals 
             sup_vals = int(r*218192)
-            sup_vals_other = 218192 - un_vals 
+            sup_vals_other = 218192 - sup_vals 
             trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [un_vals, 25000, 17077, un_vals_other])
             trainset_sup, _ = torch.utils.data.random_split(trainset_sup, [sup_vals, sup_vals_other])
             current_pams = count_parameters(model)
