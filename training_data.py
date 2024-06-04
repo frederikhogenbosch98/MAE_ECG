@@ -169,6 +169,7 @@ if __name__ == "__main__":
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         print(f'RUN R: {R}')
         for r in ratios:
+            print(f'ratio: {r}')
             un_vals = int(r*190000)
             un_vals_other = 190000 - un_vals 
 
