@@ -156,7 +156,7 @@ if __name__ == "__main__":
     CLASSIFY = True
     fact = 'cp'
     R_LIST = [0, 100]
-    ratios = [0.025, 0.05, 0.10, 0.2]
+    ratios = [ 0.10, 0.2]
 
     now = datetime.now()
     run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_runn'
@@ -174,6 +174,7 @@ if __name__ == "__main__":
 
             sup_vals = int(r*200000)
             sup_vals_other = 18192 + 200000 - sup_vals
+            print(sup_vals + sup_vals_other)
             trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [un_vals, 25000, 17077, un_vals_other])
             trainset_sup, _ = torch.utils.data.random_split(trainset_sup, [sup_vals, sup_vals_other])
             current_pams = count_parameters(model)
