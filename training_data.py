@@ -140,6 +140,8 @@ if __name__ == "__main__":
     valset_sup = mitbih_dataset_val
     testset_sup = mitbih_dataset_test
 
+    training_supset = trainset_sup
+
     mega_mses = []
     accuracies = []
 
@@ -177,7 +179,7 @@ if __name__ == "__main__":
             sup_vals_other = int(18192 + 200000 - sup_vals)
             print(sup_vals + sup_vals_other)
             trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [un_vals, 25000, 17077, un_vals_other])
-            trainset_sup, _ = torch.utils.data.random_split(trainset_sup, [sup_vals, sup_vals_other])
+            trainset_sup, _ = torch.utils.data.random_split(training_supset, [sup_vals, sup_vals_other])
             # current_pams = count_parameters(model)
             # print(f'num params: {current_pams}')
             # comp_ratio = num_params_uncompressed/current_pams
