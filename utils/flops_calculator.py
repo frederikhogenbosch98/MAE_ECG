@@ -10,10 +10,8 @@ from UNet import UNet
 from convnext import ConvNext
 from _11am_un import AutoEncoder11_UN
 
-input_tensor = torch.randn(256, 1, 128, 128)
+input_tensor = torch.randn(1, 1, 128, 128)
 
-# Initialize FlopCountAnalysis with the model and the input tensor
-flops = FlopCountAnalysis(AutoEncoder11_UN(), input_tensor)
+flops = FlopCountAnalysis(ResNet(), input_tensor)
 
-# Print the total FLOPs
 print(f"FLOPs: {flops.total()}")
