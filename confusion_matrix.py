@@ -30,7 +30,7 @@ if __name__ == "__main__":
         mae = AutoEncoder11_UN()
         classifier = Classifier_UN(autoencoder=mae,in_features=256, out_features=5)
 
-        classifier.load_state_dict(torch.load(f'trained_models/model_comparison/RUN_30_5_11_11_uncompressed_baseline/{i}')) 
+        classifier.load_state_dict(torch.load(f'trained_models/compressed/RUN_8_6_11_15_full_training_runn/RUN_30_5_11_11_uncompressed_baseline/{i}')) 
 
         classifier.to(device)
         classifier.eval()
