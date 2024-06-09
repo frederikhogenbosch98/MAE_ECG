@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # mae = AutoEncoder11(R=100, factorization='cp')
     mae = AutoEncoder11_UN()
-    classifier = Classifier_UN(autoencoder=mae, out_features=5)
+    classifier = Classifier_UN(autoencoder=mae,in_features=256, out_features=5)
 
     classifier.load_state_dict(torch.load('trained_models/model_comparison/RUN_30_5_11_11_uncompressed_baseline/CLASSIFIER_RUN_basic_R0_30_5_11_11.pth')) 
 
