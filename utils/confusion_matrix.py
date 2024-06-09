@@ -3,6 +3,7 @@ from torchvision import transforms
 import torch
 import numpy as np
 from models._11am_un import AutoEncoder11_UN
+from models._11am_back import AutoEncoder11
 
 if __name__ == "__main__":
 
@@ -19,9 +20,9 @@ if __name__ == "__main__":
     mitbih_dataset_test = MITBIHImageWithFeatureDataset(root_dir=mitbih_ds2_dir, transform=transform) 
     testset_sup = mitbih_dataset_test
 
-    model = AutoEncoder11_UN()
+    model = AutoEncoder11(R=100, factorization='cp')
 
-    model.load_state_dict(torch.load('trained_models/last/last_run.pth')) 
+    model.load_state_dict(torch.load('trained_models/model_comparison/RUN_30_5_11_11_uncompressed_baseline/CLASSIFIER_RUN_basic_R0_30_5_11_11.pth')) 
 
     model.to(device)
     model.eval()
@@ -41,10 +42,8 @@ if __name__ == "__main__":
 
             _, predicted = torch.max(output.data, 1)
             for i in range(len(labels)):
-                labels_cpu = labels.cpu()
-                preds_cpu = predicted.cpu()
-                y_true.append(labels_cpu[i].item())
-                y_pred.append(preds_cpu[i].item())
+                y_true.append(labels[i].item())
+                y_pred.append(predicted[i].item())
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
             test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
