@@ -158,7 +158,7 @@ if __name__ == "__main__":
     CLASSIFY = True
     fact = 'cp'
     R_LIST = [0, 100]
-    ratios = [0.025, 0.05, 0.10, 0.2]
+    intervals = [1, 3, 5, 8, 10, 12, 15, 20]
 
     now = datetime.now()
     run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_runn'
@@ -171,15 +171,6 @@ if __name__ == "__main__":
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         print(f'RUN R: {R}')
         for r in ratios:
-            print(f'ratio: {r}')
-            un_vals = int(r*190000)
-            un_vals_other = 190000 - un_vals 
-
-            sup_vals = int(r*200000)
-            sup_vals_other = int(18192 + 200000 - sup_vals)
-            print(sup_vals + sup_vals_other)
-            trainset_un, testset_un, valset_un, _ = torch.utils.data.random_split(combined_unsupervised_train, [un_vals, 25000, 17077, un_vals_other])
-            trainset_sup, _ = torch.utils.data.random_split(training_supset, [sup_vals, sup_vals_other])
             current_pams = count_parameters(model)
             print(f'num params: {current_pams}')
             comp_ratio = num_params_uncompressed/current_pams

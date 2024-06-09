@@ -400,6 +400,8 @@ def conf_matrix(y_true, y_pred):
     cf_matrix = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index = [i for i in classes],
                         columns = [i for i in classes])
-    plt.figure(figsize = (10,6))
-    sn.heatmap(df_cm, annot=True)
-    plt.savefig('imgs/conf_matrix.png')
+
+    # plt.figure(figsize = (10,6))
+    # sn.heatmap(df_cm, annot=True)
+    # plt.savefig('imgs/conf_matrix.png')
+    return df_cm
