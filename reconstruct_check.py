@@ -1,4 +1,4 @@
-import torch
+import torch, argparse
 from torchvision import datasets, transforms
 from models.model_56x56_TD import AutoEncoder56_TD, Classifier56_TD
 from models.model_56x56 import AutoEncoder56, Classifier56
@@ -14,6 +14,16 @@ import numpy as np
 from models.resnet50 import ResNet
 from models.convnext import ConvNext
 from models.convnext_ae import FCMAE
+
+
+def get_args_parser():
+    parser = argparse.ArgumentParser('training', add_help=False)
+
+    # Model parameters
+    parser.add_argument('--model', default='', type=str, metavar='MODEL',
+                        help='Name of model to train')
+
+    return parser
 
 def save_image(tensor, filename):
     # Convert the tensor to a NumPy array and move channels to the last dimension
@@ -75,6 +85,10 @@ def eval_mae(model, testset, batch_size=128):
 
 
 if __name__ == "__main__":
+
+    parser = get_args_parser()
+    args = parser.parse_args()
+
     device = torch.device("cuda:0")
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
@@ -94,7 +108,7 @@ if __name__ == "__main__":
     # model = nn.DataParallel(AutoEncoder56())
     # model = AutoEncoder56_TD(R=20, in_channels=1, channels=[16, 32, 64]).to(device) 
     # model.load_state_dict(torch.load('trained_models/RUN_8_5_13_42/MAE_RUN_default_R0_8_5_13_42_epoch_40.pth', map_location=torch.device('cpu')))
-    model.load_state_dict(torch.load('trained_models/model_comparison/RUN_28_5_8_18_exprun/MAE_RUN_unet_32_R0_28_5_8_18_epoch_40.pth'))
+    model.load_state_dict(torch.load(f'{args.model}'))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
     # model.load_state_dict(torch.load('trained_models/250_epoch_01_05_11am.pth', map_location=torch.device('cpu')))
 
