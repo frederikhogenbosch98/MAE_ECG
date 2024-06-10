@@ -61,6 +61,8 @@ class AutoEncoder11_UN(nn.Module):
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
             nn.Upsample(scale_factor=2, mode='bilinear'),
+
+
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
@@ -70,6 +72,8 @@ class AutoEncoder11_UN(nn.Module):
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
+
+
             nn.Conv2d(channels[1], channels[1], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
@@ -79,6 +83,8 @@ class AutoEncoder11_UN(nn.Module):
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
+
+
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
@@ -86,6 +92,8 @@ class AutoEncoder11_UN(nn.Module):
             nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+
+            
             # Corresponds to LAYER 1 in Encoder
             nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1),
             nn.Sigmoid(),

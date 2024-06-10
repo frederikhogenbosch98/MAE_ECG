@@ -62,6 +62,8 @@ class AutoEncoder11(nn.Module):
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
             nn.Upsample(scale_factor=2, mode='bilinear'),
+
+
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=False, factorization=factorization),
             nn.BatchNorm2d(channels[2]),
             nn.GELU(),
@@ -71,6 +73,8 @@ class AutoEncoder11(nn.Module):
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
+
+
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[2], channels[1], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=False, factorization=factorization),
             nn.BatchNorm2d(channels[1]),
             nn.GELU(),
@@ -80,6 +84,8 @@ class AutoEncoder11(nn.Module):
             nn.GELU(),
             # Corresponds to LAYER 4 in Encoder
             nn.Upsample(scale_factor=2, mode='bilinear'),
+
+
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[1], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=False, factorization=factorization),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
@@ -87,6 +93,8 @@ class AutoEncoder11(nn.Module):
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], channels[0], kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=False, factorization=factorization),
             nn.BatchNorm2d(channels[0]),
             nn.GELU(),
+
+            
             # Corresponds to LAYER 1 in Encoder
             tltorch.FactorizedConv.from_conv(nn.Conv2d(channels[0], in_channels, kernel_size=3, stride=1, padding=1), rank=R, decompose_weights=False, factorization=factorization),
             nn.Sigmoid(),

@@ -4,6 +4,9 @@ from fvcore.nn import FlopCountAnalysis
 import sys, os
 from pprint import pprint
 # from torch_flops import TorchFLOPsByFX
+from tabulate import tabulate
+from collections import Counter
+from decomposed_conv import CPDConvolution2D, UNConvModel, TensorlyConv, TLConvModel
 
 sys.path.append(os.path.abspath(os.path.join('..', 'models')))
 sys.path.append(os.path.abspath(os.path.join('..')))
@@ -14,21 +17,51 @@ from resnet50 import ResNet
 from UNet import UNet
 from convnext import ConvNext
 from _11am_un import AutoEncoder11_UN
-from _11am_back import AutoEncoder11
+# from _11am_back import AutoEncoder11
+from _11am_corr import AutoEncoder11
 
 x = torch.randn(1, 1, 128, 128)
 
 
-flops = FlopCountAnalysis(AutoEncoder11_UN(), x)
-print(f"FLOPs: {flops.total()}")
-current_pams = count_parameters(AutoEncoder11_UN())
-print(f'num params: {current_pams}')
+# flops = FlopCountAnalysis(AutoEncoder11_UN(), x)
+# print(f"FLOPs: {flops.total()}")
+# current_pams = count_parameters(AutoEncoder11_UN())
+# print(f'num params: {current_pams}')
 
-for r in [5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 175, 200]:
+for r in [0, 5, 10, 15, 20, 25, 35, 50, 75, 100, 125, 150, 175, 200]:
 
-    flops = FlopCountAnalysis(AutoEncoder11(R=r), x)
+    conv = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=7, stride=1, padding=1) 
+    if r == 0:
+       flops = FlopCountAnalysis(AutoEncoder11_UN(), x) 
+    #    flops = FlopCountAnalysis(UNConvModel(), x) 
+    elif r == 1:
+        flops = FlopCountAnalysis(TensorlyConv(conv, R=100), x)
+    elif r == 4:
+        flops = FlopCountAnalysis(TLConvModel(), x)
+    else:
+        flops = FlopCountAnalysis(AutoEncoder11(R=r), x)
+        # flops = FlopCountAnalysis(CPDConvolution2D(conv=conv,R=r), x)
+
 
     # print(f"FLOPs: {flops.total()}, R: {r}")
-    current_pams = count_parameters(AutoEncoder11(R=r))
-    print(f'num params: {current_pams}')
+    # current_pams = count_parameters(AutoEncoder11(R=r))
+    # print(f'num params: {current_pams}')
     # print(flops.by_module())
+    # Get the results
+    print(r)
+    total_flops = flops.total()
+    flops_by_operator = flops.by_operator()
+    flops_by_module = flops.by_module()
+    flops_by_module_and_operator = flops.by_module_and_operator()
+
+    # Pretty print the total FLOPs
+    print("Total FLOPs:", total_flops)
+
+    # Pretty print FLOPs by operator
+    print("\nFLOPs by Operator:")
+    print(tabulate(flops_by_operator.items(), headers=["Operator", "FLOPs"], tablefmt="pretty"))
+
+    # Pretty print FLOPs by module
+    # print("\nFLOPs by Module:")
+    # print(tabulate(flops_by_module.items(), headers=["Module", "FLOPs"], tablefmt="pretty"))
+
