@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from models._11am_un import AutoEncoder11_UN, Classifier_UN
 from models._11am_back import AutoEncoder11
+import torch.nn as nn
 
 if __name__ == "__main__":
 
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     for i in R_0_classifiers:
         mae = AutoEncoder11_UN()
         classifier = Classifier_UN(autoencoder=mae,in_features=256, out_features=5)
+        classifier = nn.DataParallel(classifier, device_ids=[0,2,3]).to(device)
 
         classifier.load_state_dict(torch.load(f'trained_models/compressed/RUN_8_6_11_15_full_training_runn/{i}'))
 
