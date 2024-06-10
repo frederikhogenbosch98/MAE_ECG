@@ -178,9 +178,10 @@ def plot_adam_loss():
     0.0021498, 0.0021429, 0.0021406, 0.0021506, 0.0021425]
 
 
-    plt.plot(epochs, loss_un, label='uncompressed adam')
-    plt.plot(epochs, loss_cp, label='cpd adam')
-    plt.title('Adam training and validation loss uncompressed vs cpd (24x compressed)')
+    plt.figure(figsize=(10,6))
+    plt.plot(epochs, loss_un, label='Uncompressed')
+    plt.plot(epochs, loss_cp, label='CPD')
+    plt.title('Adam validation loss uncompressed vs CPD')
     plt.xlabel('epochs')
     plt.ylabel('loss')
     plt.legend()
@@ -207,10 +208,10 @@ def plot_sgd_loss():
     0.0095301, 0.0095284, 0.0095184, 0.0094924, 0.0094900,
     0.0094835
     ]
-
-    plt.plot(epochs, loss_sgd_un, label='uncompressed sgd')
-    plt.plot(epochs, loss_sgd_cp, label='cpd sgd')
-    plt.title('SGD training and validation loss uncompressed vs cpd (24x compressed)')
+    plt.figure(figsize=(10,6))
+    plt.plot(epochs, loss_sgd_un, label='Uncompressed')
+    plt.plot(epochs, loss_sgd_cp, label='CPD')
+    plt.title('SGD validation loss uncompressed vs CPD')
     plt.xlabel('epochs')
     plt.ylabel('loss')
     plt.legend()
@@ -358,7 +359,7 @@ def train_val_loss(model_name):
 
 
 
-    plt.figure(figsize=(10,9))
+    plt.figure(figsize=(10,6))
     plt.plot(epochs, train_basic, label='training')
     plt.plot(epochs, val_basic, label='validation')
     plt.title(f'Training and validation loss {model_name} model')
@@ -371,12 +372,12 @@ def train_val_loss(model_name):
 
 if __name__ == '__main__':
     # plot_compression_cp()
-    plot_accs_cp()
+    # plot_accs_cp()
     # plot_compression_tucker()
     # plot_accs_tucker()
     # plot_mses_cp()
-    # plot_adam_loss()
-    # plot_sgd_loss()
+    plot_adam_loss()
+    plot_sgd_loss()
     # classifier_adam_vs_sgd()
     # sgd_vs_adam_loss()
     # exp1_val_comp()

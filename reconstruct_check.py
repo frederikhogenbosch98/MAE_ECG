@@ -5,7 +5,7 @@ from models.model_56x56 import AutoEncoder56, Classifier56
 from print_funs import plot_losses, plotimg, plot_single_img, count_parameters
 import torch.nn as nn
 # from models._11am import AutoEncoder11
-from models._11am_back import AutoEncoder11
+from models._11am_corr import AutoEncoder11
 from models._11am_un import AutoEncoder11_UN
 from models.convnext import ConvNext
 from models.UNet import UNet
