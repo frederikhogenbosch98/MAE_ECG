@@ -30,7 +30,7 @@ def plot_accs_cp():
     ax.tick_params('y')
     ax.set_ylim(93.5, 95.5) 
 
-    ax.axhline(94.41, color='red', linestyle='-', label='uncompressed')
+    ax.axhline(94.48, color='red', linestyle='-', label='uncompressed')
     ax.set_title('Accuracies at various compression ratios')
     # plt.xticks(c_ratios)
     # ax.set_xlim([205, 1])
@@ -162,20 +162,22 @@ def plot_sgd_loss():
 
 
 def plot_adam_loss():
-    num_epochs = 30
+    num_epochs = 25
     epochs = np.arange(num_epochs)
     loss_un = [0.0238849, 0.0022764, 0.0016823, 0.0008592, 0.0006434,
     0.0005292, 0.0004069, 0.0004447, 0.0004904, 0.0004808,
     0.0002920, 0.0003081, 0.0003146, 0.0002733, 0.0003427,
     0.0003022, 0.0003125, 0.0005739, 0.0003186, 0.0002659,
-    0.0002083, 0.0002131, 0.0002058, 0.0002133, 0.0002020,
-    0.0002014, 0.0002023, 0.0002001, 0.0002032, 0.0002037]
+    0.0002083, 0.0002131, 0.0002058, 0.0002133, 0.0002020]
+    #,
+    #0.0002014, 0.0002023, 0.0002001, 0.0002032, 0.0002037]
     loss_cp = [0.0098841, 0.0055452, 0.0048496, 0.0054096, 0.0036840,
     0.0034440, 0.0030900, 0.0030042, 0.0028229, 0.0027689,
     0.0029659, 0.0026524, 0.0025764, 0.0025059, 0.0023866,
     0.0024003, 0.0024250, 0.0023358, 0.0025048, 0.0022827,
-    0.0021646, 0.0021549, 0.0021544, 0.0021449, 0.0021587,
-    0.0021498, 0.0021429, 0.0021406, 0.0021506, 0.0021425]
+    0.0021646, 0.0021549, 0.0021544, 0.0021449, 0.0021587]
+    #,
+    #0.0021498, 0.0021429, 0.0021406, 0.0021506, 0.0021425]
 
 
     plt.figure(figsize=(10,6))
@@ -370,14 +372,17 @@ def train_val_loss(model_name):
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
+
+
+
 if __name__ == '__main__':
     # plot_compression_cp()
-    # plot_accs_cp()
+    plot_accs_cp()
     # plot_compression_tucker()
     # plot_accs_tucker()
     # plot_mses_cp()
-    plot_adam_loss()
-    plot_sgd_loss()
+    # plot_adam_loss()
+    # plot_sgd_loss()
     # classifier_adam_vs_sgd()
     # sgd_vs_adam_loss()
     # exp1_val_comp()
