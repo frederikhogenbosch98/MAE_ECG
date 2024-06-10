@@ -12,7 +12,7 @@ import sys, os
 
 sys.path.append(os.path.abspath(os.path.join('..')))
 
-from models._11am_back import AutoEncoder11
+from models._11am_corr import AutoEncoder11
 from models._11am_un import AutoEncoder11_UN, Classifier_UN
 
 _CONVOLUTION = {1: F.conv1d, 2: F.conv2d, 3: F.conv3d}

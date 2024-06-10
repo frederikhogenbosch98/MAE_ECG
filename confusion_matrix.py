@@ -27,6 +27,7 @@ if __name__ == "__main__":
     "CLASSIFIER_RUN_cp_R100_8_6_23_2.pth",
     "CLASSIFIER_RUN_cp_R100_8_6_23_50.pth"]
     
+
     device = torch.device("cuda:0")
 
     transform = transforms.Compose([
@@ -41,40 +42,40 @@ if __name__ == "__main__":
     testset_sup = mitbih_dataset_test
 
     # mae = AutoEncoder11(R=100, factorization='cp')
-    for i in R_100_classifier:
-        print(i)
-        mae = AutoEncoder11(R=100)
-        classifier = Classifier_UN(autoencoder=mae,in_features=256, out_features=5)
-        classifier = nn.DataParallel(classifier, device_ids=[0,2,3]).to(device)
+    # for i in R_100_classifier:
+    mae = AutoEncoder11(R=100)
+    classifier = Classifier_UN(autoencoder=mae,in_features=256, out_features=5)
+    classifier = nn.DataParallel(classifier, device_ids=[0,2,3]).to(device)
 
-        classifier.load_state_dict(torch.load(f'trained_models/compressed/RUN_8_6_11_15_full_training_runn/{i}'))
+    # classifier.load_state_dict(torch.load(f'trained_models/compressed/RUN_8_6_11_15_full_training_runn/{i}'))
+    classifier.load_state_dict(torch.load(f'trained_models/compressed/RUN_8_6_11_15_full_training_runn/{i}'))
 
-        classifier.to(device)
-        classifier.eval()
+    classifier.to(device)
+    classifier.eval()
 
-        test_loader = torch.utils.data.DataLoader(testset_sup, 
-                                                batch_size=128, 
-                                                shuffle=True)
-        y_pred = []
-        y_true = []
-        correct = 0
-        total = 0
-        test_accuracy = []
-        with torch.no_grad():
-            for images, features, labels in test_loader:
-                images, features, labels = images.to(device), features.to(device), labels.to(device)
-                output = classifier(images, features)
+    test_loader = torch.utils.data.DataLoader(testset_sup, 
+                                            batch_size=128, 
+                                            shuffle=True)
+    y_pred = []
+    y_true = []
+    correct = 0
+    total = 0
+    test_accuracy = []
+    with torch.no_grad():
+        for images, features, labels in test_loader:
+            images, features, labels = images.to(device), features.to(device), labels.to(device)
+            output = classifier(images, features)
 
-                _, predicted = torch.max(output.data, 1)
-                for i in range(len(labels)):
-                    y_true.append(labels[i].item())
-                    y_pred.append(predicted[i].item())
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-                test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
-            
-        print(f'acc: {np.mean(test_accuracy)}')
+            _, predicted = torch.max(output.data, 1)
+            for i in range(len(labels)):
+                y_true.append(labels[i].item())
+                y_pred.append(predicted[i].item())
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            test_accuracy.append((predicted == labels).sum().item() / predicted.size(0))
+        
+    print(f'acc: {np.mean(test_accuracy)}')
 
-        accuracy = 100 * correct / total
-        print(f'Accuracy: {np.round(accuracy,3)}%')
-        # print(conf_matrix(y_true, y_pred))
+    accuracy = 100 * correct / total
+    print(f'Accuracy: {np.round(accuracy,3)}%')
+    print(conf_matrix(y_true, y_pred))

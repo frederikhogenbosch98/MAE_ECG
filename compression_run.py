@@ -154,13 +154,13 @@ if __name__ == "__main__":
     num_params_uncompressed = 9411649#2355745
 
     
-    R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100,125, 150, 200] # 
+    R_LIST = [150, 200] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
 
     CLASSIFY = True
     fact = 'cp'
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_comp_run_rerun_lowerlr2_new_model'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_comp_run_rerun_150_200'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
