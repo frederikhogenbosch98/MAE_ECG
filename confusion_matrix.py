@@ -12,6 +12,20 @@ if __name__ == "__main__":
                        'CLASSIFIER_RUN_cp_R0_8_6_12_37.pth', 'CLASSIFIER_RUN_cp_R0_8_6_13_2.pth', 'CLASSIFIER_RUN_cp_R0_8_6_13_28.pth', \
                         'CLASSIFIER_RUN_cp_R0_8_6_13_59.pth', 'CLASSIFIER_RUN_cp_R0_8_6_14_30.pth', 'CLASSIFIER_RUN_cp_R0_8_6_15_2.pth',\
                             'CLASSIFIER_RUN_cp_R0_8_6_15_44.pth', 'CLASSIFIER_RUN_cp_R0_8_6_16_27.pth', 'CLASSIFIER_RUN_cp_R0_8_6_17_11.pth']
+
+
+    R_100_classifier = ["CLASSIFIER_RUN_cp_R100_8_6_17_37.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_18_1.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_18_25.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_18_52.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_19_20.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_19_47.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_20_21.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_20_55.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_21_29.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_22_15.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_23_2.pth",
+    "CLASSIFIER_RUN_cp_R100_8_6_23_50.pth"]
     
     device = torch.device("cuda:0")
 
@@ -27,8 +41,9 @@ if __name__ == "__main__":
     testset_sup = mitbih_dataset_test
 
     # mae = AutoEncoder11(R=100, factorization='cp')
-    for i in R_0_classifiers:
-        mae = AutoEncoder11_UN()
+    for i in R_100_classifier:
+        print(i)
+        mae = AutoEncoder11(R=100)
         classifier = Classifier_UN(autoencoder=mae,in_features=256, out_features=5)
         classifier = nn.DataParallel(classifier, device_ids=[0,2,3]).to(device)
 
