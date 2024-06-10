@@ -13,7 +13,7 @@ if __name__ == "__main__":
                         'CLASSIFIER_RUN_cp_R0_8_6_13_59.pth', 'CLASSIFIER_RUN_cp_R0_8_6_14_30.pth', 'CLASSIFIER_RUN_cp_R0_8_6_15_2.pth',\
                             'CLASSIFIER_RUN_cp_R0_8_6_15_44.pth', 'CLASSIFIER_RUN_cp_R0_8_6_16_27.pth', 'CLASSIFIER_RUN_cp_R0_8_6_17_11.pth']
     
-    device = torch.device("cpu")
+    device = torch.device("cuda:0")
 
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
