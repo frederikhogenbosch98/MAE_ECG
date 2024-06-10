@@ -60,4 +60,4 @@ if __name__ == "__main__":
 
         accuracy = 100 * correct / total
         print(f'Accuracy: {np.round(accuracy,3)}%')
-        print(conf_matrix(y_true, y_pred))
+        # print(conf_matrix(y_true, y_pred))
