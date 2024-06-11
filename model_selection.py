@@ -155,16 +155,16 @@ if __name__ == "__main__":
     class_losses_run = np.zeros((4, num_epochs_classifier))
     class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [ ResNet()]# AutoEncoder11_UN()]#,  ConvNext(),UNet(), ResNet() ] # ConvNext(),
+    models = [AutoEncoder11_UN()]#,  ConvNext(),UNet(), ResNet() ] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
-    lr = [1e-4, 1e-4, 1e-4, 1e-4]
+    lr = [5e-5, 1e-4, 1e-4, 1e-4]
 
     CLASSIFY = True
     NUM_RUNS = args.num_runs
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_uncompressed_baseline'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_Basic'
     for i, model in enumerate(models):
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
