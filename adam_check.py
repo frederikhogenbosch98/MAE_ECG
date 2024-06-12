@@ -168,10 +168,10 @@ if __name__ == "__main__":
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
         if R == 0:
-            model = AutoEncoder11_UN(channels=[16,32,64,128])
+            model = AutoEncoder11_UN(channels=[96,192,96*3,768])
             num_params_uncompressed = count_parameters(model)
         else:
-            model = AutoEncoder11(R=R, factorization='cp', channels=[16,32,64,128])
+            model = AutoEncoder11(R=R, factorization='cp', channels=[96,192,96*3,768])
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
         current_pams = count_parameters(model)
