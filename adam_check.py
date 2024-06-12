@@ -163,15 +163,15 @@ if __name__ == "__main__":
     fact = 'cp'
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_adam_check'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_adam_convergence'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
         if R == 0:
-            model = AutoEncoder11_UN(channels=[96,192,96*3,768])
+            model = AutoEncoder11_UN(channels=[64, 128, 256, 512])
             num_params_uncompressed = count_parameters(model)
         else:
-            model = AutoEncoder11(R=R, factorization='cp', channels=[96,192,96*3,768])
+            model = AutoEncoder11(R=R, factorization='cp', channels=[64, 128, 256, 512])
         model = nn.DataParallel(model, device_ids=device_ids).to(device)
         mses = []
         current_pams = count_parameters(model)
