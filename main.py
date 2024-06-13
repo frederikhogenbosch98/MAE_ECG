@@ -190,8 +190,8 @@ def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valse
             t_epoch_end = time.time()
 
 
-            if epoch+1 in [1, 3, 5, 8, 10, 12, 15, 20]:
-                eval_mae(model, testset,R,device=device)
+            
+            print(f'epoch test mse: {epoch+1}: {eval_mae(model, testset,R,device=device)}')
 
             print('epoch {}: training loss: {:.7f}, val loss: {:.7f}, duration: {:.2f}s, lr: {:.2e}'.format(epoch+1, epoch_loss, validation_loss, t_epoch_end - t_epoch_start, optimizer.param_groups[0]['lr']))
 
