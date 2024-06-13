@@ -157,13 +157,13 @@ if __name__ == "__main__":
     num_params_uncompressed = 9411649#2355745
 
     
-    R_LIST = [0, args.rank] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
+    R_LIST = [args.rank] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
     # R_LIST = [args.rank]
     CLASSIFY = True
     fact = 'cp'
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_adam_convergence'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_adam_convergence_extra_rank_run'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
