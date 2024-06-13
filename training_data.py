@@ -186,7 +186,7 @@ if __name__ == "__main__":
             print(f'compression ratio: {comp_ratio}')
 
             for j in range(args.num_runs):
-                os.makedirs(f'{run_dir}/R_{R}/{j}', exist_ok=True)
+                os.makedirs(f'{run_dir}/R_{R}/{r}/{j}', exist_ok=True)
                 mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                             trainset=trainset_un,
                                                             valset=valset_un,
@@ -205,8 +205,8 @@ if __name__ == "__main__":
                                                             device = device,
                                                             step_size=15)
                 
-                train_save_folder = f'{run_dir}/R_{R}/{j}/MAE_losses_train.npy'
-                val_save_folder = f'{run_dir}/R_{R}/{j}/MAE_losses_val.npy'
+                train_save_folder = f'{run_dir}/R_{R}/{r}/{j}/MAE_losses_train.npy'
+                val_save_folder = f'{run_dir}/R_{R}/{r}/{j}/MAE_losses_val.npy'
                 np.save(train_save_folder, mae_losses)
                 np.save(val_save_folder, mae_val_losses)
 
@@ -243,21 +243,11 @@ if __name__ == "__main__":
                                                 testset=testset_sup)
 
                     accuracy = eval_classifier(classifier, testset_sup, device=device)
-                    accuracies.append(accuracy)
 
 
-
-            save_str = f'''compression ratio: {comp_ratio} | num_params: {current_pams} | R: {R} |
-                        fact: {fact} | avg accuracy: {np.mean(accuracies)} 
-                        (last) epoch time: {epoch_time}'''
-            with open(f"{run_dir}/run_info_{R}.txt", "w") as file:
-                file.write(save_str)
-
-
-    
-
-
-
-
-
+                save_str = f'''compression ratio: {comp_ratio} | num_params: {current_pams} | R: {R} |
+                            fact: {fact} | avg accuracy: {accuracy} 
+                            (last) epoch time: {epoch_time}'''
+                with open(f"{run_dir}/R_{R}/{r}/{j}/run_info_{R}_{j}_{r}.txt", "w") as file:
+                    file.write(save_str)
 

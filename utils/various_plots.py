@@ -493,11 +493,31 @@ def convergence():
     ]
 
     run_R100_1 = [
-    0.009032162863534532, 0.010074321162312265, 0.009262143579068599, 0.007542194836082708, 0.012771689188390414,
-    0.009747657011783189, 0.0167465095342326, 0.01812405521193527, 0.01708165938865247, 0.011629419828473705,
-    0.01322788517490669, 0.011743548524489588, 0.013078930367864379, 0.01601212652916162, 0.011868759292487242,
-    0.00539645343563446, 0.006136462932318726, 0.005609218052110062, 0.007215510954134833, 0.00595991855614625,
-    0.005247590163907077, 0.005595575123857372, 0.0053195732021463805, 0.011310694760273679, 0.0056299172866629875
+    0.0134640,
+    0.0090321,
+    0.0075955,
+    0.0068110,
+    0.0063761,
+    0.0060866,
+    0.0057820,
+    0.0057011,
+    0.0055994,
+    0.0055025,
+    0.0057354,
+    0.0076205,
+    0.0069071,
+    0.0068299,
+    0.0062460,
+    0.0050240,
+    0.0050361,
+    0.0052032,
+    0.0052591,
+    0.0053761,
+    0.0052960,
+    0.0051585,
+    0.0052893,
+    0.0051556,
+    0.005221
     ]
     run_R100_2 = [
     0.013483163818922934, 0.009034644240855825, 0.007521951656320445, 0.006928217221875394, 0.006231341310888843, 0.006114583543981772,
@@ -533,9 +553,88 @@ def convergence():
     # plt.fill_between(x_x_values_R0values, mean_values - std_devs, mean_values + std_devs, color='blue', alpha=0.2, label='Standard Deviation')
 
     plt.figure(figsize=(10,6))
-    # plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
     plt.errorbar(range(len(mean_values_R100)), mean_values_R100, yerr=std_devs_R100, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='CPD')
     plt.title(f'Three run validation loss average for the CPD model.')
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend()
+    # plt.yscale('log')
+    # plt.ylim([0.0001, 0.0005])
+    plt.show()
+
+
+def MSE_conv():
+    epochs = np.arange(1, 26)
+    mses_1 = [
+    0.013427,
+    0.009016,
+    0.007525,
+    0.006782,
+    0.00633,
+    0.00604,
+    0.006236,
+    0.006208,
+    0.006436,
+    0.005603,
+    0.006192,
+    0.007921,
+    0.006378,
+    0.00651,
+    0.007108,
+    0.00503,
+    0.004851,
+    0.005164,
+    0.005063,
+    0.004986,
+    0.005137,
+    0.005431,
+    0.005188,
+    0.005,
+    0.005357
+    ]
+
+    mses_2 = [
+    0.013407,
+    0.00898,
+    0.007557,
+    0.006777,
+    0.006341,
+    0.006061,
+    0.005759,
+    0.005672,
+    0.005574,
+    0.005479,
+    0.005723,
+    0.007591,
+    0.006877,
+    0.006805,
+    0.006221,
+    0.005003,
+    0.005015,
+    0.005173,
+    0.00523,
+    0.005349,
+    0.005268,
+    0.005134,
+    0.005267,
+    0.005128,
+    0.005221
+
+    ]
+
+
+    mses_1 = np.array(mses_1)
+    mses_2 = np.array(mses_2)
+    
+    stacked_arrays = np.vstack((mses_1, mses_2))
+    
+    mean_values_R0 = np.mean(stacked_arrays, axis=0)
+    std_devs_R0 = np.std(stacked_arrays, axis=0)
+
+    plt.figure(figsize=(10,6))
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
+    plt.title(f'MSE of the test set for saved model at each epoch for a 25 epoch run.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
