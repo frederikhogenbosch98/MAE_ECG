@@ -161,7 +161,7 @@ if __name__ == "__main__":
     ratios = [0.025, 0.05, 0.10, 0.2]
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_runn'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_run_test'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         if R == 0: 
@@ -203,7 +203,7 @@ if __name__ == "__main__":
                                                             run_dir = run_dir,
                                                             contrun = args.contrun,
                                                             device = device,
-                                                            step_size=15)
+                                                            step_size=10)
                 
                 train_save_folder = f'{run_dir}/R_{R}/{r}/{j}/MAE_losses_train.npy'
                 val_save_folder = f'{run_dir}/R_{R}/{r}/{j}/MAE_losses_val.npy'
