@@ -161,7 +161,7 @@ if __name__ == "__main__":
     ratios = [0.025, 0.05, 0.10, 0.2]
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_run_test'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_run_final_night_run'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         if R == 0: 
