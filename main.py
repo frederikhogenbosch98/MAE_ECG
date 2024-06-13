@@ -86,7 +86,7 @@ def get_args_parser():
     return parser
 
 
-def train_mae(model, trainset, run_dir, device, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, step_size=15):
+def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, step_size=15):
     now = datetime.now()
 
     if TRAIN_MAE:
