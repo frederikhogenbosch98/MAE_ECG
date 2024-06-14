@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     CLASSIFY = True
     fact = 'cp'
-    R_LIST = [0, 100]
+    R_LIST = [100]
     ratios = [1]#, 0.025, 0.05, 0.10, 0.2]
 
     now = datetime.now()
