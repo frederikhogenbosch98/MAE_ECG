@@ -82,7 +82,7 @@ def get_args_parser():
 
 
 if __name__ == "__main__":
-    torch.manual_seed(42)
+    # torch.manual_seed(42)
 
     parser = get_args_parser()
     args = parser.parse_args()
