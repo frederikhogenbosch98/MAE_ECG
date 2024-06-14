@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     CLASSIFY = True
     fact = 'cp'
-    R_LIST = [0, 100]
+    R_LIST = [100]
 
     now = datetime.now()
     run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_runn'

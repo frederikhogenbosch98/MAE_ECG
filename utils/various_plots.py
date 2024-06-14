@@ -651,7 +651,7 @@ def data_eff_0025_un():
     ]
 
     run_full_1 = [
-        
+
     ]
 
     run_R0_0 = np.array(run_R0_0)
@@ -662,8 +662,8 @@ def data_eff_0025_un():
     mean_values_R0 = np.mean(stacked_arrays_R0, axis=0)
     std_devs_R0 = np.std(stacked_arrays_R0, axis=0)
 
-    run_R100_0 = np.array(run_R100_0)
-    run_R100_1 = np.array(run_R100_1)
+    run_full_0 = np.array(run_full_0)
+    run_full_1 = np.array(run_full_1)
     
     stacked_arrays_full = np.vstack((run_full_0, run_full_1))
     
@@ -677,7 +677,7 @@ def data_eff_0025_un():
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -723,7 +723,7 @@ def data_eff_005_un():
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -766,7 +766,7 @@ def data_eff_01_un():
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -813,7 +813,7 @@ def data_eff_02_un():
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -821,10 +821,10 @@ def data_eff_02_un():
 def data_eff_0025_cp():
     epochs = np.arange(1, 26)
     run_R0_0 = [
-0.18585793078626328, 0.10652055422586587, 0.07844931489612442, 0.06588304615036633, 0.04962959465970338, 0.041235051906273947, 0.035971795119257494, 0.032904287283621575, 0.027644402219616622, 0.03646529876051285, 0.026593535183597597, 0.023458556970322363, 0.021464776830736707, 0.021246233763492918, 0.020683614822673828, 0.020695415020330194, 0.019879103756630847, 0.019188571080727752, 0.01817287570695087, 0.018040985170809182, 0.0177487940204369, 0.017816194867322683, 0.01755490651336851, 0.017151290016477767, 0.017217007776683155    ]
-
+0.21260079158677384, 0.17589802426424728, 0.14475460695621453, 0.1265029964319903, 0.11811670842077943, 0.1019776950935475, 0.09249873926085708, 0.07581994963174278, 0.06702909184940568, 0.06128646457567702, 0.05872883401240015, 0.057631942694254666, 0.056873477123681654, 0.05550550383375988, 0.053942634020830306, 0.0532254001439061, 0.0526720672117667, 0.0504055305254793, 0.04950313443169561, 0.049550420298859144, 0.048401854892823656, 0.04860859642146363, 0.048834115475129974, 0.04737852363639793, 0.04709687339278416
+    ]
     run_R0_1 = [
-0.17483145060504063, 0.09708518830531095, 0.07157399551580276, 0.058752242733815546, 0.04994264087858605, 0.04149998025453299, 0.035702222574378106, 0.03166551173220646, 0.0279148370490013, 0.028894325606810715, 0.023911526342904624, 0.023021903715243718, 0.022473885711404, 0.022123970878197882, 0.02113316931116687, 0.02040967849570966, 0.020058580100778052, 0.019676390089870804, 0.01913906030220324, 0.018748983890673327, 0.018116129952850293, 0.018001386988924412, 0.018059848661103047, 0.018095386108262355, 0.017639519524492605
+0.2217566000681931, 0.1750154065307119, 0.1560437625251484, 0.1356442055816623, 0.13138519961960862, 0.12306541533635805, 0.11186794344737838, 0.10313221565349855, 0.09133036927138292, 0.08293590952558876, 0.08019992531108558, 0.07687376827828783, 0.0768788489782783, 0.07340650307262726, 0.07215598439290023, 0.0717783824700958, 0.06838596052494374, 0.06696601785444967, 0.06551583588940063, 0.06335525840883854, 0.06324455822158796, 0.06344373716288933, 0.06306835285738549, 0.062209383259247776, 0.06277305464115049
     ]
 
     run_full_0 = [
@@ -843,8 +843,8 @@ def data_eff_0025_cp():
     mean_values_R0 = np.mean(stacked_arrays_R0, axis=0)
     std_devs_R0 = np.std(stacked_arrays_R0, axis=0)
 
-    run_R100_0 = np.array(run_R100_0)
-    run_R100_1 = np.array(run_R100_1)
+    run_full_0 = np.array(run_full_0)
+    run_full_1 = np.array(run_full_1)
     
     stacked_arrays_full = np.vstack((run_full_0, run_full_1))
     
@@ -852,13 +852,13 @@ def data_eff_0025_cp():
     std_devs_full = np.std(stacked_arrays_full, axis=0)
 
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')
     plt.title(f'Three run validation loss average at a 0.025% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -867,10 +867,10 @@ def data_eff_0025_cp():
 def data_eff_005_cp():
     epochs = np.arange(1, 26)
     run_R0_0 = [
-0.12212805047133017, 0.06596265055722177, 0.04532163212319172, 0.0329821959245681, 0.022632523364727597, 0.020640315635120757, 0.01671506531888668, 0.01275812768211954, 0.011518084104451294, 0.010185760203422812, 0.009581978332922984, 0.00926615006955778, 0.008906169962963622, 0.008746837111396219, 0.008598542195181066, 0.008566361452236491, 0.008193161286048928, 0.008047881981913878, 0.007886174465784034, 0.00786796494298141, 0.00754580862099501, 0.007440753591430092, 0.007432936501723668, 0.007356523714180619, 0.007361397307707314
+0.1895564476709466, 0.12702552915673532, 0.10814193058613907, 0.08554420918671261, 0.06855139012319837, 0.05458577742729546, 0.04484889755889258, 0.03769431274072092, 0.031346013548852074, 0.02734299870021936, 0.02617858699944208, 0.025853344210444634, 0.02462314321710388, 0.02380350498186887, 0.023259904614958447, 0.022655888040044335, 0.022154787766721053, 0.021885073086648346, 0.02104355112340332, 0.020941003395734546, 0.020544190733421567, 0.020218051330944432, 0.02011220395569832, 0.020325173297021666, 0.019847741857395313
     ]
     run_R0_1 = [
-0.09398649485201846, 0.08880237395830272, 0.05284576256908186, 0.032159729117770076, 0.038055994747889475, 0.026810169818892324, 0.018250090319246844, 0.01553564014405958, 0.013314778522619452, 0.014097757320315537, 0.011306691940483596, 0.01086446216508049, 0.010792037470165548, 0.010210592402283244, 0.009985664520795967, 0.009674006693633221, 0.009541348984542772, 0.009225421945629947, 0.008993951040951905, 0.008776255771967136, 0.008566924096887639, 0.00858568600735873, 0.008690850505392755, 0.008364766071944139, 0.008372936439184235
+0.1925614006307314, 0.1427568495221235, 0.1390130975374595, 0.11544206782232203, 0.09205388898134524, 0.07076036289431155, 0.05938681573942701, 0.045511378308345514, 0.038183879824284894, 0.03098645524783405, 0.028942753549006627, 0.027878386219429518, 0.027504017871073254, 0.026105133861210834, 0.02503814158087827, 0.024296767777881815, 0.023525555522613623, 0.022870917175349736, 0.022207443643885535, 0.021662343184900464, 0.021950324809699752, 0.02122229291619689, 0.021625029188529273, 0.021381986357300903, 0.020766931005861067
     ]
 
     run_full_0 = [
@@ -899,25 +899,25 @@ def data_eff_005_cp():
 
 
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')    
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')    
     plt.title(f'Three run validation loss average at a 0.025% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
 
-def data_eff_0_cp():
+def data_eff_01_cp():
     epochs = np.arange(1, 26)
     run_R0_0 = [
-0.04707723381132482, 0.025145185358070612, 0.016216791536661838, 0.018558013935440276, 0.011365132486141087, 0.008429608006736462, 0.008731366433386463, 0.007247533302462065, 0.006411573577562297, 0.006021304605068968, 0.005381491346218322, 0.0053582562598813045, 0.005236253810649127, 0.0051879926624527305, 0.00501588810711476, 0.004893412520846009, 0.0048180504913306645, 0.004663182266952903, 0.004676631597909262, 0.0044193372289695575, 0.004344737811883698, 0.0043196818933834156, 0.004316926937260826, 0.004228633666705431, 0.004245956242379001    ]
-
+0.14387988847508434, 0.12093461282041262, 0.07418047939273131, 0.04837612577824135, 0.034036289465993186, 0.027539424331096442, 0.022216454630942, 0.019575686539056086, 0.01833173275832016, 0.016722665061507654, 0.01585872141265765, 0.015717574269532346, 0.015445712635639038, 0.01501672187971798, 0.014745879291710624, 0.014455205804525535, 0.014300279503183971, 0.014013459647587314, 0.013703767627777816, 0.013821415876880364, 0.013649099378113013, 0.013442362675749461, 0.013599155915748035, 0.013384149444079594, 0.013254384078016051
+    ]
     run_R0_1 = [
-0.05860566535858044, 0.048053953428393595, 0.02890451558051211, 0.013735273400889984, 0.01555313701743197, 0.008778233925984336, 0.007866253738588841, 0.007119727745346139, 0.0065227548791723985, 0.00609981893795361, 0.005453560820703743, 0.005388066791699978, 0.005212024286922283, 0.005195181919808816, 0.004973293053228516, 0.004955823826726026, 0.004770324524594991, 0.004584594224361213, 0.004640091507474033, 0.004371389637429021, 0.004461514058347763, 0.004291501559108564, 0.004400568760301266, 0.004336093463188624, 0.004244486005172817    ]
-
+0.10444676542914555, 0.07771580288648158, 0.047166988786525706, 0.03174620000493361, 0.024017321118522027, 0.019579341532797216, 0.016678042553089058, 0.014602867880425032, 0.013143277103986108, 0.012146262129367449, 0.011490835360416994, 0.011331810235945323, 0.01112668718832907, 0.010954318205387129, 0.010772506552023317, 0.010624266778426877, 0.010463522544009939, 0.01031903523922101, 0.01017407833210744, 0.010043779724506773, 0.00996493489844232, 0.009928435641896367, 0.00989167800455336, 0.009867776424471923, 0.009832957355055665
+    ]
     run_full_0 = [
 0.01630191720898658, 0.009912065556221055, 0.008479436013952082, 0.007783000567251593, 0.007352829466313699, 0.006590318989954113, 0.00611814036843208, 0.006329014875831784, 0.005829324746339616, 0.005781011720225429, 0.0062598770028892605, 0.006013920801369563, 0.005504401458085147, 0.0072291982843924385, 0.006459119500207431, 0.005090824268808907, 0.005082351501586941, 0.0049652897222670555, 0.004993230013097503, 0.005035567195722726, 0.004988922181537547, 0.005603838191451836, 0.004968194988819455, 0.005214978867651268, 0.004990574012984347
     ]
@@ -943,13 +943,13 @@ def data_eff_0_cp():
     std_devs_full = np.std(stacked_arrays_full, axis=0)
     
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')  
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')  
     plt.title(f'Three run validation loss average at a 0.025% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -957,11 +957,10 @@ def data_eff_0_cp():
 def data_eff_02_cp():
     epochs = np.arange(1, 26)
     run_R0_0 = [
-0.021793207666649782, 0.016384371348938723, 0.007687827909235827, 0.006224550467080277, 0.005200445080300231, 0.005509571533247898, 0.004105175818070296, 0.003764936309898991, 0.0032944145490311065, 0.003003228075797745, 0.0027114478189109014, 0.002692538071942958, 0.002554776356006065, 0.0025054682220010615, 0.0025083372051214452, 0.0023990850897415675, 0.0023091008405736087, 0.002225579845143623, 0.0021857290261607723, 0.0021351404221429692, 0.002002666684225825, 0.0019828499661958257, 0.001978054419049725, 0.0019708491301510555, 0.0019511260760973366
-    ]
+0.06456576165846083, 0.03143746541778003, 0.022299871505822477, 0.017928319834026568, 0.014831872732910983, 0.013128588966538377, 0.012421157614363907, 0.011260952446514842, 0.010645095205996088, 0.010454885224708822, 0.009873614747387212, 0.009915637997489903, 0.009648067518227109, 0.009395926704150006, 0.009324695739702918, 0.009278818609869986, 0.009187444998052281, 0.009145957570870531, 0.008998734622372637, 0.008991908090672403, 0.008858775476657681, 0.008741171399469871, 0.008767452541887743, 0.008830923320781297, 0.008722590853612782    ]
 
     run_R0_1 = [
-0.036094355168799545, 0.013648859774997616, 0.009172379569378853, 0.006999212834258072, 0.0059963429216937925, 0.005728697186309635, 0.004684109366450077, 0.004638467811681965, 0.0036114467825587217, 0.003368016708254598, 0.003087977225768284, 0.002894988990637334, 0.0028023988022624143, 0.002738891543659399, 0.0026721665453688886, 0.0025385774692291774, 0.0026455338086505114, 0.0024142528210394183, 0.0023308720169388773, 0.0024142838449557635, 0.0021511309539482895, 0.002147344094744468, 0.002129772408797385, 0.0021118619687569037, 0.0020750221243086625
+0.09712860282928706, 0.04267182152107713, 0.023713272277835366, 0.017086729746855742, 0.01376192848014709, 0.011678303143724738, 0.010479977859962165, 0.009706740006998617, 0.00921214915055701, 0.008893531496021014, 0.008369011609656522, 0.008258540234079372, 0.008177869163360649, 0.00807024610161811, 0.007998775362728701, 0.007910826035648228, 0.007832914059212192, 0.007778785203392606, 0.007695778150202186, 0.007658946694651443, 0.007581188283256854, 0.007560420152975291, 0.007541957671683219, 0.007525261783799065, 0.007505505477931376
 
     ]
 
@@ -991,13 +990,13 @@ def data_eff_02_cp():
 
 
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')   
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')   
     plt.title(f'Three run validation loss average at a 0.025% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -1006,8 +1005,8 @@ def exp2_3_mses():
     mses_un_0 = [0.0173, 0.00742, 0.004198, 0.001965]
     mses_un_1 = [0.0177, 0.00845, 0.004196, 0.002088]
     
-    mses_cp_0 = [0.0468, 0.019795]
-    mses_cp_1 = [0.062448]
+    mses_cp_0 = [0.0468, 0.019795, 0.013432, 0.008604]
+    mses_cp_1 = [0.062448, 0.020724, 0.009969, 0.007387]
 
     mses_un_0 = np.array(mses_un_0)
     mses_un_1 = np.array(mses_un_1)
@@ -1026,9 +1025,10 @@ def exp2_3_mses():
     std_devs_CP = np.std(stacked_arrays_CP, axis=0)
 
     plt.figure(figsize=(10,6))
-    plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')   
-    plt.axhline(y=0.005, color='red', linestyle='--', label='Full training set')
+    plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
+    plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    plt.axhline(y=0.000206, color='red', linestyle='--', label='Uncompressed full')
+    plt.axhline(y=0.005, color='green', linestyle='--', label='CPD full')
     plt.title(f'MSE of the test set comparison at every trainin set ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
@@ -1041,8 +1041,8 @@ def exp2_3_accs():
     accs_un_0 = [92.031, 93.21, 93.22, 94.12]
     accs_un_1 = [92.51, 93.04, 92.9, 93.69]
     
-    accs_cp_0 = [91.46, ]
-    accs_cp_1 = [92.142]
+    accs_cp_0 = [91.46, 92.668, 93.415, 94.07]
+    accs_cp_1 = [92.142, 92.93, 93.977, 93.68]
 
     accs_un_0 = np.array(accs_un_0)
     accs_un_1 = np.array(accs_un_1)
@@ -1061,12 +1061,26 @@ def exp2_3_accs():
     std_devs_CP = np.std(stacked_arrays_CP, axis=0)
 
     plt.figure(figsize=(10,6))
-    plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')   
-    plt.axhline(y=94.48, color='red', linestyle='--', label='Full training set')
+    plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
+    # plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    plt.axhline(y=94.48, color='red', linestyle='--', label='Uncompressed full')
+    # plt.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
     plt.title(f'MSE of the test set comparison at every trainin set ratio.')
     plt.xlabel('epoch')
-    plt.ylabel('loss')
+    plt.ylabel('accuracy')
+    plt.legend()
+    plt.show()
+
+
+    plt.figure(figsize=(10,6))
+
+    # plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
+    plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    # plt.axhline(y=94.48, color='red', linestyle='--', label='Uncompressed full')
+    plt.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
+    plt.title(f'MSE of the test set comparison at every trainin set ratio.')
+    plt.xlabel('epoch')
+    plt.ylabel('accuracy')
     plt.legend()
     plt.show()
 
@@ -1075,7 +1089,16 @@ if __name__ == '__main__':
     # plot_accs_cp()
     # data_eff()
     # convergence()
-    data_eff_0025_un()
+    # data_eff_0025_un()
+    # data_eff_005_un()
+    # data_eff_01_un()
+    # data_eff_02_un()
+    data_eff_0025_cp()
+    data_eff_005_cp()
+    data_eff_01_cp()
+    data_eff_02_cp()
+    exp2_3_mses()
+    exp2_3_accs()
     # plot_compression_tucker()
     # plot_accs_tucker()
     # plot_mses_cp()
