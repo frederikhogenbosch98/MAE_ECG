@@ -161,14 +161,9 @@ if __name__ == "__main__":
     ratios = [0.025, 0.05, 0.10, 0.2]
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_full_training_run_final_night_run'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_new_model_each_iteration'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
-        if R == 0: 
-            model = AutoEncoder11_UN()
-        else:
-            model = AutoEncoder11(R=R, factorization='cp')
-        model = nn.DataParallel(model, device_ids=device_ids).to(device)
         print(f'RUN R: {R}')
         for r in ratios:
             print(f'ratio: {r}')
@@ -186,6 +181,11 @@ if __name__ == "__main__":
             print(f'compression ratio: {comp_ratio}')
 
             for j in range(args.num_runs):
+                if R == 0: 
+                    model = AutoEncoder11_UN()
+                else:
+                    model = AutoEncoder11(R=R, factorization='cp')
+                model = nn.DataParallel(model, device_ids=device_ids).to(device)
                 os.makedirs(f'{run_dir}/R_{R}/{r}/{j}', exist_ok=True)
                 mae, mae_losses, mae_val_losses, epoch_time = train_mae(model=model, 
                                                             trainset=trainset_un,
