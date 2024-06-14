@@ -160,7 +160,7 @@ def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valse
                     tepoch.set_postfix(lr=optimizer.param_groups[0]['lr'])
                 scheduler.step()
 
-            if (epoch + 1) % 10 == 0 and epoch != 0 and SAVE_MODEL_MAE:
+            if (epoch + 1) % 5 == 0 and epoch != 0 and SAVE_MODEL_MAE:
                 torch.save(model.state_dict(), f'{run_dir}/MAE_RUN_{fact}_R{R}_{now.day}_{now.month}_{now.hour}_{now.minute}_epoch_{epoch+1}.pth')
                 torch.save(model.state_dict(), 'trained_models/last/last_run.pth')
 
