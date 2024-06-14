@@ -86,7 +86,7 @@ def get_args_parser():
     return parser
 
 
-def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, step_size=15):
+def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valset=None, weight_decay=1e-4, MASK_RATIO=0.0, num_epochs=50, n_warmup_epochs=5, batch_size=128, learning_rate=5e-4, TRAIN_MAE=True, SAVE_MODEL_MAE=True, R=None, fact=None, contrun=False, step_size=15, gamma=0.25, optim='Adam'):
     now = datetime.now()
 
     if TRAIN_MAE:
@@ -95,13 +95,16 @@ def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valse
             model.load_state_dict(torch.load('trained_models/last/last_run.pth'))
 
         criterion = nn.MSELoss() # mean square error loss
-        optimizer = torch.optim.Adam(model.parameters(),
-                                    lr=learning_rate, 
-                                    weight_decay=1e-4)
-
-        # optimizer = torch.optim.SGD(model.parameters(),
-        #                             lr=learning_rate,
-        #                             weight_decay=weight_decay)
+        if optim == 'Adam':
+            optimizer = torch.optim.Adam(model.parameters(),
+                                        lr=learning_rate, 
+                                        weight_decay=1e-4)
+        elif optim == 'SGD':
+            optimizer = torch.optim.SGD(model.parameters(),
+                                        lr=learning_rate,
+                                        weight_decay=1e-4)
+        else:
+            raise ValueError("Optimizer not specificed")
 
         train_loader = torch.utils.data.DataLoader(trainset, 
                                                 batch_size=batch_size, 
@@ -123,7 +126,7 @@ def train_mae(model, trainset, run_dir, device, testset=None, min_lr=1e-5, valse
 
 
             # early_stopper = EarlyStopper(patience=6)
-        scheduler = StepLR(optimizer, step_size=step_size, gamma=0.25)
+        scheduler = StepLR(optimizer, step_size=step_size, gamma=gamma)
         outputs = []
         losses = []
         val_losses = []

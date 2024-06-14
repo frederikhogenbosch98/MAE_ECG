@@ -158,10 +158,10 @@ if __name__ == "__main__":
     CLASSIFY = True
     fact = 'cp'
     R_LIST = [0, 100]
-    ratios = [0.025, 0.05, 0.10, 0.2]
+    ratios = [1]#, 0.025, 0.05, 0.10, 0.2]
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_new_model_each_iteration'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_extra_uncompressed'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
