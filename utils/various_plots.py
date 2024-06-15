@@ -548,8 +548,8 @@ def convergence():
 
     plt.figure(figsize=(10,6))
     plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_R100)), mean_values_R100, yerr=std_devs_R100, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='CPD')
-    plt.title(f'Three run validation loss average for the CPD model.')
+    plt.errorbar(range(len(mean_values_R100)), mean_values_R100, yerr=std_devs_R100, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')
+    plt.title(f'Three run validation loss average for the uncompressed and CP-decomposed model.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
