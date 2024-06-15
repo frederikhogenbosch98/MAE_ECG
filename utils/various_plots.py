@@ -463,11 +463,11 @@ def convergence():
     ]
 
     run_R0_1 = [
-    0.0010643245959032187, 0.0007732050064558245, 0.0006931129498672565, 0.0006028513231468185, 0.0009707393111004073,
-    0.0006467825859377582, 0.0005237747864581364, 0.000576872752910327, 0.0006050071602806621, 0.0006306977613825313,
-    0.000601611437538518, 0.0005188365237583099, 0.000649572895669547, 0.0008670711010350269, 0.0006527989650822627,
-    0.00038505979096335085, 0.0004225691123148251, 0.0004084950409505369, 0.0003957986758510924, 0.0004210324189054409,
-    0.0004526794860442713, 0.00040876084269432804, 0.00035698534639709247, 0.0003960802946175084, 0.0003904624793525356
+    0.0110079, 0.0037890, 0.0030919, 0.0016506, 0.0014738, 0.0013501, 
+    0.0013495, 0.0010727, 0.0008072, 0.0007353, 0.0003996, 0.0003958, 
+    0.0007865, 0.0003986, 0.0004025, 0.0003881, 0.0003655, 0.0003382, 
+    0.0002839, 0.0003208, 0.0002061, 0.0002405, 0.0002459, 0.0001889, 
+    0.0002049
 
     ]
     run_R0_2 = [
@@ -524,7 +524,7 @@ def convergence():
     run_R0_1 = np.array(run_R0_1)
     run_R0_2 = np.array(run_R0_2)
     
-    stacked_arrays_R0 = np.vstack((run_R0_0, run_R0_1, run_R0_2))
+    stacked_arrays_R0 = np.vstack((run_R0_0, run_R0_1))
     
     mean_values_R0 = np.mean(stacked_arrays_R0, axis=0)
     std_devs_R0 = np.std(stacked_arrays_R0, axis=0)
@@ -553,7 +553,7 @@ def convergence():
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -675,13 +675,14 @@ def data_eff_0025_un():
     std_devs_full = np.std(stacked_arrays_full, axis=0)
 
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')
+    plt.title(f'Three run validation loss average at a 2.5% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
+    plt.ylim([0.0001, 1])
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -727,13 +728,14 @@ def data_eff_005_un():
 
 
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')    
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')    
+    plt.title(f'Three run validation loss average at a 5% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
+    plt.ylim([0.0001, 1])
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -776,13 +778,14 @@ def data_eff_01_un():
     std_devs_full = np.std(stacked_arrays_full, axis=0)
     
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')  
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')  
+    plt.title(f'Three run validation loss average at a 10% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
+    plt.ylim([0.0001, 1])
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -829,13 +832,14 @@ def data_eff_02_un():
 
 
     plt.figure(figsize=(9,7))
-    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed')
-    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD')   
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
+    plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')   
+    plt.title(f'Three run validation loss average at a 20% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
+    plt.ylim([0.0001, 1])
     # plt.ylim([0.0001, 0.0005])
     plt.show()
 
@@ -876,12 +880,13 @@ def data_eff_0025_cp():
     plt.figure(figsize=(9,7))
     plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
     plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.title(f'Three run validation loss average at a 2.5% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
+    plt.ylim([0.0001, 1])
     plt.show()
 
 
@@ -923,12 +928,13 @@ def data_eff_005_cp():
     plt.figure(figsize=(9,7))
     plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
     plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')    
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.title(f'Three run validation loss average at a 5% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
+    plt.ylim([0.0001, 1])
     plt.show()
 
 
@@ -967,12 +973,13 @@ def data_eff_01_cp():
     plt.figure(figsize=(9,7))
     plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
     plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')  
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.title(f'Three run validation loss average at a 10% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
     plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
+    plt.ylim([0.0001, 1])
     plt.show()
 
 
@@ -1014,12 +1021,14 @@ def data_eff_02_cp():
     plt.figure(figsize=(9,7))
     plt.errorbar(range(len(mean_values_R0)), mean_values_R0, yerr=std_devs_R0, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Reduced')
     plt.errorbar(range(len(mean_values_full)), mean_values_full, yerr=std_devs_full, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='Full')   
-    plt.title(f'Three run validation loss average at a 0.025% ratio.')
+    plt.title(f'Three run validation loss average at a 20% ratio.')
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.legend()
+    plt.ylim([0.0001, 0.1])
     plt.yscale('log')
     # plt.ylim([0.0001, 0.0005])
+    plt.ylim([0.0001, 1])
     plt.show()
 
 
@@ -1046,15 +1055,22 @@ def exp2_3_mses():
     mean_values_CP = np.mean(stacked_arrays_CP, axis=0)
     std_devs_CP = np.std(stacked_arrays_CP, axis=0)
 
-    plt.figure(figsize=(10,6))
-    plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
-    plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
-    plt.axhline(y=0.000206, color='red', linestyle='--', label='Uncompressed full')
-    plt.axhline(y=0.005, color='green', linestyle='--', label='CPD full')
-    plt.title(f'MSE of the test set comparison at every trainin set ratio.')
-    plt.xlabel('epoch')
-    plt.ylabel('loss')
-    plt.legend()
+    a = np.arange(4)
+    c_ratios = [0.025, 0.05, 0.1, 0.2]
+
+    fig, ax = plt.subplots(1, 1,figsize=(10,6))
+    ax.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
+    ax.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    ax.axhline(y=0.000206, color='red', linestyle='--', label='Uncompressed full')
+    ax.axhline(y=0.004702, color='green', linestyle='--', label='CPD full')
+    ax.set_title(f'MSE of the test set comparison at every trainin set ratio.')
+    ax.set_xlabel('reduction rate')
+    ax.set_ylabel('loss')
+    ax.set_xticks(a)
+    ax.set_xticklabels(c_ratios)
+    # plt.xticks()
+    ax.set_yscale('log')
+    ax.legend()
     plt.show()
 
 
@@ -1082,47 +1098,66 @@ def exp2_3_accs():
     mean_values_CP = np.mean(stacked_arrays_CP, axis=0)
     std_devs_CP = np.std(stacked_arrays_CP, axis=0)
 
-    plt.figure(figsize=(10,6))
-    plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
-    # plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
-    plt.axhline(y=94.48, color='red', linestyle='--', label='Uncompressed full')
-    # plt.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
-    plt.title(f'MSE of the test set comparison at every trainin set ratio.')
-    plt.xlabel('epoch')
-    plt.ylabel('accuracy')
-    plt.legend()
-    plt.show()
+    a = np.arange(4)
+    c_ratios = [0.025, 0.05, 0.1, 0.2]
 
-
-    plt.figure(figsize=(10,6))
-
+    # plt.figure(figsize=(10,6))
     # plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
-    plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    # # plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
     # plt.axhline(y=94.48, color='red', linestyle='--', label='Uncompressed full')
-    plt.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
-    plt.title(f'MSE of the test set comparison at every trainin set ratio.')
-    plt.xlabel('epoch')
-    plt.ylabel('accuracy')
-    plt.legend()
+    # # plt.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
+    # plt.title(f'MSE of the test set comparison at every trainin set ratio.')
+    # plt.xlabel('epoch')
+    # plt.ylabel('accuracy')
+    # plt.legend()
+    # plt.show()
+
+
+    # plt.figure(figsize=(10,6))
+
+    # # plt.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
+    # plt.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    # # plt.axhline(y=94.48, color='red', linestyle='--', label='Uncompressed full')
+    # plt.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
+    # plt.title(f'MSE of the test set comparison at every trainin set ratio.')
+    # plt.xlabel('epoch')
+    # plt.ylabel('accuracy')
+    # plt.legend()
+    # plt.show()
+
+    fig, ax = plt.subplots(1, 1,figsize=(10,6))
+    ax.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Uncompressed reduced')
+    ax.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
+    ax.axhline(y=94.48, color='red', linestyle='--', label='Uncompressed and CPD full')
+    # ax.axhline(y=94.48, color='green', linestyle='--', label='CPD full')
+    ax.set_title(f'MSE of the test set at every training set ratio.')
+    ax.set_xlabel('reduction rate')
+    ax.set_ylabel('loss')
+    ax.set_xticks(a)
+    ax.set_xticklabels(c_ratios)
+    # plt.xticks()
+    # ax.set_yscale('log')
+    ax.legend()
     plt.show()
 
 if __name__ == '__main__':
     # plot_compression_cp()
     # plot_accs_cp()
     # data_eff()
-    # convergence()
-    data_eff_0025_un()
-    data_eff_005_un()
-    data_eff_01_un()
-    data_eff_02_un()
-    data_eff_0025_cp()
-    data_eff_005_cp()
-    data_eff_01_cp()
-    data_eff_02_cp()
-    exp2_3_mses()
-    exp2_3_accs()
-    # plot_compression_tucker()
-    # plot_accs_tucker()
+    # 2.2
+    MSE_conv()
+    convergence()
+    # 2.3
+    # data_eff_0025_un()
+    # data_eff_005_un()
+    # data_eff_01_un()
+    # data_eff_02_un()
+    # data_eff_0025_cp()
+    # data_eff_005_cp()
+    # data_eff_01_cp()
+    # data_eff_02_cp()
+    # exp2_3_mses()
+    # exp2_3_accs()
     # plot_mses_cp()
     # plot_adam_loss()
     # plot_sgd_loss()

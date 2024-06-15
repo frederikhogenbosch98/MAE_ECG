@@ -192,9 +192,9 @@ if __name__ == "__main__":
                                                         run_dir = run_dir,
                                                         contrun = args.contrun,
                                                         device = device,
-                                                        step_size=10,
+                                                        step_size=15,
                                                         gamma=0.25,
-                                                        optim='SGD')
+                                                        optim='Adam')
             
             train_save_folder = f'{run_dir}/R_{R}/{j}/MAE_losses_train.npy'
             val_save_folder = f'{run_dir}/R_{R}/{j}/MAE_losses_val.npy'
