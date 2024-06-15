@@ -211,7 +211,7 @@ if __name__ == "__main__":
             save_str = f'''compression ratio: {comp_ratio} | num_params: {current_pams} | R: {R} |
                     fact: {fact} | mse: {mse} 
                     (last) epoch time: {epoch_time}'''
-            with open(f"{run_dir}/{R}/{j}/run_info_{R}.txt", "w") as file:
+            with open(f"{run_dir}/R_{R}/{j}/run_info_{R}.txt", "w") as file:
                 file.write(save_str)
 
 
