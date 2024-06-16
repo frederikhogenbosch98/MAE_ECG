@@ -157,8 +157,8 @@ if __name__ == "__main__":
     num_params_uncompressed = 9411649#2355745
 
     
-    # R_LIST = [150, 200] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
-    R_LIST = [args.rank]
+    R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100,125,150, 200] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
+    # R_LIST = [args.rank]
     CLASSIFY = True
     fact = 'cp'
 
