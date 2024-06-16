@@ -160,8 +160,18 @@ if __name__ == "__main__":
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_Basic'
-    for i, model in enumerate(models):
+    for i, model in enumerate(model_strs):
         for j in range(NUM_RUNS):
+            if model == 'basic':
+               model = AutoEncoder11_UN(channels=[32, 64, 128, 256]) 
+            elif model == 'unet_32':
+               model = UNet()
+            elif model == 'resnet':
+               model = ResNet() 
+            elif model == 'convnext':
+               model = ConvNext()
+            else:
+                raise ValueError("No model selected")
             model = nn.DataParallel(model, device_ids=device_ids).to(device)
             mses = []
             current_pams = count_parameters(model)
