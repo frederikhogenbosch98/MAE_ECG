@@ -150,7 +150,7 @@ if __name__ == "__main__":
     num_epochs_classifier = args.epochs_class + num_warmup_epochs_classifier
 
 
-    models = [AutoEncoder11_UN(), UNet(), ResNet(), ConvNext() ] # ConvNext(),
+    models = [AutoEncoder11_UN(channels=[32, 64, 128, 256]), UNet(), ResNet(), ConvNext() ] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
