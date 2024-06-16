@@ -1,0 +1,39 @@
+digraph {
+	graph [size="12,12"]
+	node [align=left fontname=monospace fontsize=10 height=0.2 ranksep=0.1 shape=box style=filled]
+	4866495488 [label="
+ (1, 64, 32, 32)" fillcolor=darkolivegreen1]
+	5244450368 [label=ConvolutionBackward0]
+	5244450656 -> 5244450368
+	5244450656 [label=ConvolutionBackward0]
+	5244450464 -> 5244450656
+	5244450464 [label=ConvolutionBackward0]
+	5244450848 -> 5244450464
+	5244450848 [label=ConvolutionBackward0]
+	5244450992 -> 5244450848
+	4866499104 [label="s_to_r.weight
+ (10, 64, 1, 1)" fillcolor=lightblue]
+	4866499104 -> 5244450992
+	5244450992 [label=AccumulateGrad]
+	5244450800 -> 5244450464
+	4866498864 [label="depth_vert.weight
+ (10, 1, 7, 1)" fillcolor=lightblue]
+	4866498864 -> 5244450800
+	5244450800 [label=AccumulateGrad]
+	5244450320 -> 5244450656
+	4866498624 [label="depth_hor.weight
+ (10, 1, 1, 7)" fillcolor=lightblue]
+	4866498624 -> 5244450320
+	5244450320 [label=AccumulateGrad]
+	5244450560 -> 5244450368
+	4866495408 [label="r_to_t.weight
+ (64, 10, 1, 1)" fillcolor=lightblue]
+	4866495408 -> 5244450560
+	5244450560 [label=AccumulateGrad]
+	5244450608 -> 5244450368
+	4866498448 [label="r_to_t.bias
+ (64)" fillcolor=lightblue]
+	4866498448 -> 5244450608
+	5244450608 [label=AccumulateGrad]
+	5244450368 -> 4866495488
+}

@@ -139,7 +139,6 @@ if __name__ == "__main__":
     valset_sup = mitbih_dataset_val
     testset_sup = mitbih_dataset_test
 
-    mega_mses = []
     accuracies = []
 
     # MAE
@@ -150,12 +149,8 @@ if __name__ == "__main__":
     num_warmup_epochs_classifier = args.warmup_epochs_class
     num_epochs_classifier = args.epochs_class + num_warmup_epochs_classifier
 
-    mae_losses_run = np.zeros((4, num_epochs_mae))
-    mae_val_losses_run = np.zeros((4, num_epochs_mae))
-    class_losses_run = np.zeros((4, num_epochs_classifier))
-    class_val_losses_run = np.zeros((4, num_epochs_classifier))
 
-    models = [AutoEncoder11_UN()]#,  ConvNext(),UNet(), ResNet() ] # ConvNext(),
+    models = [AutoEncoder11_UN(), UNet(), ResNet(), ConvNext() ] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [5e-5, 1e-4, 1e-4, 1e-4]
@@ -190,8 +185,7 @@ if __name__ == "__main__":
                                                         device = device,
                                                         step_size=15)
             
-            mae_losses_run[i,:] = mae_losses
-            mae_val_losses_run[i,:] = mae_val_losses
+
             train_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_train.npy'
             val_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_{model_strs[i]}_val.npy'
             np.save(train_save_folder, mae_losses)
@@ -226,11 +220,9 @@ if __name__ == "__main__":
                                             device = device,
                                             testset=testset_sup)
                                             
-                accuracy = eval_classifier(classifier, testset_sup, device=device)
-        mega_mses.append(np.mean(mses))
+                accuracies.append(eval_classifier(classifier, testset_sup, device=device))
 
-
-    print(mega_mses)
+    print(accuracies)
 
     
 
