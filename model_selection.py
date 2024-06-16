@@ -153,13 +153,13 @@ if __name__ == "__main__":
     models = [AutoEncoder11_UN(channels=[32, 64, 128, 256]), UNet(), ResNet(), ConvNext() ] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
-    lr = [1e-5, 5e-5, 5e-5, 5e-5]
+    lr = [2e-5, 5e-5, 5e-5, 5e-5]
 
     CLASSIFY = True
     NUM_RUNS = args.num_runs
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_MODEL_SELECTION_RERUN'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_MODEL_SELECTION_RERUN_NOTEST'
     for i, model_str in enumerate(model_strs):
         for j in range(NUM_RUNS):
             if model_str == 'basic':
