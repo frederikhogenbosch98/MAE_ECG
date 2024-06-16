@@ -60,7 +60,7 @@ class AutoEncoder11_UN(nn.Module):
             # nn.Conv2d(channels[3], channels[2], kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm2d(channels[2]),
             # nn.GELU(),
-            # nn.Upsample(scale_factor=2, mode='bilinear'),
+            nn.Upsample(scale_factor=2, mode='bilinear'),
 
 
             nn.Conv2d(channels[2], channels[2], kernel_size=3, stride=1, padding=1),
