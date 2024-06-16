@@ -187,7 +187,7 @@ if __name__ == "__main__":
             
 
             train_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_train.npy'
-            val_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_{model_strs[i]}_val.npy'
+            val_save_folder = f'{run_dir}/{model_strs[i]}/{j}/MAE_losses_val.npy'
             np.save(train_save_folder, mae_losses)
             np.save(val_save_folder, mae_val_losses)
 
