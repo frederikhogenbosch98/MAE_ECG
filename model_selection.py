@@ -159,7 +159,7 @@ if __name__ == "__main__":
     NUM_RUNS = args.num_runs
 
     now = datetime.now()
-    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_Basic'
+    run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_MODEL_SELECTION_RERUN'
     for i, model in enumerate(model_strs):
         for j in range(NUM_RUNS):
             if model == 'basic':
