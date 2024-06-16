@@ -160,15 +160,15 @@ if __name__ == "__main__":
 
     now = datetime.now()
     run_dir = f'trained_models/model_comparison/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_MODEL_SELECTION_RERUN'
-    for i, model in enumerate(model_strs):
+    for i, model_str in enumerate(model_strs):
         for j in range(NUM_RUNS):
-            if model == 'basic':
+            if model_str == 'basic':
                model = AutoEncoder11_UN(channels=[32, 64, 128, 256]) 
-            elif model == 'unet_32':
+            elif model_str == 'unet_32':
                model = UNet()
-            elif model == 'resnet':
+            elif model_str == 'resnet':
                model = ResNet() 
-            elif model == 'convnext':
+            elif model_str == 'convnext':
                model = ConvNext()
             else:
                 raise ValueError("No model selected")
