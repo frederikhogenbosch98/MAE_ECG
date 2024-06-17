@@ -30,7 +30,8 @@ def plot_accs_cp():
     ax.tick_params('y')
     ax.set_ylim(93.5, 95.5) 
 
-    ax.axhline(94.48, color='red', linestyle='-', label='uncompressed')
+    ax.axhline(94.57, color='red', linestyle='-', label='uncompressed')
+    # ax.axhline(94.48, color='red', linestyle='-', label='uncompressed')
     ax.set_title('Accuracies at various compression ratios')
     # plt.xticks(c_ratios)
     # ax.set_xlim([205, 1])
@@ -1170,6 +1171,51 @@ def exp2_2_SGD():
     ax.set_yscale('log')
     ax.legend()
     plt.show()
+
+
+
+def exp1():
+    basic_0 = np.array([]) 
+    basic_1 = np.array([])
+
+    unet_0 = np.array([])
+    unet_1 = np.array([])
+
+    convnext_0 = np.array([])
+    convnext_1 = np.array([])
+
+    resnet_0 = np.array([])
+    resnet_1 = np.array([])
+    
+    
+    basic = np.vstack((basic_0, basic_1))
+    unet = np.vstack((unet_0, unet_1))
+    convnext = np.vstack((convnext_0, convnext_1))
+    resnet = np.vstack((resnet_0, resnet_1))
+    
+    mean_values_basic = np.mean(basic, axis=0)
+    std_devs_basic = np.std(basic, axis=0)
+    mean_values_unet = np.mean(unet, axis=0)
+    std_devs_unet = np.std(unet, axis=0)
+    mean_values_convnext = np.mean(convnext, axis=0)
+    std_devs_convnext = np.std(convnext, axis=0)
+    mean_values_resnet = np.mean(resnet, axis=0)
+    std_devs_resnet = np.std(resnet, axis=0)
+    
+
+    fig, ax = plt.subplots(1, 1,figsize=(10,6))
+    ax.errorbar(range(len(mean_values_UN)), mean_values_UN, yerr=std_devs_UN, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='royalblue', ecolor='cornflowerblue', label='Basic')
+    ax.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='ResNet')   
+    ax.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='ResNet')   
+    ax.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='ResNet')   
+    ax.set_title(f'Validation loss with SGD optimizer for uncompressed and CP-decomposed models.')
+    ax.set_xlabel('epochs')
+    ax.set_ylabel('loss')
+    # plt.xticks()
+    ax.set_yscale('log')
+    ax.legend()
+    plt.show()
+
 
 if __name__ == '__main__':
     # plot_compression_cp()

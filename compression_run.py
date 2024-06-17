@@ -157,13 +157,13 @@ if __name__ == "__main__":
     num_params_uncompressed = 9411649#2355745
 
     
-    R_LIST = [5, 10, 15, 20, 25, 35, 50, 75, 100,125,150, 200] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
+    R_LIST = [150, 200]#[5, 10, 15, 20, 25, 35, 50, 75, 100,125,150, 200] #5, 10, 15, 20, 25, 35, 50, 75, 100,125,  
     # R_LIST = [args.rank]
     CLASSIFY = True
     fact = 'cp'
 
     now = datetime.now()
-    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_high_rank_run'
+    run_dir = f'trained_models/compressed/RUN_{now.day}_{now.month}_{now.hour}_{now.minute}_dday_150_200'
     os.makedirs(f'{run_dir}/', exist_ok=True)
     for i, R in enumerate(R_LIST):
         print(f'RUN R: {R}')
@@ -204,44 +204,44 @@ if __name__ == "__main__":
             # if j == 0:
             #     reconstruct_img(mae, R=R, run_dir=run_dir)
 
-        #     if CLASSIFY:
-        #         num_classes = 5
-        #         if args.model == 'default':
-        #             classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-        #             # classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+            if CLASSIFY:
+                num_classes = 5
+                if args.model == 'default':
+                    classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    # classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
 
 
-        #         if args.gpu == 'all':
-        #             classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
+                if args.gpu == 'all':
+                    classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
 
-        #         classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
-        #                                     trainset=trainset_sup, 
-        #                                     valset=valset_sup, 
-        #                                     num_epochs=num_epochs_classifier, 
-        #                                     n_warmup_epochs=num_warmup_epochs_classifier, 
-        #                                     learning_rate=args.lr_class,
-        #                                     min_lr = args.min_lr_class,
-        #                                     weight_decay = args.weight_decay_class,
-        #                                     batch_size=args.batch_size_class, 
-        #                                     TRAIN_CLASSIFIER=args.train_class, 
-        #                                     SAVE_MODEL_CLASSIFIER=args.save_class,
-        #                                     R=R,
-        #                                     fact='cp',
-        #                                     run_dir = run_dir,
-        #                                     device = device,
-        #                                     testset=testset_sup)
+                classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+                                            trainset=trainset_sup, 
+                                            valset=valset_sup, 
+                                            num_epochs=num_epochs_classifier, 
+                                            n_warmup_epochs=num_warmup_epochs_classifier, 
+                                            learning_rate=args.lr_class,
+                                            min_lr = args.min_lr_class,
+                                            weight_decay = args.weight_decay_class,
+                                            batch_size=args.batch_size_class, 
+                                            TRAIN_CLASSIFIER=args.train_class, 
+                                            SAVE_MODEL_CLASSIFIER=args.save_class,
+                                            R=R,
+                                            fact='cp',
+                                            run_dir = run_dir,
+                                            device = device,
+                                            testset=testset_sup)
 
-        #         accuracy = eval_classifier(classifier, testset_sup, device=device)
-        #         accuracies.append(accuracy)
+                accuracy = eval_classifier(classifier, testset_sup, device=device)
+                accuracies.append(accuracy)
 
 
-        # mega_mses.append(np.mean(mses))
+        mega_mses.append(np.mean(mses))
 
-        # save_str = f'''compression ratio: {comp_ratio} | num_params: {current_pams} | R: {R} |
-        #             fact: {fact} | avg accuracy: {np.mean(accuracies)} | avg test mse: {np.mean(mses)} 
-        #             (last) epoch time: {epoch_time}'''
-        # with open(f"{run_dir}/run_info_{R}.txt", "w") as file:
-        #     file.write(save_str)
+        save_str = f'''compression ratio: {comp_ratio} | num_params: {current_pams} | R: {R} |
+                    fact: {fact} | avg accuracy: {np.mean(accuracies)} | avg test mse: {np.mean(mses)} 
+                    (last) epoch time: {epoch_time}'''
+        with open(f"{run_dir}/run_info_{R}.txt", "w") as file:
+            file.write(save_str)
 
     print(mega_mses)
 
