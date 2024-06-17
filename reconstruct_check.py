@@ -96,7 +96,7 @@ if __name__ == "__main__":
         transforms.Resize((128,128)), 
         transforms.ToTensor(),         
     ])
-    device_ids = [0, 2, 3]
+    device_ids = [0]
 
     ptbxl_dir = 'data/physionet/ptbxl_full_224/'
     testset = datasets.ImageFolder(root=ptbxl_dir, transform=transform)
