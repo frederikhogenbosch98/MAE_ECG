@@ -106,6 +106,7 @@ class AutoEncoder11_UN(nn.Module):
         x = self.decoder(x)
         return x
 
+
 class Classifier_UN(nn.Module):
     def __init__(self, autoencoder, in_features, out_features):
         super(Classifier_UN, self).__init__()
