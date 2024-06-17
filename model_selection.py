@@ -150,7 +150,7 @@ if __name__ == "__main__":
     num_epochs_classifier = args.epochs_class + num_warmup_epochs_classifier
 
 
-    models = [AutoEncoder11_UN(channels=[32, 64, 128, 256]), UNet(), ResNet(), ConvNext() ] # ConvNext(),
+    models = [ConvNext()]#AutoEncoder11_UN(channels=[32, 64, 128, 256]), UNet(), ResNet(),  ] # ConvNext(),
     # models = [ConvNext()]
     model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [2e-5, 5e-5, 5e-5, 5e-5]
@@ -203,34 +203,34 @@ if __name__ == "__main__":
 
             mses.append(eval_mae(mae, testset_un, R=0, device=device))
 
-    #         if CLASSIFY:
-    #             num_classes = 5
-    #             if args.model == 'default':
-    #                 classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
-    #                 # classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+            if CLASSIFY:
+                num_classes = 5
+                if args.model == 'default':
+                    classifier = Classifier_UN(autoencoder=mae.module, in_features=2048, out_features=num_classes)
+                    # classifier = ClassifierUnet(autoencoder=mae.module, in_features=2048, out_features=num_classes)
 
 
-    #             if args.gpu == 'all':
-    #                 classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
+                if args.gpu == 'all':
+                    classifier = nn.DataParallel(classifier, device_ids=device_ids).to(device) 
 
-    #             classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
-    #                                         trainset=trainset_sup, 
-    #                                         valset=valset_sup, 
-    #                                         num_epochs=num_epochs_classifier, 
-    #                                         n_warmup_epochs=num_warmup_epochs_classifier, 
-    #                                         learning_rate=args.lr_class,
-    #                                         min_lr = args.min_lr_class,
-    #                                         weight_decay = args.weight_decay_class,
-    #                                         batch_size=args.batch_size_class, 
-    #                                         TRAIN_CLASSIFIER=args.train_class, 
-    #                                         SAVE_MODEL_CLASSIFIER=args.save_class,
-    #                                         R=0,
-    #                                         fact=model_strs[i],
-    #                                         run_dir = run_dir,
-    #                                         device = device,
-    #                                         testset=testset_sup)
+                classifier, class_losses, class_val_losses = train_classifier(classifier=classifier, 
+                                            trainset=trainset_sup, 
+                                            valset=valset_sup, 
+                                            num_epochs=num_epochs_classifier, 
+                                            n_warmup_epochs=num_warmup_epochs_classifier, 
+                                            learning_rate=args.lr_class,
+                                            min_lr = args.min_lr_class,
+                                            weight_decay = args.weight_decay_class,
+                                            batch_size=args.batch_size_class, 
+                                            TRAIN_CLASSIFIER=args.train_class, 
+                                            SAVE_MODEL_CLASSIFIER=args.save_class,
+                                            R=0,
+                                            fact=model_strs[i],
+                                            run_dir = run_dir,
+                                            device = device,
+                                            testset=testset_sup)
                                             
-    #             accuracies.append(eval_classifier(classifier, testset_sup, device=device))
+                accuracies.append(eval_classifier(classifier, testset_sup, device=device))
 
     # print(accuracies)
 
