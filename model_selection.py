@@ -152,7 +152,7 @@ if __name__ == "__main__":
 
     models = [ConvNext()]#AutoEncoder11_UN(channels=[32, 64, 128, 256]), UNet(), ResNet(),  ] # ConvNext(),
     # models = [ConvNext()]
-    model_strs = ['basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
+    model_strs = ['convnext']#, 'basic', 'unet_32', 'resnet', 'convnext'] # 'convnext', 
     lr = [2e-5, 5e-5, 5e-5, 5e-5]
 
     CLASSIFY = True
