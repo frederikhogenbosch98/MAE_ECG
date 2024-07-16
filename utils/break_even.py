@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Define the variables
 R = 100  # R ranges from 0 to 199
 S = [1, 64, 64, 128, 128, 256, 256, 512, 512, 512, 256, 256, 128, 128, 64, 64]  # example value for S
 H = [128, 128, 64, 64, 32, 32, 16, 16, 16, 16, 32, 32, 64, 64, 128, 128]  # example value for H
@@ -9,7 +8,6 @@ W = [128, 128, 64, 64, 32, 32, 16, 16, 16, 16, 32, 32, 64, 64, 128, 128]  # exam
 D = 3  # example value for D
 T = [64, 64, 128, 128, 256, 256, 512, 512, 512, 256, 256, 128, 128, 64, 64, 1]  # example value for T
 
-# Calculate each term
 def  FLOPs_sr(R, S, H, W):
     return 4 * R * S * H * W
 def  FLOPs_w(R, H, W):
@@ -22,28 +20,46 @@ def FLOPs_og(S, T, H, W):
     return 4 * S * D**2 * T * H * W
 
 
-S = 64
-T = 128
-D = 3
-H = 64
-W = 64
-R = 100
+# S = 64
+# T = 128
+# D = 3
+# H = 64
+# W = 64
+# R = 100
 
-print(FLOPs_og(S, T, H, W))
-print(FLOPs_sr(R, S, H, W) + FLOPs_w(R, H, W) + FLOPs_h(R, H, W) + FLOPs_rt(R, H, W, T))
+# print(FLOPs_og(S, T, H, W))
+# print(FLOPs_sr(R, S, H, W) + FLOPs_w(R, H, W) + FLOPs_h(R, H, W) + FLOPs_rt(R, H, W, T))
 
 # epoch_durations = [294, 294, 296, 307, 314, 325, 345, 378, 413, 454, 505, 568]
 
 # # Sum the terms
-# total_FLOPs = []
-# total_FLOPs_og = []
-# for i in range(8):
-#     sr = FLOPs_sr(R, S[i], H[i], W[i])
-#     h = FLOPs_w(R, H[i], W[i])
-#     w = FLOPs_h(R, H[i], W[i])
-#     rt = FLOPs_rt(R, H[i], W[i], T[i])
-#     total_FLOPs.append(sr + h + w + rt)
-#     total_FLOPs_og.append(FLOPs_og(S[i], T[i], H[i], W[i]))
+    
+OG = []
+CP = []
+
+for R in range(200):
+    total_FLOPs = []
+    total_FLOPs_og = []
+
+    for i in range(8):
+        sr = FLOPs_sr(R, S[i], H[i], W[i])
+        h = FLOPs_w(R, H[i], W[i])
+        w = FLOPs_h(R, H[i], W[i])
+        rt = FLOPs_rt(R, H[i], W[i], T[i])
+        total_FLOPs.append(sr + h + w + rt)
+        total_FLOPs_og.append(FLOPs_og(S[i], T[i], H[i], W[i]))
+
+    if np.isclose(np.sum(total_FLOPs), np.sum(total_FLOPs_og), rtol=1e-2):
+        print(f"Value of R where both statements are equal: {R}")
+        print(np.sum(total_FLOPs), np.sum(total_FLOPs_og))
+
+    OG.append(np.sum(total_FLOPs_og))
+    CP.append(np.sum(total_FLOPs))
+
+    
+plt.plot(OG)
+plt.plot(CP) 
+plt.show()
 
 
 # # 2HW T SD2,

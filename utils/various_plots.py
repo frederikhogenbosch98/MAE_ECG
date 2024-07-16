@@ -19,18 +19,20 @@ def plot_accs_cp():
     full_params = 9411649
     accuracies = [94.28, 94.21, 94.35, 94.35, 94.4, 94.4, 94.48, 94.46, 94.45, 94.43]
 
-    c_ratios = [np.round(full_params / i,1) for i in num_params]
+
+
+    c_ratios = [210.5, 118.8, 82.7, 63.5, 51.5, 37.4, 26.5, 17.8, 13.4, 10.8]#[np.round(full_params / i,1) for i in num_params]
     ticks = list(reversed(c_ratios))
     a = np.arange(len(c_ratios))
     fig, ax = plt.subplots(1, 1,figsize=(10,6))
     # ax.figure() 
-    ax.plot(a, accuracies, 'o-', label='Accuracies')  
+    ax.plot(a, accuracies, 'o-', label='CP Accuracies')  
     ax.set_xlabel('Compression ratio')
     ax.set_ylabel('Accuracies')
     ax.tick_params('y')
     ax.set_ylim(93.5, 95.5) 
 
-    ax.axhline(94.57, color='red', linestyle='-', label='uncompressed')
+    ax.axhline(94.51, color='red', linestyle='-', label='Uncompressed baseline')
     # ax.axhline(94.48, color='red', linestyle='-', label='uncompressed')
     ax.set_title('Accuracies at various compression ratios')
     # plt.xticks(c_ratios)
@@ -1059,7 +1061,7 @@ def exp2_3_mses():
     ax.errorbar(range(len(mean_values_CP)), mean_values_CP, yerr=std_devs_CP, fmt='-o', capsize=5, capthick=2, elinewidth=1, color='darkorange', ecolor='orange', label='CPD reduced')   
     ax.axhline(y=0.000206, color='red', linestyle='--', label='Uncompressed full')
     ax.axhline(y=0.004702, color='green', linestyle='--', label='CPD full')
-    ax.set_title(f'MSE of the test set comparison at every trainin set ratio.')
+    ax.set_title(f'MSE of the test set comparison at every training set ratio.')
     ax.set_xlabel('reduction rate')
     ax.set_ylabel('loss')
     ax.set_xticks(a)
@@ -1225,7 +1227,7 @@ if __name__ == '__main__':
     # plot_compression_cp()
     # plot_accs_cp()
     # data_eff()
-    exp1()
+    # exp1()
     # 2.2
     # MSE_conv()
     # convergence()
@@ -1239,7 +1241,7 @@ if __name__ == '__main__':
     # data_eff_005_cp()
     # data_eff_01_cp()
     # data_eff_02_cp()
-    # exp2_3_mses()
+    exp2_3_mses()
     # exp2_3_accs()
     # plot_mses_cp()
     # plot_adam_loss()
