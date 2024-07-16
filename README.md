@@ -1,2 +1,2 @@
 # MAE_ECG
-MSc Thesis repository for "Tensor Decompositions in Masked AutoEncoders for Electrocardiography Classification"
+Unorganized repo for my master thesis. Additional utilities and models can be found here. 
